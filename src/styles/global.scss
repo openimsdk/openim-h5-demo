@@ -1,0 +1,31 @@
+body {
+    overflow: hidden;
+}
+
+.page_container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: #f6f6f6;
+    color: #333;
+}
+
+.van-nav-bar__placeholder {
+    min-height: 46px;
+}
+
+.van-search {
+    padding: 12px 22px !important;
+}
+
+.van-search_no_b {
+    padding-bottom: 0 !important;
+}
+
+.emoji_display {
+    width: 24px;
+    height: 18px;
+    vertical-align: sub;
+    display: inline-block;
+}
