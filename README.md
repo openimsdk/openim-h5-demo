@@ -11,6 +11,10 @@ Open im includes instant messaging and real-time audio and video server and clie
 
 ## Getting Started
 
+### Environment
+
+> It is recommended to use node14-16.x version
+
 ### Develop
 
 - Get dependencies from npm
