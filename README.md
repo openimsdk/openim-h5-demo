@@ -13,7 +13,7 @@ Open im includes instant messaging and real-time audio and video server and clie
 
 ### Environment
 
-> It is recommended to use node14-16.x version
+> It is recommended to use node14-16.x version.
 
 ### Develop
 
