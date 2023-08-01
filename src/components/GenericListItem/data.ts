@@ -1,14 +1,14 @@
 import { BusinessUserInfo } from "@/api/data";
 import {
   ConversationItem,
-  FriendItem,
+  FriendUserItem,
   FullUserItem,
   GroupItem,
   GroupMemberItem,
 } from "open-im-sdk-wasm/lib/types/entity";
 
 export type GenericListItemSource = FullUserItem &
-  FriendItem &
+  FriendUserItem &
   GroupItem &
   GroupMemberItem &
   BusinessUserInfo &

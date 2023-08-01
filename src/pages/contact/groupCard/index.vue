@@ -79,7 +79,7 @@ const comptMemberRow = computed(() => {
 })
 
 const toConversationOrApply = () => {
-    const sessionType = conversationStore.storeCurrentGroupInfo.groupType === GroupType.NomalGroup ? SessionType.Group : SessionType.SuperGroup
+    const sessionType = SessionType.WorkingGroup
     if (comptInGroup.value) {
         toSpecifiedConversation(conversationStore.storeCurrentGroupInfo.groupID, sessionType)
     } else {

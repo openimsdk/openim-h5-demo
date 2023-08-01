@@ -119,12 +119,12 @@ const clickEmojiBtn = () => {
     showEmojiBar.value = !showEmojiBar.value
 }
 const getFile = async (uploadData: UploaderFileListItem) => {
-    let messageType = MessageType.FILEMESSAGE
+    let messageType = MessageType.FileMessage
     if (uploadData.file?.type.includes('image')) {
-        messageType = MessageType.PICTUREMESSAGE
+        messageType = MessageType.PictureMessage
     }
     if (uploadData.file?.type.includes('video')) {
-        messageType = MessageType.VIDEOMESSAGE
+        messageType = MessageType.VideoMessage
     }
     const { error, message, buffer, snapBuffer } = await createFileMessage(uploadData.file!, messageType)
     if (error || !message) {

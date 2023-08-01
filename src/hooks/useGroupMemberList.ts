@@ -51,8 +51,7 @@ export default function useGroupMemberList(
       .finally(() => (fetchState.loading = false));
   };
 
-  const groupMemberInfoChangedHandler = ({ data }: any) => {
-    const member = JSON.parse(data as string);
+  const groupMemberInfoChangedHandler = ({ data:member }: WSEvent<GroupMemberItem>) => {
     if (member.groupID === fetchState.groupMemberList[0]?.groupID) {
       const idx = fetchState.groupMemberList.findIndex(
         (item) => item.userID === member.userID
@@ -61,11 +60,10 @@ export default function useGroupMemberList(
     }
   };
 
-  const groupMemberCountHandler = ({ data }: any) => {
+  const groupMemberCountHandler = ({ data:member }: WSEvent<GroupMemberItem>) => {
     if (!needRefresh) {
       return;
     }
-    const member = JSON.parse(data);
     if (member.groupID === fetchState.groupMemberList[0]?.groupID) {
       fetchState.offset = 0;
       fetchState.groupMemberList = [];
@@ -74,15 +72,15 @@ export default function useGroupMemberList(
   };
 
   const setIMListener = () => {
-    IMSDK.on(CbEvents.ONGROUPMEMBERINFOCHANGED, groupMemberInfoChangedHandler);
-    IMSDK.on(CbEvents.ONGROUPMEMBERADDED, groupMemberCountHandler);
-    IMSDK.on(CbEvents.ONGROUPMEMBERDELETED, groupMemberCountHandler);
+    IMSDK.on(CbEvents.OnGroupMemberInfoChanged, groupMemberInfoChangedHandler);
+    IMSDK.on(CbEvents.OnGroupMemberAdded, groupMemberCountHandler);
+    IMSDK.on(CbEvents.OnGroupMemberDeleted, groupMemberCountHandler);
   };
 
   const disposeIMListener = () => {
-    IMSDK.off(CbEvents.ONGROUPMEMBERINFOCHANGED, groupMemberInfoChangedHandler);
-    IMSDK.off(CbEvents.ONGROUPMEMBERADDED, groupMemberCountHandler);
-    IMSDK.off(CbEvents.ONGROUPMEMBERDELETED, groupMemberCountHandler);
+    IMSDK.off(CbEvents.OnGroupMemberInfoChanged, groupMemberInfoChangedHandler);
+    IMSDK.off(CbEvents.OnGroupMemberAdded, groupMemberCountHandler);
+    IMSDK.off(CbEvents.OnGroupMemberDeleted, groupMemberCountHandler);
   };
 
   onMounted(() => {

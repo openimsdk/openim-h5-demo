@@ -6,6 +6,8 @@ export declare function localConversations(db: Database): QueryExecResult[];
 export declare function getConversationByUserID(db: Database, userID: string): QueryExecResult[];
 export declare function getAllConversationList(db: Database): QueryExecResult[];
 export declare function getAllConversationListToSync(db: Database): QueryExecResult[];
+export declare function getAllSingleConversationIDList(db: Database): QueryExecResult[];
+export declare function getAllConversationIDList(db: Database): QueryExecResult[];
 export declare function getHiddenConversationList(db: Database): QueryExecResult[];
 export declare function getConversationListSplit(db: Database, offset: number, count: number): QueryExecResult[];
 export declare function getConversation(db: Database, conversationID: string): QueryExecResult[];
@@ -27,3 +29,4 @@ export declare function removeConversationDraft(db: Database, conversationID: st
 export declare function unPinConversation(db: Database, conversationID: string, isPinned: number): QueryExecResult[];
 export declare function getTotalUnreadMsgCount(db: Database): QueryExecResult[];
 export declare function setMultipleConversationRecvMsgOpt(db: Database, conversationIDList: string[], opt: number): QueryExecResult[];
+export declare function getAllConversations(db: Database): QueryExecResult[];

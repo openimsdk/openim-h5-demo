@@ -13,7 +13,7 @@
         }}</span>
       </div>
 
-      <GroupMemberRow :member-count="conversationStore.storeCurrentGroupInfo.memberCount" is-nomal/>
+      <GroupMemberRow :member-count="conversationStore.storeCurrentGroupInfo.memberCount" :is-nomal="isNomal"/>
 
 
       <SettingRowItem title="群聊名称" :sub-title="conversationStore.storeCurrentGroupInfo.groupName" />
@@ -36,14 +36,15 @@ import SettingRowItem from "@/components/SettingRowItem/index.vue";
 import GroupMemberRow from "./components/GroupMemberRow.vue";
 import { useClipboard } from "@vueuse/core";
 import useConversationStore from "@/store/modules/conversation";
-import { GroupRole } from "@/utils/open-im-sdk-wasm/types/enum";
+import { GroupMemberRole } from "open-im-sdk-wasm/lib/types/enum";
 
 const { copy, isSupported } = useClipboard()
 
 const conversationStore = useConversationStore();
 
 
-const isOwner = conversationStore.currentMemberInGroup.roleLevel === GroupRole.Owner
+const isOwner = conversationStore.currentMemberInGroup.roleLevel === GroupMemberRole.Owner
+const isNomal = conversationStore.currentMemberInGroup.roleLevel === GroupMemberRole.Nomal
 
 const copyGroupID = () => {
   if (isSupported) {

@@ -5,4 +5,4 @@ export declare type ClientUser = {
 export declare function localUsers(db: Database): QueryExecResult[];
 export declare function getLoginUser(db: Database, userID: string): QueryExecResult[];
 export declare function insertLoginUser(db: Database, user: ClientUser): QueryExecResult[];
-export declare function updateLoginUserByMap(db: Database, userID: string, user: ClientUser): QueryExecResult[];
+export declare function updateLoginUser(db: Database, user: ClientUser): QueryExecResult[];

@@ -11,20 +11,27 @@ export type SendSmsParams = {
 };
 
 export type DemoRegisterParams = {
-  phoneNumber: string;
-  areaCode: string;
-  verificationCode: string;
-  password: string;
-  faceURL: string;
-  nickname: string;
   invitationCode?: string;
-  birth?: number;
+  verifyCode: string;
+  deviceID: string;
+  autoLogin?: boolean;
+  user: {
+    nickname: string;
+    faceURL: string;
+    birth: number;
+    gender: number;
+    email?: string;
+    account?: string;
+    areaCode: string;
+    phoneNumber: string;
+    password: string;
+  };
 };
 
 export type VerifyCodeParams = {
   phoneNumber: string;
   areaCode: string;
-  verificationCode: string;
+  verifyCode: string;
   usedFor: UsedFor;
 };
 
@@ -41,30 +48,25 @@ export type DemoLoginParams = {
   password: string;
 };
 
-export type BusinessUserInfo = {
-  account: string;
-  allowAddFriend: number;
-  allowBeep: number;
-  allowVibration: number;
-  areaCode: string;
-  birth: number;
-  email: string;
-  englishName: string;
-  faceURL: string;
-  forbidden: number;
-  gender: number;
-  hireDate: string;
-  level: number;
-  nickname: string;
-  phoneNumber: string;
-  telephone: string;
+export interface BusinessUserInfo {
   userID: string;
-};
-
-// im api
-
-export enum MinioUploadType {
-  File = "1",
-  Video = "2",
-  Picture = "3",
+  password: string;
+  account: string;
+  phoneNumber: string;
+  areaCode: string;
+  email: string;
+  nickname: string;
+  faceURL: string;
+  gender: number;
+  level: number;
+  birth: number;
+  allowAddFriend: BusinessAllowType;
+  allowBeep: BusinessAllowType;
+  allowVibration: BusinessAllowType;
 }
+
+export enum BusinessAllowType {
+  Allow = 1,
+  NotAllow = 2,
+}
+

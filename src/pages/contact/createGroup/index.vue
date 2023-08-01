@@ -34,18 +34,16 @@
 
 <script setup lang='ts'>
 import Avatar from '@/components/Avatar/index.vue';
-import { feedbackToast, switchUpload } from '@/utils/common';
+import { feedbackToast } from '@/utils/common';
 import { IMSDK, toSpecifiedConversation } from '@/utils/imCommon';
 import { PublicUserItem } from 'open-im-sdk-wasm/lib/types/entity';
-import { GroupRole, GroupType, SessionType } from 'open-im-sdk-wasm/lib/types/enum';
+import { GroupType, SessionType } from 'open-im-sdk-wasm/lib/types/enum';
 import { ContactChooseEnum } from '../chooseUser/data';
 import NavBar from '@/components/NavBar/index.vue';
 import { UploaderFileListItem, UploaderInstance, showLoadingToast } from 'vant';
+import { v4 as uuidV4 } from "uuid";
 
-type CreateGroupProps = {
-    groupType: GroupType
-}
-const props = defineProps<CreateGroupProps>();
+const props = defineProps();
 
 const router = useRouter()
 const route = useRoute()
@@ -73,33 +71,37 @@ const toChooseMember = () => {
 const createGroup = () => {
     createLoading.value = true
     const baseInfo = {
-        groupType: props.groupType,
+        groupType: GroupType.WorkingGroup,
         groupName: groupBaseInfo.value.groupName,
         faceURL: groupBaseInfo.value.groupFaceUrl,
     }
-    const memberList = checkedUserList.value.map(member => ({
-        userID: member.userID,
-        roleLevel: GroupRole.Nomal
-    }))
+    const memberList = checkedUserList.value.map(member =>
+        member.userID
+    )
     IMSDK.createGroup({
-        groupBaseInfo: baseInfo,
-        memberList
+        groupInfo: baseInfo,
+        memberUserIDs: memberList
     }).then(({ data }) => {
         feedbackToast({ message: '创建成功！' })
-        toSpecifiedConversation(data.groupID, props.groupType === GroupType.NomalGroup ? SessionType.Group : SessionType.SuperGroup)
+        toSpecifiedConversation(data.groupID, SessionType.Group)
     }).catch(error => feedbackToast({ error }))
         .finally(() => createLoading.value = false)
 }
 
 const afterReadFile = (data: UploaderFileListItem | UploaderFileListItem[]) => {
-    data = Array.isArray(data) ? data[0] : data
+    const fileData = Array.isArray(data) ? data[0] : data
     const uploadToast = showLoadingToast({
         message: '上传中',
         forbidClick: true,
         duration: 0
     })
-    switchUpload(data.file!).then(({ data: { URL } }) => {
-        groupBaseInfo.value.groupFaceUrl = URL
+    IMSDK.uploadFile({
+        name: fileData.file?.name ?? '',
+        contentType: fileData.file?.type!,
+        uuid: uuidV4(),
+        file: fileData.file as File,
+    }).then((res) => {
+        groupBaseInfo.value.groupFaceUrl = res.data.url
     }).catch(() => uploadToast.message = "上传失败！").finally(() => uploadToast.close())
 }
 

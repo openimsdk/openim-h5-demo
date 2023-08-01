@@ -1,6 +1,6 @@
 import { IMSDK } from "@/utils/imCommon";
 import { FullUserItem } from "open-im-sdk-wasm/lib/types/entity";
-import { OptType } from "open-im-sdk-wasm/lib/types/enum";
+import { MessageReceiveOptType } from "open-im-sdk-wasm/lib/types/enum";
 import { defineStore } from "pinia";
 import store from "../index";
 import { BusinessUserInfo } from "@/api/data";
@@ -8,7 +8,7 @@ import { getAppConfig, getBusinessInfo } from "@/api/user";
 import { feedbackToast, filterEmptyValue } from "@/utils/common";
 
 export type FullSelfInfo = FullUserItem & {
-  globalRecvMsgOpt?: OptType;
+  globalRecvMsgOpt?: MessageReceiveOptType;
 } & BusinessUserInfo;
 
 interface StateType {
@@ -42,7 +42,7 @@ const useStore = defineStore("user", {
       try {
         const { data } = await IMSDK.getSelfUserInfo();
         const res = await getBusinessInfo(data.userID);
-        const businessData = res.data.userFullInfoList[0] ?? {};
+        const businessData = res.data.users[0] ?? {};
         filterEmptyValue(businessData);
         this.selfInfo = {
           ...data,

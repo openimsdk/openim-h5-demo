@@ -266,6 +266,7 @@ export const lang = {
     singleMuteMessage: "{name}被{operator}禁言了{muteTime}",
     cancelSingleMuteMessage: "{operator}取消了禁言{name}",
     burnReadStatus: "阅后即焚已{status}",
+    updateGroupNameMessage: "{operator}修改了群名称为{name}",
   },
   messageTip: {
     getOnlineFailed: "获取在线状态失败",

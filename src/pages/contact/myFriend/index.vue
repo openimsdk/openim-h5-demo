@@ -20,14 +20,14 @@
 import GenericListItem from '@/components/GenericListItem/index.vue';
 import useContactStore from '@/store/modules/contact';
 import { formatContacts } from '@/utils/common';
-import { FriendItem } from 'open-im-sdk-wasm/lib/types/entity';
+import { FriendUserItem } from 'open-im-sdk-wasm/lib/types/entity';
 import CommonEmpty from '@/components/CommonEmpty/index.vue';
 
 const contactStore = useContactStore()
 
 const renderList = computed(() => formatContacts(contactStore.storeFriendList))
 
-const toUserCard = (friend: FriendItem) => {
+const toUserCard = (friend: FriendUserItem) => {
     contactStore.setUserCardData({
         baseInfo: friend
     })

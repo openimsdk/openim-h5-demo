@@ -1,9 +1,10 @@
 import { getPicInfo, getMediaDuration, getVideoSnshot } from "@/utils/common";
 import { v4 as uuidV4 } from "uuid";
-import { MessageType } from "open-im-sdk-wasm/lib/types/enum";
+import { MessageType } from "@/utils/open-im-sdk-wasm/types/enum";
 import { IMSDK } from "@/utils/imCommon";
 import { showFailToast } from "vant";
-import { MessageItem } from "open-im-sdk-wasm/lib/types/entity";
+import { MessageItem } from "@/utils/open-im-sdk-wasm/types/entity";
+import { ExMessageItem } from "@/store/modules/message";
 
 export default function useCreateFileMessage() {
   const getFileData = (data: Blob): Promise<ArrayBuffer> => {
@@ -35,8 +36,9 @@ export default function useCreateFileMessage() {
       sourcePicture: baseInfo,
       bigPicture: baseInfo,
       snapshotPicture: baseInfo,
+      file
     };
-    return (await IMSDK.createImageMessage(options)).data;
+    return (await IMSDK.createImageMessageByFile<ExMessageItem>(options)).data;
   };
 
   const getVideoMessage = async (
@@ -45,6 +47,8 @@ export default function useCreateFileMessage() {
   ): Promise<MessageItem> => {
     const { width, height } = await getPicInfo(snapShotFile);
     const options = {
+      videoFile: file,
+      snapFile: snapShotFile,
       videoPath: "",
       duration: await getMediaDuration(URL.createObjectURL(file)),
       videoType: getFileType(file.name),
@@ -59,16 +63,15 @@ export default function useCreateFileMessage() {
       snapshotHeight: height,
       snapShotType: getFileType(file.name),
     };
-    return (await IMSDK.createVideoMessage(options)).data;
+    return (await IMSDK.createVideoMessageByFile<ExMessageItem>(options)).data;
   };
 
   const createFileMessage = async (
     file: File,
     messageType: MessageType,
-    duration?: number
   ) => {
     let snapShotFile = undefined;
-    if (messageType === MessageType.VIDEOMESSAGE) {
+    if (messageType === MessageType.VideoMessage) {
       try {
         snapShotFile = await getVideoSnshot(URL.createObjectURL(file));
       } catch (error) {
@@ -80,12 +83,12 @@ export default function useCreateFileMessage() {
       }
     }
     switch (messageType) {
-      case MessageType.PICTUREMESSAGE:
+      case MessageType.PictureMessage:
         return {
           message: await getImageMessage(file),
           buffer: await getFileData(file),
         };
-      case MessageType.VIDEOMESSAGE:
+      case MessageType.VideoMessage:
         return {
           message: await getVideoMessage(file, snapShotFile!),
           buffer: await getFileData(file),

@@ -126,19 +126,22 @@ const login = async () => {
   localStorage.setItem("IMAccount",props.baseData.phoneNumber)
   try {
     const { data: { chatToken, imToken, userID } } = await register({
-      ...baseInfo,
-      birth: baseInfo.birth / 1000,
-      phoneNumber: props.baseData.phoneNumber,
-      areaCode: props.baseData.areaCode,
-      verificationCode: props.baseData.verificationCode,
-      password: md5(props.baseData.password),
+      verifyCode: props.baseData.verificationCode,
+      deviceID:'',
+      user:{
+        ...baseInfo,
+        birth: baseInfo.birth / 1000,
+        phoneNumber: props.baseData.phoneNumber,
+        areaCode: props.baseData.areaCode,
+        password: md5(props.baseData.password),
+      },
     })
     setIMProfile({ chatToken, imToken, userID })
     await IMSDK.login({
       userID,
       token: imToken,
-      apiAddress: process.env.API_URL!,
-      wsAddress: process.env.WS_URL!,
+      apiAddr: process.env.API_URL!,
+      wsAddr: process.env.WS_URL!,
       platformID: 5,
     });
     initStore();

@@ -11,3 +11,5 @@ export declare function getGroupInfoByGroupID(db: Database, groupID: string): Qu
 export declare function getAllGroupInfoByGroupIDOrGroupName(db: Database, keyword: string, isSearchGroupID: boolean, isSearchGroupName: boolean): QueryExecResult[];
 export declare function subtractMemberCount(db: Database, groupID: string): QueryExecResult[];
 export declare function addMemberCount(db: Database, groupID: string): QueryExecResult[];
+export declare function getGroupMemberAllGroupIDs(db: Database): QueryExecResult[];
+export declare function getGroups(db: Database, groupIDs: string[]): QueryExecResult[];

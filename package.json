@@ -18,7 +18,7 @@
     "js-audio-recorder": "^1.0.7",
     "md5": "^2.3.0",
     "mitt": "^3.0.0",
-    "open-im-sdk-wasm": "^0.0.6",
+    "open-im-sdk-wasm": "^3.0.1",
     "pinia": "^2.0.23",
     "uqrcodejs": "^4.0.6",
     "vant": "^4.0.7",

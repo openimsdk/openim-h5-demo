@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { GroupRole } from "open-im-sdk-wasm/lib/types/enum";
+import { GroupMemberRole } from "open-im-sdk-wasm/lib/types/enum";
 import { GenericListItemSource } from "./data";
 import Avatar from "../Avatar/index.vue";
 
@@ -86,8 +86,8 @@ const getSubTitle = computed(() => {
   return (props.source as any)[props.subKey];
 });
 
-const isAdmin = computed(() => props.source.roleLevel === GroupRole.Admin);
-const isOwner = computed(() => props.source.roleLevel === GroupRole.Owner);
+const isAdmin = computed(() => props.source.roleLevel === GroupMemberRole.Admin);
+const isOwner = computed(() => props.source.roleLevel === GroupMemberRole.Owner);
 
 const remove = () => {
   emit("remove", props.source);

@@ -21,12 +21,7 @@
 <script setup lang="ts">
 import Avatar from "@/components/Avatar/index.vue";
 import TextMessageRenderer from "./TextMessageRenderer.vue";
-import AudioMessageRenderer from "./AudioMessageRenderer.vue";
-import CardMessageRenderer from "./CardMessageRenderer.vue";
-import FileMessageRenderer from "./FileMessageRenderer.vue";
-import LocationMessageRenderer from "./LocationMessageRenderer.vue";
 import MediaMessageRenderer from "./MediaMessageRenderer.vue";
-import MergeMessageRenderer from "./MergeMessageRenderer.vue";
 import CatchMsgRenderer from "./CatchMsgRenderer.vue";
 import MessageReadState from "./MessageReadState.vue";
 import { AllowType, MessageType } from "open-im-sdk-wasm/lib/types/enum";
@@ -56,23 +51,11 @@ const avatarRef = ref();
 const isSelfMsg = computed(() => userStore.selfInfo.userID === source.value.sendID);
 const getRenderComp = computed(() => {
   switch (props.source.contentType) {
-    case MessageType.TEXTMESSAGE:
-    case MessageType.ATTEXTMESSAGE:
-    case MessageType.QUOTEMESSAGE:
+    case MessageType.TextMessage:
       return TextMessageRenderer;
-    case MessageType.VOICEMESSAGE:
-      return AudioMessageRenderer;
-    case MessageType.VIDEOMESSAGE:
-    case MessageType.PICTUREMESSAGE:
+    case MessageType.VideoMessage:
+    case MessageType.PictureMessage:
       return MediaMessageRenderer;
-    case MessageType.CARDMESSAGE:
-      return CardMessageRenderer;
-    case MessageType.FILEMESSAGE:
-      return FileMessageRenderer;
-    case MessageType.LOCATIONMESSAGE:
-      return LocationMessageRenderer;
-    case MessageType.MERGERMESSAGE:
-      return MergeMessageRenderer;
     default:
       return CatchMsgRenderer;
   }
@@ -85,7 +68,6 @@ useMessageIsRead({
   isPreView: props.isPreView!,
   clientMsgID: props.source.clientMsgID,
 });
-
 const toDetails = async () => {
   if (props.showCheck) {
     return;

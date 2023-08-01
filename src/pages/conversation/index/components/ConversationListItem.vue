@@ -35,10 +35,9 @@ import { ConversationItem, MessageItem } from 'open-im-sdk-wasm/lib/types/entity
 import Avatar from '@/components/Avatar/index.vue';
 import conversation_not_accept from '@assets/images/conversation_not_accept.png'
 import { formatConversionTime, IMSDK, formatMessageByType } from '@/utils/imCommon';
-import { GroupAtType, OptType, SessionType } from 'open-im-sdk-wasm/lib/types/enum';
+import { GroupAtType, MessageReceiveOptType, SessionType } from 'open-im-sdk-wasm/lib/types/enum';
 import { feedbackToast } from '@/utils/common';
 import useConversationStore from '@/store/modules/conversation';
-import { GroupSessionTypes } from '@/constants/enum';
 
 
 type ConversationItemProps = {
@@ -53,10 +52,10 @@ const conversationStore = useConversationStore();
 const emit = defineEmits([]);
 const props = defineProps<ConversationItemProps>();
 
-const isGroup = GroupSessionTypes.includes(props.source.conversationType)
+const isGroup = props.source.conversationType === SessionType.WorkingGroup
 const isNotification = props.source.conversationType === SessionType.Notification
 
-const isOptNomal = props.source.recvMsgOpt === OptType.Nomal
+const isOptNomal = props.source.recvMsgOpt === MessageReceiveOptType.Nomal
 
 const formattedMessage = computed(() => {
     let parsedMessage: MessageItem | undefined = undefined
@@ -76,7 +75,7 @@ const messagePrefix = computed(() => {
     }
     let prefix = ''
 
-    if (props.source?.recvMsgOpt !== OptType.Nomal && props.source.unreadCount > 0) {
+    if (props.source?.recvMsgOpt !== MessageReceiveOptType.Nomal && props.source.unreadCount > 0) {
         prefix = t('pieces', { number: props.source.unreadCount });
     }
 
@@ -118,13 +117,10 @@ const updatePin = () => {
     }).catch((error) => feedbackToast({ error }))
 }
 const removeConversation = () => {
-    IMSDK.deleteConversationFromLocalAndSvr(props.source.conversationID).then(() => conversationStore.delConversationByCID(props.source.conversationID)).catch((error) => feedbackToast({ error }))
+    IMSDK.deleteConversationAndDeleteAllMsg(props.source.conversationID).then(() => conversationStore.delConversationByCID(props.source.conversationID)).catch((error) => feedbackToast({ error }))
 }
 const markHasRead = () => {
-    IMSDK.markMessageAsReadByConID({
-        conversationID: props.source.conversationID,
-        msgIDList: []
-    }).catch((error) => feedbackToast({ error }))
+    IMSDK.markConversationMessageAsRead(props.source.conversationID).catch((error) => feedbackToast({ error }))
 }
 
 </script>

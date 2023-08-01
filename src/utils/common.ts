@@ -1,12 +1,9 @@
 import { showToast } from "vant";
-import { minioUpload } from "@api/im_api";
-import { MinioUploadType } from "@api/data";
-import { cosUpload } from "./cos";
 import PinYin from "./pinyin";
 
 // i18n
 import { i18n } from "@/i18n";
-import { FriendItem } from "open-im-sdk-wasm/lib/types/entity";
+import { FriendUserItem } from "open-im-sdk-wasm/lib/types/entity";
 // @ts-ignore
 const { t } = i18n.global;
 
@@ -161,17 +158,6 @@ export const base64toFile = (base64Str: string) => {
   });
 };
 
-export const switchUpload = (
-  file: File,
-  progressFunc?: (progress: number) => void,
-  snapShot?: File
-) => {
-  if (process.env.OBJECT_STORAGE === "minio") {
-    return minioUpload(file, MinioUploadType.File, snapShot, progressFunc);
-  }
-  return cosUpload(file, progressFunc);
-};
-
 export const genAvatar = (str: string, size: number) => {
   let colors = ["#5496EB"];
   let cvs = document.createElement("canvas");
@@ -193,7 +179,7 @@ export const genAvatar = (str: string, size: number) => {
   return cvs.toDataURL("image/png", 1);
 };
 
-export const formatContacts = (data: FriendItem[], key = "nickname") => {
+export const formatContacts = (data: FriendUserItem[], key = "nickname") => {
   const ucfirst = (l1: any) => {
     if (l1.length > 0) {
       var first = l1.substr(0, 1).toUpperCase();

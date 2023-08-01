@@ -22,16 +22,6 @@ const conversationRouters: Array<RouteRecordRaw> = [
     component: () => import("@pages/conversation/notifyMessageList/index.vue"),
   },
   {
-    path: "/previewFile",
-    name: "PreviewFile",
-    component: () => import("@pages/conversation/previewFile/index.vue"),
-  },
-  {
-    path: "/previewLocation",
-    name: "PreviewLocation",
-    component: () => import("@pages/conversation/previewLocation/index.vue"),
-  },
-  {
     path: "/previewVideo",
     name: "PreviewVideo",
     props: ({ query }) => ({

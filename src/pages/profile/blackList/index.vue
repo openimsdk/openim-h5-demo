@@ -18,7 +18,7 @@
 import NavBar from '@/components/NavBar/index.vue';
 import VirtualList from '@components/VirtualList';
 import GenericListItem from '@/components/GenericListItem/index.vue';
-import { BlackItem } from 'open-im-sdk-wasm/lib/types/entity';
+import { BlackUserItem } from 'open-im-sdk-wasm/lib/types/entity';
 import useContactStore from '@/store/modules/contact';
 import CommonEmpty from '@/components/CommonEmpty/index.vue';
 import { IMSDK } from '@/utils/imCommon';
@@ -28,7 +28,7 @@ import { feedbackToast } from '@/utils/common';
 
 const contactStore = useContactStore();
 
-const blackRemove = ({ userID }: BlackItem) => {
+const blackRemove = ({ userID }: BlackUserItem) => {
     IMSDK.removeBlack(userID).catch((error)=>feedbackToast({error}))
 }
 

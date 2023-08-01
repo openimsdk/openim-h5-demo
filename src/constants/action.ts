@@ -27,12 +27,3 @@ export const ConversationTopMoreActions: PopoverAction[] = [
         icon: more_create_group
     },
 ]
-
-export const LaunchGroupSheetActions:ActionSheetAction[] = [
-    {
-        name: '普通群'
-    },
-    {
-        name: '工作群'
-    },
-]

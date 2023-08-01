@@ -13,7 +13,6 @@
             @click="$router.push({path:'searchToJoin',query:{isGroup:'false'}})" />
         <AddMenuItem :icon="contact_add_scan" :title="'扫一扫'" :sub-title="'扫描二维码名片'" />
 
-        <LaunchGroupSheet ref="launchSheetRef" />
     </div>
 </template>
 
@@ -24,15 +23,11 @@ import contact_add_create_group from '@assets/images/contact_add_create_group.pn
 import contact_add_join_group from '@assets/images/contact_add_join_group.png'
 import contact_add_search_user from '@assets/images/contact_add_search_user.png'
 import contact_add_scan from '@assets/images/contact_add_scan.png'
-import LaunchGroupSheet from '@/components/LaunchGroupSheet/index.vue';
 
-const launchSheetRef=ref()
+const router = useRouter()
 
 const chooseGroupType = () => {
-    launchSheetRef.value.openLaunchSheet()
-}
-const scanQr = () => {
-
+    router.push('createGroup')
 }
 
 </script>

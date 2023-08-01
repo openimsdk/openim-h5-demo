@@ -3,7 +3,6 @@ import useConversationStore from "@/store/modules/conversation";
 import useMessageStore from "@/store/modules/message";
 import { IMSDK } from "@/utils/imCommon";
 import { useIntersectionObserver } from "@vueuse/core";
-import { SessionType } from "open-im-sdk-wasm/lib/types/enum";
 import { ComputedRef, Ref } from "vue";
 
 type UseMessageIsReadProps = {
@@ -25,20 +24,14 @@ export function useMessageIsRead({
   clientMsgID,
 }: UseMessageIsReadProps) {
   const markC2CAsRead = () => {
-    const isSingle =
-      conversationStore.storeCurrentConversation.conversationType ===
-      SessionType.Single;
-    const funcName = isSingle
-      ? "markC2CMessageAsRead"
-      : "markGroupMessageAsRead";
-    IMSDK[funcName]({
-      userID: conversationStore.storeCurrentConversation.userID,
-      groupID: conversationStore.storeCurrentConversation.groupID,
-      msgIDList: [clientMsgID],
+    IMSDK.markMessagesAsReadByMsgID({
+      conversationID: conversationStore.storeCurrentConversation.conversationID,
+      clientMsgIDList: [clientMsgID],
     });
     messageStore.updateOneMessage({
       clientMsgID,
       isRead: true,
+      isAppend: false,
     } as ExedMessageItem);
   };
 

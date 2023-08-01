@@ -19,21 +19,15 @@
                     <van-icon size="24" name="add-o" />
                 </template>
             </van-popover>
-
-            <LaunchGroupSheet ref="launchSheetRef" />
         </div>
     </div>
 </template>
 
 <script setup lang='ts'>
 import Avatar from '@/components/Avatar/index.vue';
-import common_call from '@/assets/images/common_call.png'
-import common_circle_add from '@/assets/images/common_circle_add.png'
 import { PopoverAction } from 'vant';
 import useUserStore from '@/store/modules/user';
 import { ConversationTopMoreActions } from '@/constants/action';
-import { GroupType } from 'open-im-sdk-wasm/lib/types/enum';
-import LaunchGroupSheet from '@/components/LaunchGroupSheet/index.vue';
 
 enum ActionEnum {
     Scan,
@@ -45,7 +39,6 @@ const userStore = useUserStore()
 const router = useRouter()
 
 const showPopover = ref(false)
-const launchSheetRef = ref()
 
 const selectMenu = (_: PopoverAction, idx: ActionEnum) => {
     switch (idx) {
@@ -61,7 +54,7 @@ const selectMenu = (_: PopoverAction, idx: ActionEnum) => {
             })
             break;
         case ActionEnum.LaunchGroup:
-            launchSheetRef.value.openLaunchSheet()
+            router.push('createGroup')
             break;
         default:
             break;

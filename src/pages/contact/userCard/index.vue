@@ -24,10 +24,6 @@
                 <img width="50" :src="user_card_message" alt="" />
                 <span class="text-[#1D6BED] mt-1">发消息</span>
             </div>
-            <div class="flex flex-col justify-center items-center">
-                <img width="50" :src="user_card_call" alt="" />
-                <span class="text-[#1D6BED] mt-1">OpenIM电话</span>
-            </div>
             <div v-if="!friendInfo" class="flex flex-col justify-center items-center" @click="toAddFriend">
                 <img width="50" :src="user_card_add" alt="" />
                 <span class="text-[#1D6BED] mt-1">添加好友</span>
@@ -55,7 +51,7 @@ const onlineStateStr = ref(t("offline"))
 const friendInfo = computed(() => contactStore.storeFriendList.find(friend => friend.userID === contactStore.storeUserCardData.baseInfo?.userID))
 
 const getOnlineState = async () => {
-    onlineStateStr.value = await getDesignatedUserOnlineState(contactStore.storeUserCardData.baseInfo!.userID)
+    onlineStateStr.value = await getDesignatedUserOnlineState(contactStore.storeUserCardData.baseInfo!.userID!)
 }
 
 // events

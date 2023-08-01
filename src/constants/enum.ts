@@ -1,4 +1,4 @@
-import { MessageType, SessionType } from "open-im-sdk-wasm/lib/types/enum";
+import { MessageType, SessionType } from "@/utils/open-im-sdk-wasm/types/enum";
 
 export enum CustomType {
   VideoCall = "c100",
@@ -8,46 +8,33 @@ export enum CustomType {
   InsertLoading = 999,
 }
 
-export const GroupSessionTypes = [SessionType.Group, SessionType.SuperGroup];
-
 export const TipTypes = [
-  MessageType.REVOKEMESSAGE,
-  MessageType.ADVANCEREVOKEMESSAGE,
-  MessageType.FRIENDAPPLICATIONAPPROVED,
-  MessageType.FRIENDAPPLICATIONREJECTED,
-  MessageType.FRIENDAPPLICATIONADDED,
-  MessageType.FRIENDADDED,
-  MessageType.FRIENDDELETED,
-  MessageType.FRIENDREMARKSET,
-  MessageType.BLACKADDED,
-  MessageType.BLACKDELETED,
-  MessageType.SELFINFOUPDATED,
-  MessageType.GROUPCREATED,
-  MessageType.GROUPINFOUPDATED,
-  MessageType.JOINGROUPAPPLICATIONADDED,
-  MessageType.MEMBERQUIT,
-  MessageType.GROUPAPPLICATIONACCEPTED,
-  MessageType.GROUPAPPLICATIONREJECTED,
-  MessageType.GROUPOWNERTRANSFERRED,
-  MessageType.MEMBERKICKED,
-  MessageType.MEMBERINVITED,
-  MessageType.MEMBERENTER,
-  MessageType.GROUPDISMISSED,
-  MessageType.GROUPMEMBERMUTED,
-  MessageType.GROUPMEMBERCANCELMUTED,
-  MessageType.GROUPMUTED,
-  MessageType.GROUPCANCELMUTED,
-  MessageType.BURNMESSAGECHANGE,
+  MessageType.RevokeMessage,
+  MessageType.FriendAdded,
+  MessageType.FriendAdded,
+  MessageType.GroupCreated,
+  MessageType.GroupInfoUpdated,
+  MessageType.MemberQuit,
+  MessageType.GroupOwnerTransferred,
+  MessageType.MemberKicked,
+  MessageType.MemberInvited,
+  MessageType.MemberEnter,
+  MessageType.GroupDismissed,
+  MessageType.GroupMemberMuted,
+  MessageType.GroupMemberCancelMuted,
+  MessageType.GroupMemberInfoUpdated,
+  MessageType.GroupMuted,
+  MessageType.GroupAnnouncementUpdated,
+  MessageType.GroupCancelMuted,
+  MessageType.BurnMessageChange,
+  MessageType.GroupMemberToAdmin,
+  MessageType.GroupAdminToNomal,
+  MessageType.GroupNameUpdated,
 ];
 
 export const FileMessageTypes = [
-  MessageType.PICTUREMESSAGE,
-  MessageType.VIDEOMESSAGE,
-  MessageType.VOICEMESSAGE,
-  MessageType.FILEMESSAGE,
+  MessageType.PictureMessage,
+  MessageType.VideoMessage,
+  MessageType.VoiceMessage,
+  MessageType.FileMessage,
 ];
-
-export enum isAllow {
-  Allowed = 1,
-  NotAllowed = 2,
-}

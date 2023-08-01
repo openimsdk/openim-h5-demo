@@ -1,5 +1,5 @@
 import { DatabaseErrorCode } from '../../constant';
-import { insertGroup as databaseInsertGroup, deleteGroup as databasedeleteGroup, updateGroup as databaseupdateGroup, getJoinedGroupList as databaseGetJoinedGroupList, getGroupInfoByGroupID as databaseGetGroupInfoByGroupID, getAllGroupInfoByGroupIDOrGroupName as databaseGetAllGroupInfoByGroupIDOrGroupName, subtractMemberCount as databasesubtractMemberCount, addMemberCount as databaseaddMemberCount, } from '../../sqls';
+import { insertGroup as databaseInsertGroup, deleteGroup as databasedeleteGroup, updateGroup as databaseupdateGroup, getJoinedGroupList as databaseGetJoinedGroupList, getGroupInfoByGroupID as databaseGetGroupInfoByGroupID, getGroupMemberAllGroupIDs as databaseGetGroupMemberAllGroupIDs, getAllGroupInfoByGroupIDOrGroupName as databaseGetAllGroupInfoByGroupIDOrGroupName, subtractMemberCount as databaseSubtractMemberCount, addMemberCount as databaseAddMemberCount, getGroups as databaseGetGroups, } from '../../sqls';
 import { converSqlExecResult, convertObjectField, convertToSnakeCaseObject, formatResponse, } from '../../utils';
 import { getInstance } from './instance';
 export async function insertGroup(localGroupStr) {
@@ -78,7 +78,7 @@ export async function getAllGroupInfoByGroupIDOrGroupName(keyword, isSearchGroup
 export async function subtractMemberCount(groupID) {
     try {
         const db = await getInstance();
-        databasesubtractMemberCount(db, groupID);
+        databaseSubtractMemberCount(db, groupID);
         return formatResponse('');
     }
     catch (e) {
@@ -89,7 +89,7 @@ export async function subtractMemberCount(groupID) {
 export async function addMemberCount(groupID) {
     try {
         const db = await getInstance();
-        databaseaddMemberCount(db, groupID);
+        databaseAddMemberCount(db, groupID);
         return formatResponse('');
     }
     catch (e) {
@@ -120,8 +120,31 @@ export async function getJoinedWorkingGroupList() {
         const db = await getInstance();
         const execResult = databaseGetJoinedGroupList(db);
         const allJoinedGroupList = converSqlExecResult(execResult[0], 'CamelCase', [], { name: 'groupName' });
-        const filterList = allJoinedGroupList.filter(group => group.group_type === 2);
+        const filterList = allJoinedGroupList.filter(group => group.groupType === 2);
         return formatResponse(JSON.stringify(filterList));
+    }
+    catch (e) {
+        console.error(e);
+        return formatResponse(undefined, DatabaseErrorCode.ErrorInit, JSON.stringify(e));
+    }
+}
+export async function getGroupMemberAllGroupIDs() {
+    try {
+        const db = await getInstance();
+        const execResult = databaseGetGroupMemberAllGroupIDs(db);
+        return formatResponse(converSqlExecResult(execResult[0], 'CamelCase').map(item => item.groupID));
+    }
+    catch (e) {
+        console.error(e);
+        return formatResponse(undefined, DatabaseErrorCode.ErrorInit, JSON.stringify(e));
+    }
+}
+export async function getGroups(groupIDListStr) {
+    try {
+        const db = await getInstance();
+        const execResult = databaseGetGroups(db, JSON.parse(groupIDListStr));
+        const allJoinedGroupList = converSqlExecResult(execResult[0], 'CamelCase', [], { name: 'groupName' });
+        return formatResponse(JSON.stringify(allJoinedGroupList));
     }
     catch (e) {
         console.error(e);

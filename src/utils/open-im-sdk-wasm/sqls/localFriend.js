@@ -11,10 +11,6 @@ export function localFriends(db) {
           'operator_user_id' varchar(64),
           'name'             varchar(255),
           'face_url'         varchar(255),
-          'gender'           INTEGER,
-          'phone_number'     varchar(32),
-          'birth'            INTEGER,
-          'email'            varchar(64),
           'ex'               varchar(1024),
           'attached_info'    varchar(1024),
           primary key ('owner_user_id', 'friend_user_id')
@@ -22,8 +18,6 @@ export function localFriends(db) {
       `);
 }
 export function insertFriend(db, localFriend) {
-    console.log('localFriend::::insert');
-    console.log(localFriend);
     const sql = squel
         .insert()
         .into('local_friends')
@@ -52,6 +46,15 @@ export function getAllFriendList(db, loginUser) {
       select *
         from local_friends
         where owner_user_id = "${loginUser}"
+        `);
+}
+export function getPageFriendList(db, offset, count, loginUser) {
+    return db.exec(`
+      select *
+        from local_friends
+        where owner_user_id = "${loginUser}"
+        order by name
+        limit ${count} offset ${offset}
         `);
 }
 export function searchFriendList(db, keyword, isSearchUserID, isSearchNickname, isSearchRemark) {

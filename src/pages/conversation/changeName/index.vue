@@ -37,15 +37,13 @@ const finishChange = () => {
     if(props.originData.groupName){
         func = IMSDK.setGroupInfo({
             groupID: props.originData.groupID,
-            groupInfo: {
-                groupName: name.value
-            }
+            groupName: name.value
         })
     }else {
         func = IMSDK.setGroupMemberNickname({
             groupID: props.originData.groupID,
             userID: props.originData.userID,
-            GroupMemberNickname: name.value
+            groupMemberNickname: name.value
         })
     }
     func.then(()=>feedbackToast({message:'修改成功！',onClose:router.back})).catch((error)=>feedbackToast({message:'修改失败！',error}))

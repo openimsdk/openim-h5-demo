@@ -39,11 +39,7 @@ const initLoading = toRef(
 
 const checkUnRead = () => {
   if (conversationStore.storeCurrentConversation.unreadCount > 0) {
-      IMSDK.markMessageAsReadByConID({
-        conversationID:
-          conversationStore.storeCurrentConversation.conversationID,
-        msgIDList: [],
-      });
+      IMSDK.markConversationMessageAsRead(conversationStore.storeCurrentConversation.conversationID);
     }
 }
 

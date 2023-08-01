@@ -3,8 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { formatEmoji, parseAt, parseBr } from "@/utils/imCommon";
-import { MessageType } from "open-im-sdk-wasm/lib/types/enum";
+import { formatEmoji, parseBr } from "@/utils/imCommon";
 import { ExedMessageItem } from "./data";
 
 type TextMsgRendererProps = {
@@ -14,13 +13,7 @@ type TextMsgRendererProps = {
 const props = defineProps<TextMsgRendererProps>();
 
 const content = computed(() => {
-  let msgStr = props.message.content;
-  if (props.message.contentType === MessageType.QUOTEMESSAGE) {
-    msgStr = props.message.quoteElem.text;
-  }
-  if (props.message.contentType === MessageType.ATTEXTMESSAGE) {
-    msgStr = parseAt(props.message.atElem);
-  }
+  let msgStr = props.message.textElem.content;;
   return formatEmoji(parseBr(msgStr));
 });
 </script>

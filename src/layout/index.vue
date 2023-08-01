@@ -63,7 +63,7 @@ onMounted(() => {
 const loginCheck = () => {
   IMSDK.getLoginStatus()
     .then((res) => {
-      if (res.data === -1) {
+      if (res.data !== 3) {
         tryLogin();
       }
     })
@@ -78,8 +78,8 @@ const tryLogin = async () => {
     IMSDK.login({
       userID: IMUserID,
       token: IMToken,
-      apiAddress: process.env.API_URL!,
-      wsAddress: process.env.WS_URL!,
+      apiAddr: process.env.API_URL!,
+      wsAddr: process.env.WS_URL!,
       platformID: 5,
     }).then(() => {
       showOverlay.value = false

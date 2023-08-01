@@ -1,5 +1,5 @@
 import { DatabaseErrorCode } from '../../constant';
-import { getLoginUser as databaseGetLoginUser, insertLoginUser as databaseInsertLoginUser, updateLoginUserByMap as databaseUpdateLoginUserByMap, } from '../../sqls';
+import { getLoginUser as databaseGetLoginUser, insertLoginUser as databaseInsertLoginUser, updateLoginUser as databaseUpdateLoginUser, } from '../../sqls';
 import { formatResponse, converSqlExecResult, convertToSnakeCaseObject, convertObjectField, } from '../../utils';
 import { getInstance } from './instance';
 export async function getLoginUser(userID) {
@@ -30,10 +30,15 @@ export async function insertLoginUser(userStr) {
         return formatResponse(undefined, DatabaseErrorCode.ErrorInit, JSON.stringify(e));
     }
 }
-export async function updateLoginUserByMap(userID, user) {
+export async function updateLoginUser(userStr) {
     try {
         const db = await getInstance();
-        const execResult = databaseUpdateLoginUserByMap(db, userID, user);
+        const user = convertToSnakeCaseObject(convertObjectField(JSON.parse(userStr), { nickname: 'name' }));
+        const execResult = databaseUpdateLoginUser(db, user);
+        const modifed = db.getRowsModified();
+        if (modifed === 0) {
+            throw 'updateLoginUser no record updated';
+        }
         return formatResponse(execResult);
     }
     catch (e) {

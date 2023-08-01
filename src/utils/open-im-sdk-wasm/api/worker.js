@@ -1,23 +1,21 @@
 import { RPC, RPCMessageEvent } from 'rpc-shooter';
 import { init, close, 
 // message
-getMessage, getMultipleMessage, getSendingMessageList, getNormalMsgSeq, updateMessageTimeAndStatus, updateMessage, updateColumnsMessage, insertMessage, batchInsertMessageList, getMessageList, getMessageListNoTime, messageIfExists, isExistsInErrChatLogBySeq, messageIfExistsBySeq, getAbnormalMsgSeq, getAbnormalMsgSeqList, batchInsertExceptionMsg, searchMessageByKeyword, searchMessageByContentType, searchMessageByContentTypeAndKeyword, updateMsgSenderNickname, updateMsgSenderFaceURL, updateMsgSenderFaceURLAndSenderNickname, getMsgSeqByClientMsgID, getMsgSeqListByGroupID, getMsgSeqListByPeerUserID, getMsgSeqListBySelfUserID, deleteAllMessage, getAllUnDeleteMessageSeqList, updateSingleMessageHasRead, updateGroupMessageHasRead, updateMessageStatusBySourceID, 
+getMessage, getMultipleMessage, getSendingMessageList, updateMessageTimeAndStatus, updateMessage, updateMessageBySeq, updateColumnsMessage, insertMessage, batchInsertMessageList, getMessageList, getMessageListNoTime, messageIfExists, isExistsInErrChatLogBySeq, searchMessageByKeyword, searchMessageByContentType, searchMessageByContentTypeAndKeyword, updateMsgSenderFaceURLAndSenderNickname, 
 // conversation
 getAllConversationList, getAllConversationListToSync, getHiddenConversationList, getConversation, getMultipleConversation, updateColumnsConversation, decrConversationUnreadCount, batchInsertConversationList, insertConversation, getTotalUnreadMsgCount, batchUpdateConversationList, clearAllConversation, clearConversation, conversationIfExists, deleteConversation, getConversationByUserID, getConversationListSplit, incrConversationUnreadCount, removeConversationDraft, resetAllConversation, resetConversation, setConversationDraft, setMultipleConversationRecvMsgOpt, unPinConversation, 
 // users
-getLoginUser, insertLoginUser, updateLoginUserByMap, 
+getLoginUser, insertLoginUser, updateLoginUser, 
 // super group
 getJoinedSuperGroupList, getJoinedSuperGroupIDList, getSuperGroupInfoByGroupID, deleteSuperGroup, insertSuperGroup, updateSuperGroup, 
 // unread messages
 deleteConversationUnreadMessageList, batchInsertConversationUnreadMessageList, 
-// super group messages
-superGroupGetMessage, superGroupGetMultipleMessage, getSuperGroupNormalMsgSeq, superGroupGetNormalMinSeq, superGroupUpdateMessageTimeAndStatus, superGroupUpdateMessage, superGroupInsertMessage, superGroupBatchInsertMessageList, superGroupGetMessageListNoTime, superGroupGetMessageList, superGroupDeleteAllMessage, superGroupGetMsgSeqByClientMsgID, superGroupGetSendingMessageList, superGroupSearchMessageByContentType, superGroupSearchMessageByKeyword, superGroupSearchMessageByContentTypeAndKeyword, superGroupUpdateGroupMessageHasRead, superGroupUpdateMessageStatusBySourceID, superGroupUpdateColumnsMessage, superGroupUpdateMsgSenderFaceURLAndSenderNickname, superGroupSearchAllMessageByContentType, 
 // black
 getBlackList, getBlackListUserID, getBlackInfoByBlockUserID, getBlackInfoList, insertBlack, deleteBlack, updateBlack, 
 // friendRequest
-insertFriendRequest, deleteFriendRequestBothUserID, updateFriendRequest, getRecvFriendApplication, getSendFriendApplication, getFriendApplicationByBothID, 
+insertFriendRequest, deleteFriendRequestBothUserID, updateFriendRequest, getRecvFriendApplication, getSendFriendApplication, getFriendApplicationByBothID, getBothFriendReq, 
 // groups
-insertGroup, deleteGroup, updateGroup, getJoinedGroupList, getGroupInfoByGroupID, getAllGroupInfoByGroupIDOrGroupName, subtractMemberCount, addMemberCount, getJoinedWorkingGroupIDList, getJoinedWorkingGroupList, 
+insertGroup, deleteGroup, updateGroup, getJoinedGroupList, getGroupInfoByGroupID, getAllGroupInfoByGroupIDOrGroupName, subtractMemberCount, addMemberCount, getJoinedWorkingGroupIDList, getJoinedWorkingGroupList, getGroups, 
 // groupRequest
 insertGroupRequest, deleteGroupRequest, updateGroupRequest, getSendGroupApplication, insertAdminGroupRequest, deleteAdminGroupRequest, updateAdminGroupRequest, getAdminGroupApplication, 
 // friend
@@ -25,8 +23,12 @@ insertFriend, deleteFriend, updateFriend, getAllFriendList, searchFriendList, ge
 // groupMember
 batchInsertGroupMember, deleteGroupAllMembers, deleteGroupMember, getAllGroupMemberList, getAllGroupMemberUserIDList, getGroupAdminID, getGroupMemberCount, getGroupMemberInfoByGroupIDUserID, getGroupMemberListByGroupID, getGroupMemberListSplit, getGroupMemberListSplitByJoinTimeFilter, getGroupMemberOwner, getGroupMemberOwnerAndAdmin, getGroupMemberUIDListByGroupID, getGroupOwnerAndAdminByGroupID, getGroupSomeMemberInfo, insertGroupMember, searchGroupMembers, updateGroupMember, updateGroupMemberField, 
 // temp cache chatlogs
-batchInsertTempCacheMessageList, InsertTempCacheMessage, } from '../api/database';
+batchInsertTempCacheMessageList, InsertTempCacheMessage, getAllSingleConversationIDList, getAllConversationIDList, getPageFriendList, getGroupMemberAllGroupIDs, getAlreadyExistSeqList, markConversationAllMessageAsRead, searchAllMessageByContentType, deleteConversationMsgs, markConversationMessageAsRead, markConversationMessageAsReadBySeqs, markDeleteConversationAllMessages, getUnreadMessage, getConversationPeerNormalMsgSeq, getConversationNormalMsgSeq, deleteConversationAllMessages, getMessagesByClientMsgIDs, getMessagesBySeqs, getMessageBySeq, getAllConversations, 
+// upload
+updateUpload, deleteUpload, getUpload, insertUpload, } from '../api/database';
 import { getInstance } from './database/instance';
+import { setNotificationSeq, getNotificationAllSeqs, } from './database/notification';
+import { fileMapClear, fileMapSet, wasmClose, wasmOpen, wasmRead, } from './upload';
 const ctx = self;
 const rpc = new RPC({
     event: new RPCMessageEvent({
@@ -34,42 +36,50 @@ const rpc = new RPC({
         targetEndpoint: ctx,
     }),
 });
+// upload
+rpc.registerMethod('fileMapSet', fileMapSet);
+rpc.registerMethod('fileMapClear', fileMapClear);
+rpc.registerMethod('wasmOpen', wasmOpen);
+rpc.registerMethod('wasmClose', wasmClose);
+rpc.registerMethod('wasmRead', wasmRead);
+rpc.registerMethod('getUpload', getUpload);
+rpc.registerMethod('insertUpload', insertUpload);
+rpc.registerMethod('updateUpload', updateUpload);
+rpc.registerMethod('deleteUpload', deleteUpload);
 rpc.registerMethod('initDB', init);
 rpc.registerMethod('close', close);
 // message
 rpc.registerMethod('getMessage', getMessage);
 rpc.registerMethod('getMultipleMessage', getMultipleMessage);
 rpc.registerMethod('getSendingMessageList', getSendingMessageList);
-rpc.registerMethod('getNormalMsgSeq', getNormalMsgSeq);
 rpc.registerMethod('updateMessageTimeAndStatus', updateMessageTimeAndStatus);
 rpc.registerMethod('updateMessage', updateMessage);
+rpc.registerMethod('updateMessageBySeq', updateMessageBySeq);
 rpc.registerMethod('updateColumnsMessage', updateColumnsMessage);
 rpc.registerMethod('insertMessage', insertMessage);
 rpc.registerMethod('batchInsertMessageList', batchInsertMessageList);
-rpc.registerMethod('superGroupGetMessageListNoTime', superGroupGetMessageListNoTime);
 rpc.registerMethod('getMessageList', getMessageList);
 rpc.registerMethod('getMessageListNoTime', getMessageListNoTime);
 rpc.registerMethod('messageIfExists', messageIfExists);
 rpc.registerMethod('isExistsInErrChatLogBySeq', isExistsInErrChatLogBySeq);
-rpc.registerMethod('messageIfExistsBySeq', messageIfExistsBySeq);
-rpc.registerMethod('getAbnormalMsgSeq', getAbnormalMsgSeq);
-rpc.registerMethod('getAbnormalMsgSeqList', getAbnormalMsgSeqList);
-rpc.registerMethod('batchInsertExceptionMsg', batchInsertExceptionMsg);
 rpc.registerMethod('searchMessageByKeyword', searchMessageByKeyword);
 rpc.registerMethod('searchMessageByContentType', searchMessageByContentType);
 rpc.registerMethod('searchMessageByContentTypeAndKeyword', searchMessageByContentTypeAndKeyword);
-rpc.registerMethod('updateMsgSenderNickname', updateMsgSenderNickname);
-rpc.registerMethod('updateMsgSenderFaceURL', updateMsgSenderFaceURL);
 rpc.registerMethod('updateMsgSenderFaceURLAndSenderNickname', updateMsgSenderFaceURLAndSenderNickname);
-rpc.registerMethod('getMsgSeqByClientMsgID', getMsgSeqByClientMsgID);
-rpc.registerMethod('getMsgSeqListByGroupID', getMsgSeqListByGroupID);
-rpc.registerMethod('getMsgSeqListByPeerUserID', getMsgSeqListByPeerUserID);
-rpc.registerMethod('getMsgSeqListBySelfUserID', getMsgSeqListBySelfUserID);
-rpc.registerMethod('deleteAllMessage', deleteAllMessage);
-rpc.registerMethod('getAllUnDeleteMessageSeqList', getAllUnDeleteMessageSeqList);
-rpc.registerMethod('updateSingleMessageHasRead', updateSingleMessageHasRead);
-rpc.registerMethod('updateGroupMessageHasRead', updateGroupMessageHasRead);
-rpc.registerMethod('updateMessageStatusBySourceID', updateMessageStatusBySourceID);
+rpc.registerMethod('getAlreadyExistSeqList', getAlreadyExistSeqList);
+rpc.registerMethod('getMessageBySeq', getMessageBySeq);
+rpc.registerMethod('getMessagesByClientMsgIDs', getMessagesByClientMsgIDs);
+rpc.registerMethod('getMessagesBySeqs', getMessagesBySeqs);
+rpc.registerMethod('getConversationNormalMsgSeq', getConversationNormalMsgSeq);
+rpc.registerMethod('getConversationPeerNormalMsgSeq', getConversationPeerNormalMsgSeq);
+rpc.registerMethod('deleteConversationAllMessages', deleteConversationAllMessages);
+rpc.registerMethod('markDeleteConversationAllMessages', markDeleteConversationAllMessages);
+rpc.registerMethod('getUnreadMessage', getUnreadMessage);
+rpc.registerMethod('markConversationMessageAsReadBySeqs', markConversationMessageAsReadBySeqs);
+rpc.registerMethod('markConversationMessageAsRead', markConversationMessageAsRead);
+rpc.registerMethod('deleteConversationMsgs', deleteConversationMsgs);
+rpc.registerMethod('markConversationAllMessageAsRead', markConversationAllMessageAsRead);
+rpc.registerMethod('searchAllMessageByContentType', searchAllMessageByContentType);
 // conversation
 rpc.registerMethod('getAllConversationList', getAllConversationList);
 rpc.registerMethod('getAllConversationListToSync', getAllConversationListToSync);
@@ -95,9 +105,12 @@ rpc.registerMethod('removeConversationDraft', removeConversationDraft);
 rpc.registerMethod('unPinConversation', unPinConversation);
 rpc.registerMethod('incrConversationUnreadCount', incrConversationUnreadCount);
 rpc.registerMethod('setMultipleConversationRecvMsgOpt', setMultipleConversationRecvMsgOpt);
+rpc.registerMethod('getAllSingleConversationIDList', getAllSingleConversationIDList);
+rpc.registerMethod('getAllConversationIDList', getAllConversationIDList);
+rpc.registerMethod('getAllConversations', getAllConversations);
 rpc.registerMethod('getLoginUser', getLoginUser);
 rpc.registerMethod('insertLoginUser', insertLoginUser);
-rpc.registerMethod('updateLoginUserByMap', updateLoginUserByMap);
+rpc.registerMethod('updateLoginUser', updateLoginUser);
 rpc.registerMethod('getJoinedSuperGroupList', getJoinedSuperGroupList);
 rpc.registerMethod('getJoinedSuperGroupIDList', getJoinedSuperGroupIDList);
 rpc.registerMethod('getSuperGroupInfoByGroupID', getSuperGroupInfoByGroupID);
@@ -106,26 +119,6 @@ rpc.registerMethod('insertSuperGroup', insertSuperGroup);
 rpc.registerMethod('updateSuperGroup', updateSuperGroup);
 rpc.registerMethod('deleteConversationUnreadMessageList', deleteConversationUnreadMessageList);
 rpc.registerMethod('batchInsertConversationUnreadMessageList', batchInsertConversationUnreadMessageList);
-rpc.registerMethod('superGroupGetMessage', superGroupGetMessage);
-rpc.registerMethod('superGroupGetMultipleMessage', superGroupGetMultipleMessage);
-rpc.registerMethod('getSuperGroupNormalMsgSeq', getSuperGroupNormalMsgSeq);
-rpc.registerMethod('superGroupGetNormalMinSeq', superGroupGetNormalMinSeq);
-rpc.registerMethod('superGroupUpdateMessageTimeAndStatus', superGroupUpdateMessageTimeAndStatus);
-rpc.registerMethod('superGroupUpdateMessage', superGroupUpdateMessage);
-rpc.registerMethod('superGroupInsertMessage', superGroupInsertMessage);
-rpc.registerMethod('superGroupBatchInsertMessageList', superGroupBatchInsertMessageList);
-rpc.registerMethod('superGroupGetMessageList', superGroupGetMessageList);
-rpc.registerMethod('superGroupUpdateColumnsMessage', superGroupUpdateColumnsMessage);
-rpc.registerMethod('superGroupDeleteAllMessage', superGroupDeleteAllMessage);
-rpc.registerMethod('superGroupSearchMessageByKeyword', superGroupSearchMessageByKeyword);
-rpc.registerMethod('superGroupSearchMessageByContentTypeAndKeyword', superGroupSearchMessageByContentTypeAndKeyword);
-rpc.registerMethod('superGroupSearchMessageByContentType', superGroupSearchMessageByContentType);
-rpc.registerMethod('superGroupUpdateMessageStatusBySourceID', superGroupUpdateMessageStatusBySourceID);
-rpc.registerMethod('superGroupGetSendingMessageList', superGroupGetSendingMessageList);
-rpc.registerMethod('superGroupUpdateGroupMessageHasRead', superGroupUpdateGroupMessageHasRead);
-rpc.registerMethod('superGroupGetMsgSeqByClientMsgID', superGroupGetMsgSeqByClientMsgID);
-rpc.registerMethod('superGroupUpdateMsgSenderFaceURLAndSenderNickname', superGroupUpdateMsgSenderFaceURLAndSenderNickname);
-rpc.registerMethod('superGroupSearchAllMessageByContentType', superGroupSearchAllMessageByContentType);
 // black
 rpc.registerMethod('getBlackList', getBlackList);
 rpc.registerMethod('getBlackListUserID', getBlackListUserID);
@@ -141,6 +134,7 @@ rpc.registerMethod('updateFriendRequest', updateFriendRequest);
 rpc.registerMethod('getRecvFriendApplication', getRecvFriendApplication);
 rpc.registerMethod('getSendFriendApplication', getSendFriendApplication);
 rpc.registerMethod('getFriendApplicationByBothID', getFriendApplicationByBothID);
+rpc.registerMethod('getBothFriendReq', getBothFriendReq);
 // groups
 rpc.registerMethod('insertGroup', insertGroup);
 rpc.registerMethod('deleteGroup', deleteGroup);
@@ -152,6 +146,8 @@ rpc.registerMethod('subtractMemberCount', subtractMemberCount);
 rpc.registerMethod('addMemberCount', addMemberCount);
 rpc.registerMethod('getJoinedWorkingGroupIDList', getJoinedWorkingGroupIDList);
 rpc.registerMethod('getJoinedWorkingGroupList', getJoinedWorkingGroupList);
+rpc.registerMethod('getGroupMemberAllGroupIDs', getGroupMemberAllGroupIDs);
+rpc.registerMethod('getGroups', getGroups);
 // groupMembers
 rpc.registerMethod('getGroupMemberInfoByGroupIDUserID', getGroupMemberInfoByGroupIDUserID);
 rpc.registerMethod('getAllGroupMemberList', getAllGroupMemberList);
@@ -190,9 +186,13 @@ rpc.registerMethod('getAllFriendList', getAllFriendList);
 rpc.registerMethod('searchFriendList', searchFriendList);
 rpc.registerMethod('getFriendInfoByFriendUserID', getFriendInfoByFriendUserID);
 rpc.registerMethod('getFriendInfoList', getFriendInfoList);
+rpc.registerMethod('getPageFriendList', getPageFriendList);
 // temp cache chatlogs
 rpc.registerMethod('batchInsertTempCacheMessageList', batchInsertTempCacheMessageList);
 rpc.registerMethod('InsertTempCacheMessage', InsertTempCacheMessage);
+// notification
+rpc.registerMethod('getNotificationAllSeqs', getNotificationAllSeqs);
+rpc.registerMethod('setNotificationSeq', setNotificationSeq);
 rpc.registerMethod('exec', async (sql) => {
     const db = await getInstance();
     try {

@@ -29,7 +29,7 @@ const router = useRouter()
 
 const isError = ref(false)
 
-const isVideo = props.message.contentType === MessageType.VIDEOMESSAGE
+const isVideo = props.message.contentType === MessageType.VideoMessage
 const imageUrl = isVideo ? props.message.videoElem.snapshotUrl : props.message.pictureElem.sourcePicture.url;
 const duration = isVideo ? secFormat(props.message.videoElem.duration) : 0
 

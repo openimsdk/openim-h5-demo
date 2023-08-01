@@ -1,6 +1,8 @@
 import { ClientConversation } from '../../sqls';
 export declare function getAllConversationList(): Promise<string>;
 export declare function getAllConversationListToSync(): Promise<string>;
+export declare function getAllSingleConversationIDList(): Promise<string>;
+export declare function getAllConversationIDList(): Promise<string>;
 export declare function getHiddenConversationList(): Promise<string>;
 export declare function getConversation(conversationID: string): Promise<string>;
 export declare function getMultipleConversation(conversationIDList: string): Promise<string>;
@@ -24,3 +26,4 @@ export declare function removeConversationDraft(conversationID: string, draftTex
 export declare function unPinConversation(conversationID: string, isPinned: number): Promise<string>;
 export declare function incrConversationUnreadCount(conversationID: string): Promise<string>;
 export declare function setMultipleConversationRecvMsgOpt(conversationIDListStr: string, opt: number): Promise<string>;
+export declare function getAllConversations(): Promise<string>;

@@ -69,7 +69,7 @@ const useStore = defineStore("conversation", {
         return;
       }
       try {
-        const { data } = await IMSDK.getGroupsInfo([sourceID]);
+        const { data } = await IMSDK.getSpecifiedGroupsInfo([sourceID]);
         this.currentGroupInfo = data[0] ?? {};
       } catch (error) {
         console.error(error);
@@ -82,7 +82,7 @@ const useStore = defineStore("conversation", {
       const userStore = useUserStore();
 
       try {
-        const { data } = await IMSDK.getGroupMembersInfo({
+        const { data } = await IMSDK.getSpecifiedGroupMembersInfo({
           groupID: groupID ?? this.currentConversation.groupID,
           userIDList: [userStore.storeSelfInfo.userID],
         });

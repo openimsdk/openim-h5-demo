@@ -18,10 +18,10 @@ import { updateBusinessInfo } from '@/api/user';
 import useUserStore from '@/store/modules/user';
 import { feedbackToast } from '@/utils/common';
 import { IMSDK } from '@/utils/imCommon';
-import { FriendItem } from 'open-im-sdk-wasm/lib/types/entity';
+import { FriendUserItem } from 'open-im-sdk-wasm/lib/types/entity';
 
 
-const props = defineProps<{ friendInfo?: FriendItem, }>();
+const props = defineProps<{ friendInfo?: FriendUserItem, }>();
 
 const userStore = useUserStore();
 const router = useRouter();

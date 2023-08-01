@@ -1,6 +1,6 @@
 import { WSEvent } from '../types/entity';
 import { CbEvents } from '../constant';
-declare type Cbfn = (data: WSEvent) => void;
+declare type Cbfn = (data: WSEvent<any>) => void;
 declare class Emitter {
     private events;
     constructor();

@@ -47,7 +47,7 @@ const onSubmit = () => {
     verifyCode({
         phoneNumber,
         areaCode,
-        verificationCode: verificationCode.value,
+        verifyCode: verificationCode.value,
         usedFor: isRegiste ? UsedFor.Register : UsedFor.Modify
     }).then(() => router.push({
         path: 'setPassword',

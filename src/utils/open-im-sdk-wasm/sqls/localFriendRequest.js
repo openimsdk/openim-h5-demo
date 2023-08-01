@@ -6,11 +6,9 @@ export function localFriendRequests(db) {
           'from_user_id'    varchar(64),
           'from_nickname'   varchar(255),
           'from_face_url'   varchar(255),
-          'from_gender'     INTEGER,
           'to_user_id'   varchar(64),
           'to_nickname'   varchar(255),
           'to_face_url'     varchar(255),
-          'to_gender'      INTEGER,
           'handle_result'    INTEGER,
           'req_msg'        varchar(255),
           'create_time'   INTEGER,
@@ -70,5 +68,15 @@ export function getFriendApplicationByBothID(db, fromUserID, toUserID) {
         where from_user_id = "${fromUserID}"
         and to_user_id = "${toUserID}"
         limit 1
+      `);
+}
+export function getBothFriendReq(db, fromUserID, toUserID) {
+    return db.exec(`
+      select *
+        from local_friend_requests
+        where (from_user_id = "${fromUserID}"
+        and to_user_id = "${toUserID}")
+        or (from_user_id = "${toUserID}"
+        and to_user_id = "${fromUserID}")
       `);
 }

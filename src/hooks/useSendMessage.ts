@@ -1,14 +1,22 @@
 import { FileMessageTypes } from "@/constants/enum";
 import useConversationStore from "@/store/modules/conversation";
 import useMessageStore from "@/store/modules/message";
+import useUserStore from "@/store/modules/user";
 import emitter from "@/utils/events";
 import { IMSDK } from "@/utils/imCommon";
-import { MessageItem } from "open-im-sdk-wasm/lib/types/entity";
-import { MessageStatus } from "open-im-sdk-wasm/lib/types/enum";
-import { SendMsgParams } from "open-im-sdk-wasm/lib/types/params";
+import {
+  MessageItem,
+  PublicUserItem,
+} from "@/utils/open-im-sdk-wasm/types/entity";
+import {
+  MessageStatus,
+  SessionType,
+} from "@/utils/open-im-sdk-wasm/types/enum";
+import { SendMsgParams } from "@/utils/open-im-sdk-wasm/types/params";
 
 const messageStore = useMessageStore();
 const conversationStore = useConversationStore();
+const userStore = useUserStore();
 
 type SendMessageParams = Partial<Omit<SendMsgParams, "message">> & {
   message: MessageItem;
@@ -20,8 +28,6 @@ export default function useSendMessage() {
     recvID,
     groupID,
     message,
-    fileArrayBuffer,
-    snpFileArrayBuffer,
     needOpreateMessage,
   }: SendMessageParams) => {
     needOpreateMessage =
@@ -32,23 +38,19 @@ export default function useSendMessage() {
       emitter.emit("CHAT_MAIN_SCROLL_TO_BOTTOM", false);
     }
 
-    let funcName = "sendMessage";
-    if (FileMessageTypes.includes(message.contentType)) {
-      funcName = fileArrayBuffer ? "sendMessageByBuffer" : "sendMessageNotOss";
-    }
     const options = {
       recvID: recvID ?? conversationStore.storeCurrentConversation.userID ?? "",
       groupID:
         groupID ?? conversationStore.storeCurrentConversation.groupID ?? "",
-      message: JSON.stringify(message),
-      fileArrayBuffer,
-      snpFileArrayBuffer,
+      message,
     };
     try {
       // @ts-ignore
-      const { data: successMessage } = await IMSDK[funcName](options);
+      const { data: successMessage } = await IMSDK.sendMessage(options);
       messageStore.updateOneMessage(successMessage, true);
     } catch (error) {
+      console.error(error);
+
       messageStore.updateOneMessage({
         ...message,
         status: MessageStatus.Failed,

@@ -55,7 +55,7 @@ const searchGroups = async () => {
     try {
         let info = contactStore.storeGroupList.find(item => item.groupID === keyword.value)
         if (!info) {
-            const { data } = await IMSDK.getGroupsInfo([keyword.value])
+            const { data } = await IMSDK.getSpecifiedGroupsInfo([keyword.value])
             info = data[0]
         }
         if (info) {
@@ -72,41 +72,25 @@ const searchGroups = async () => {
 }
 
 const searchUsers = async () => {
-    try {
-        let info = contactStore.storeFriendList.find(item => item.userID === keyword.value ||
-            item.phoneNumber === keyword.value)
-        if (!info) {
-            const {
-                totalNumber,
-                userFullInfoList
-            } = await searchUserInfoByBusiness(keyword.value)
-            if (totalNumber > 0) {
-            const businessData = userFullInfoList[0];
-            filterEmptyValue(businessData)
+  try {
+    const { data:{ total, users } } = await searchUserInfoByBusiness(keyword.value);
 
-            const { data } = await IMSDK.getUsersInfo([businessData.userID])
-            console.log(data);
-
-            const imData = data[0]?.friendInfo ?? data[0]?.publicInfo ?? {}
-            console.log(imData);
-
-            info = {
-                ...imData,
-                ...businessData
-            }
-            }
-        }
-        if (info) {
-            contactStore.setUserCardData({
-                baseInfo: info
-            })
-        } else {
-            empty.value = true;
-        }
-    } catch (error) {
-
+    if (total > 0) {
+      const businessData = users[0];
+      const { data } = await IMSDK.getUsersInfo([businessData.userID]);
+      const imData = data[0]?.friendInfo ?? data[0]?.publicInfo ?? {};
+      const info = {
+        ...imData,
+        ...businessData,
+      };
+      contactStore.setUserCardData({
+        baseInfo: info,
+      });
+    } else {
+      empty.value = true;
     }
-}
+  } catch (error) {}
+};
 
 const onCancel = () => {
     router.back();

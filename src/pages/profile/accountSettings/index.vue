@@ -13,15 +13,13 @@
 import DetailInfoItem from '@/components/DetailInfoItem/index.vue';
 import useUserStore from '@/store/modules/user';
 import { IMSDK } from '@/utils/imCommon';
-import { OptType } from 'open-im-sdk-wasm/lib/types/enum';
+import { MessageReceiveOptType } from 'open-im-sdk-wasm/lib/types/enum';
 import { showToast } from 'vant';
 
 const userStore = useUserStore();
-const checked = computed(()=>userStore.storeSelfInfo.globalRecvMsgOpt !== OptType.Nomal)
+const checked = computed(()=>userStore.storeSelfInfo.globalRecvMsgOpt !== MessageReceiveOptType.Nomal)
 const onUpdateValue = (newValue: boolean) => {
-    IMSDK.setGlobalRecvMessageOpt({
-        opt: newValue ? OptType.WithoutNotify : OptType.Nomal
-    }).then(() => showToast('设置成功！'))
+    IMSDK.setGlobalRecvMessageOpt(newValue ? MessageReceiveOptType.NotNotify : MessageReceiveOptType.Nomal).then(() => showToast('设置成功！'))
         .catch(err => showToast(err.errMsg || '设置失败！'))
 }
 

@@ -89,19 +89,13 @@ export function addMemberCount(db, groupID) {
     update local_groups set member_count = member_count+1 where group_id = '${groupID}'   
     `);
 }
-// export function getJoinedWorkingGroupIDList(db: Database): QueryExecResult[] {
-//   return db.exec(
-//     `
-//     select * from local_groups
-//     groupType = 2
-//     `
-//   );
-// }
-// export function getJoinedWorkingGroupList(db: Database): QueryExecResult[] {
-//   return db.exec(
-//     `
-//     select * from local_groups
-//     groupType = 2
-//     `
-//   );
-// }
+export function getGroupMemberAllGroupIDs(db) {
+    return db.exec(`
+    select distinct group_id from local_group_members
+    `);
+}
+export function getGroups(db, groupIDs) {
+    return db.exec(`
+    select * from local_groups where group_id in (${groupIDs.join(',')});
+    `);
+}

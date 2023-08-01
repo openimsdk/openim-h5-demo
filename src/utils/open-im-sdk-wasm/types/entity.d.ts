@@ -1,25 +1,28 @@
-import { CbEvents, RequestFunc } from '../constant';
-import { GroupType, SessionType, MessageType, Platform, MessageStatus, GroupStatus, GroupVerificationType, AllowType, GroupJoinSource, GroupRole, OptType, GroupAtType } from './enum';
-export declare type WSEvent = {
+import { CbEvents } from '../constant';
+import { GroupType, SessionType, MessageType, Platform, MessageStatus, GroupStatus, GroupVerificationType, AllowType, GroupJoinSource, GroupMemberRole, MessageReceiveOptType, GroupAtType, LogLevel, ApplicationHandleResult, Relationship } from './enum';
+export declare type WSEvent<T = unknown> = {
     event: CbEvents;
-    data: unknown;
+    data: T;
     errCode: number;
     errMsg: string;
     operationID: string;
 };
-export declare type WsResponse = {
-    event: RequestFunc;
+export declare type WsResponse<T = string> = {
+    event: string;
     errCode: number;
     errMsg: string;
-    data: any;
+    data: T;
     operationID: string;
 };
 export declare type IMConfig = {
-    platform: number;
-    api_addr: string;
-    ws_addr: string;
-    log_level: number;
-    is_need_encryption: boolean;
+    platformID: Platform;
+    apiAddr: string;
+    wsAddr: string;
+    dataDir: string;
+    logLevel: LogLevel;
+    isLogStandardOutput: boolean;
+    logFilePath: string;
+    isExternalExtensions: boolean;
 };
 export declare type MessageEntity = {
     type: string;
@@ -41,26 +44,13 @@ export declare type AtUsersInfoItem = {
     groupNickname: string;
 };
 export declare type GroupInitInfo = {
+    groupID?: string;
     groupType: GroupType;
     groupName: string;
     introduction?: string;
     notification?: string;
     faceURL?: string;
     ex?: string;
-};
-export declare type Member = {
-    userID: string;
-    roleLevel: number;
-};
-export declare type RtcInvite = {
-    inviterUserID: string;
-    inviteeUserIDList: string[];
-    groupID: string;
-    roomID: string;
-    timeout: number;
-    mediaType: string;
-    sessionType: number;
-    platformID: number;
 };
 export declare type GroupApplicationItem = {
     createTime: number;
@@ -70,8 +60,8 @@ export declare type GroupApplicationItem = {
     groupFaceURL: string;
     groupID: string;
     groupName: string;
-    groupType: number;
-    handleResult: number;
+    groupType: GroupType;
+    handleResult: ApplicationHandleResult;
     handleUserID: string;
     handledMsg: string;
     handledTime: number;
@@ -82,7 +72,8 @@ export declare type GroupApplicationItem = {
     ownerUserID: string;
     reqMsg: string;
     reqTime: number;
-    status: number;
+    joinSource: GroupJoinSource;
+    status: GroupStatus;
     userFaceURL: string;
     userID: string;
 };
@@ -94,7 +85,7 @@ export declare type FriendApplicationItem = {
     fromNickname: string;
     fromUserID: string;
     handleMsg: string;
-    handleResult: number;
+    handleResult: ApplicationHandleResult;
     handleTime: number;
     handlerUserID: string;
     reqMsg: string;
@@ -103,53 +94,48 @@ export declare type FriendApplicationItem = {
     toNickname: string;
     toUserID: string;
 };
-export declare type TotalUserStruct = {
-    blackInfo: BlackItem | null;
-    friendInfo: FriendItem | null;
+export declare type FullUserItem = {
+    blackInfo: BlackUserItem | null;
+    friendInfo: FriendUserItem | null;
     publicInfo: PublicUserItem | null;
 };
 export declare type PublicUserItem = {
-    gender: number;
     nickname: string;
     userID: string;
     faceURL: string;
     ex: string;
 };
-export declare type FullUserItem = {
-    birth: number;
-    birthTime: string;
+export declare type SelfUserInfo = {
     createTime: number;
-    email: string;
     ex: string;
     faceURL: string;
-    gender: number;
     nickname: string;
-    phoneNumber: string;
     userID: string;
+    globalRecvMsgOpt: MessageReceiveOptType;
 };
-export declare type PartialUserItem = Partial<Omit<FullUserItem, 'userID'>> & {
+export declare type PartialUserInfo = {
     userID: string;
-};
-export declare type FriendItem = {
+} & Partial<Omit<SelfUserInfo, 'userID'>>;
+export declare type FriendUserItem = {
     addSource: number;
-    birth: number;
     createTime: number;
-    email: string;
     ex: string;
     faceURL: string;
     userID: string;
-    gender: number;
     nickname: string;
     operatorUserID: string;
     ownerUserID: string;
-    phoneNumber: string;
     remark: string;
+    attachedInfo: string;
 };
-export declare type FriendRelationItem = {
+export declare type SearchedFriendsInfo = FriendUserItem & {
+    relationship: Relationship;
+};
+export declare type FriendshipInfo = {
     result: number;
     userID: string;
 };
-export declare type BlackItem = {
+export declare type BlackUserItem = {
     addSource: number;
     userID: string;
     createTime: number;
@@ -173,7 +159,7 @@ export declare type GroupItem = {
     memberCount: number;
     status: GroupStatus;
     creatorUserID: string;
-    groupType: number;
+    groupType: GroupType;
     needVerification: GroupVerificationType;
     ex: string;
     applyMemberFriend: AllowType;
@@ -184,7 +170,7 @@ export declare type GroupMemberItem = {
     userID: string;
     nickname: string;
     faceURL: string;
-    roleLevel: GroupRole;
+    roleLevel: GroupMemberRole;
     muteEndTime: number;
     joinTime: number;
     joinSource: GroupJoinSource;
@@ -199,7 +185,7 @@ export declare type ConversationItem = {
     groupID: string;
     showName: string;
     faceURL: string;
-    recvMsgOpt: OptType;
+    recvMsgOpt: MessageReceiveOptType;
     unreadCount: number;
     groupAtType: GroupAtType;
     latestMsg: string;
@@ -222,7 +208,7 @@ export declare type MessageItem = {
     recvID: string;
     msgFrom: number;
     contentType: MessageType;
-    platformID: Platform;
+    senderPlatformID: Platform;
     senderNickname: string;
     senderFaceUrl: string;
     groupID: string;
@@ -230,36 +216,54 @@ export declare type MessageItem = {
     seq: number;
     isRead: boolean;
     status: MessageStatus;
+    isReact: boolean;
+    isExternalExtensions: boolean;
     offlinePush: OfflinePush;
     attachedInfo: string;
-    attachedInfoElem: AttachedInfoElem;
     ex: string;
+    localEx: string;
+    textElem: TextElem;
+    cardElem: CardElem;
     pictureElem: PictureElem;
     soundElem: SoundElem;
     videoElem: VideoElem;
     fileElem: FileElem;
-    faceElem: FaceElem;
     mergeElem: MergeElem;
-    atElem: AtElem;
+    atTextElem: AtTextElem;
+    faceElem: FaceElem;
     locationElem: LocationElem;
     customElem: CustomElem;
     quoteElem: QuoteElem;
     notificationElem: NotificationElem;
-    progress?: number;
-    downloadProgress?: number;
-    downloaded?: boolean;
-    errCode?: number;
+    advancedTextElem: AdvancedTextElem;
+    typingElem: TypingElem;
+    attachedInfoElem: AttachedInfoElem;
 };
-export declare type NotificationElem = {
-    detail: string;
-    defaultTips: string;
+export declare type TextElem = {
+    content: string;
 };
-export declare type AtElem = {
+export declare type CardElem = {
+    userID: string;
+    nickname: string;
+    faceURL: string;
+    ex: string;
+};
+export declare type AtTextElem = {
     text: string;
     atUserList: string[];
     atUsersInfo?: AtUsersInfoItem[];
-    quoteMessage?: string;
+    quoteMessage?: MessageItem;
     isAtSelf?: boolean;
+};
+export declare type NotificationElem = {
+    detail: string;
+};
+export declare type AdvancedTextElem = {
+    text: string;
+    messageEntityList: MessageEntity[];
+};
+export declare type TypingElem = {
+    msgTips: string;
 };
 export declare type CustomElem = {
     data: string;
@@ -286,6 +290,7 @@ export declare type MergeElem = {
     title: string;
     abstractList: string[];
     multiMessage: MessageItem[];
+    messageEntityList: MessageEntity[];
 };
 export declare type OfflinePush = {
     title: string;
@@ -304,10 +309,17 @@ export declare type AttachedInfoElem = {
     groupHasReadInfo: GroupHasReadInfo;
     isPrivateChat: boolean;
     isEncryption: boolean;
+    inEncryptStatus: boolean;
     burnDuration: number;
     hasReadTime: number;
     notSenderNotificationPush: boolean;
     messageEntityList: MessageEntity[];
+    uploadProgress: UploadProgress;
+};
+export declare type UploadProgress = {
+    total: number;
+    save: number;
+    current: number;
 };
 export declare type GroupHasReadInfo = {
     hasReadCount: number;
@@ -358,4 +370,45 @@ export declare type AdvancedRevokeContent = {
     sourceMessageSendID: string;
     sourceMessageSendTime: number;
     sourceMessageSenderNickname: string;
+};
+export declare type RevokedInfo = {
+    revokerID: string;
+    revokerRole: number;
+    clientMsgID: string;
+    revokerNickname: string;
+    revokeTime: number;
+    sourceMessageSendTime: number;
+    sourceMessageSendID: string;
+    sourceMessageSenderNickname: string;
+    sessionType: number;
+    seq: number;
+    ex: string;
+};
+export declare type ReceiptInfo = {
+    userID: string;
+    groupID: string;
+    msgIDList: string[];
+    readTime: number;
+    msgFrom: number;
+    contentType: MessageType;
+    sessionType: SessionType;
+};
+export declare type SearchMessageResult = {
+    totalCount: number;
+    searchResultItems: SearchMessageResultItem[];
+};
+export declare type SearchMessageResultItem = {
+    conversationID: string;
+    messageCount: number;
+    conversationType: SessionType;
+    showName: string;
+    faceURL: string;
+    messageList: MessageItem[];
+};
+export declare type AdvancedGetMessageResult = {
+    isEnd: boolean;
+    lastMinSeq: number;
+    errCode: number;
+    errMsg: string;
+    messageList: MessageItem[];
 };

@@ -22,7 +22,6 @@
             :rules="[{ required:true, message: '请输入密码' }]" type="password" placeholder="请输入密码" />
         </div>
       </div>
-      <div class="text-xs text-[#0089FF] mt-2" >{{`使用密码登录`}}</div>
 
       <div class="mt-20">
         <van-button :loading="loading" :disabled="!(formData.phoneNumber && formData.password)" block type="primary"
@@ -73,7 +72,6 @@ const formData = reactive({
 const loading = ref(false)
 
 const onSubmit = async () => {
-  console.log(formData);
   loading.value = true
   localStorage.setItem("IMAccount",formData.phoneNumber)
   try {
@@ -88,8 +86,8 @@ const onSubmit = async () => {
     await IMSDK.login({
       userID,
       token: imToken,
-      apiAddress: process.env.API_URL!,
-      wsAddress: process.env.WS_URL!,
+      apiAddr: process.env.API_URL!,
+      wsAddr: process.env.WS_URL!,
       platformID: 5,
     });
     initStore();

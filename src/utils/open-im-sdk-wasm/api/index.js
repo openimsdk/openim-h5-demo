@@ -51,7 +51,7 @@ function catchErrorHandle(error) {
     }
     throw error;
 }
-function registeMethodOnWindow(name, realName) {
+function registeMethodOnWindow(name, realName, needStringify = true) {
     console.info(`=> (database api) registe ${realName ?? name}`);
     return async (...args) => {
         if (!rpc || !worker) {
@@ -61,16 +61,12 @@ function registeMethodOnWindow(name, realName) {
             return;
         }
         try {
-            // console.info(
-            //   `=> (invoked by go wasm) run ${
-            //     realName ?? name
-            //   } method with args ${JSON.stringify(args)}`
-            // );
+            console.info(`=> (invoked by go wasm) run ${realName ?? name} method with args ${JSON.stringify(args)}`);
             const response = await rpc.invoke(name, ...args, { timeout: 5000000 });
-            // console.info(
-            //   `=> (invoked by go wasm) run ${realName ?? name} method with response `,
-            //   JSON.stringify(response)
-            // );
+            console.info(`=> (invoked by go wasm) run ${realName ?? name} method with response `, JSON.stringify(response));
+            if (!needStringify) {
+                return response;
+            }
             return JSON.stringify(response);
         }
         catch (error) {
@@ -79,11 +75,21 @@ function registeMethodOnWindow(name, realName) {
         }
     };
 }
+export const fileMapSet = registeMethodOnWindow('fileMapSet');
+export const fileMapClear = registeMethodOnWindow('fileMapClear');
 // register method on window for go wasm invoke
 export function initDatabaseAPI() {
     if (!rpc) {
         return;
     }
+    // upload
+    window.wasmOpen = registeMethodOnWindow('wasmOpen');
+    window.wasmClose = registeMethodOnWindow('wasmClose');
+    window.wasmRead = registeMethodOnWindow('wasmRead', 'wasmRead', false);
+    window.getUpload = registeMethodOnWindow('getUpload');
+    window.insertUpload = registeMethodOnWindow('insertUpload');
+    window.updateUpload = registeMethodOnWindow('updateUpload');
+    window.deleteUpload = registeMethodOnWindow('deleteUpload');
     window.initDB = registeMethodOnWindow('initDB');
     window.close = registeMethodOnWindow('close');
     // message
@@ -93,6 +99,7 @@ export function initDatabaseAPI() {
     window.getNormalMsgSeq = registeMethodOnWindow('getNormalMsgSeq');
     window.updateMessageTimeAndStatus = registeMethodOnWindow('updateMessageTimeAndStatus');
     window.updateMessage = registeMethodOnWindow('updateMessage');
+    window.updateMessageBySeq = registeMethodOnWindow('updateMessageBySeq');
     window.updateColumnsMessage = registeMethodOnWindow('updateColumnsMessage');
     window.insertMessage = registeMethodOnWindow('insertMessage');
     window.batchInsertMessageList = registeMethodOnWindow('batchInsertMessageList');
@@ -119,6 +126,20 @@ export function initDatabaseAPI() {
     window.updateSingleMessageHasRead = registeMethodOnWindow('updateSingleMessageHasRead');
     window.updateGroupMessageHasRead = registeMethodOnWindow('updateGroupMessageHasRead');
     window.updateMessageStatusBySourceID = registeMethodOnWindow('updateMessageStatusBySourceID');
+    window.getAlreadyExistSeqList = registeMethodOnWindow('getAlreadyExistSeqList');
+    window.getMessageBySeq = registeMethodOnWindow('getMessageBySeq');
+    window.getMessagesByClientMsgIDs = registeMethodOnWindow('getMessagesByClientMsgIDs');
+    window.getMessagesBySeqs = registeMethodOnWindow('getMessagesBySeqs');
+    window.getConversationNormalMsgSeq = registeMethodOnWindow('getConversationNormalMsgSeq');
+    window.getConversationPeerNormalMsgSeq = registeMethodOnWindow('getConversationPeerNormalMsgSeq');
+    window.deleteConversationAllMessages = registeMethodOnWindow('deleteConversationAllMessages');
+    window.markDeleteConversationAllMessages = registeMethodOnWindow('markDeleteConversationAllMessages');
+    window.getUnreadMessage = registeMethodOnWindow('getUnreadMessage');
+    window.markConversationMessageAsReadBySeqs = registeMethodOnWindow('markConversationMessageAsReadBySeqs');
+    window.markConversationMessageAsReadDB = registeMethodOnWindow('markConversationMessageAsRead');
+    window.deleteConversationMsgs = registeMethodOnWindow('deleteConversationMsgs');
+    window.markConversationAllMessageAsRead = registeMethodOnWindow('markConversationAllMessageAsRead');
+    window.searchAllMessageByContentType = registeMethodOnWindow('searchAllMessageByContentType');
     // conversation
     window.getAllConversationListDB = registeMethodOnWindow('getAllConversationList');
     window.getAllConversationListToSync = registeMethodOnWindow('getAllConversationListToSync');
@@ -147,10 +168,13 @@ export function initDatabaseAPI() {
     // window.updateAllConversation = registeMethodOnWindow('updateAllConversation');
     window.incrConversationUnreadCount = registeMethodOnWindow('incrConversationUnreadCount');
     window.setMultipleConversationRecvMsgOpt = registeMethodOnWindow('setMultipleConversationRecvMsgOpt');
+    window.getAllSingleConversationIDList = registeMethodOnWindow('getAllSingleConversationIDList');
+    window.getAllConversationIDList = registeMethodOnWindow('getAllConversationIDList');
+    window.getAllConversations = registeMethodOnWindow('getAllConversations');
     // users
     window.getLoginUser = registeMethodOnWindow('getLoginUser');
     window.insertLoginUser = registeMethodOnWindow('insertLoginUser');
-    window.updateLoginUserByMap = registeMethodOnWindow('updateLoginUserByMap');
+    window.updateLoginUser = registeMethodOnWindow('updateLoginUser');
     // super groups
     window.getJoinedSuperGroupList = registeMethodOnWindow('getJoinedSuperGroupList');
     window.getJoinedSuperGroupIDList = registeMethodOnWindow('getJoinedSuperGroupIDList');
@@ -219,6 +243,7 @@ export function initDatabaseAPI() {
     window.getRecvFriendApplication = registeMethodOnWindow('getRecvFriendApplication');
     window.getSendFriendApplication = registeMethodOnWindow('getSendFriendApplication');
     window.getFriendApplicationByBothID = registeMethodOnWindow('getFriendApplicationByBothID');
+    window.getBothFriendReq = registeMethodOnWindow('getBothFriendReq');
     // friend
     window.insertFriend = registeMethodOnWindow('insertFriend');
     window.deleteFriendDB = registeMethodOnWindow('deleteFriend');
@@ -227,6 +252,7 @@ export function initDatabaseAPI() {
     window.searchFriendList = registeMethodOnWindow('searchFriendList');
     window.getFriendInfoByFriendUserID = registeMethodOnWindow('getFriendInfoByFriendUserID');
     window.getFriendInfoList = registeMethodOnWindow('getFriendInfoList');
+    window.getPageFriendList = registeMethodOnWindow('getPageFriendList');
     // groups
     window.insertGroup = registeMethodOnWindow('insertGroup');
     window.deleteGroup = registeMethodOnWindow('deleteGroup');
@@ -238,6 +264,8 @@ export function initDatabaseAPI() {
     window.addMemberCount = registeMethodOnWindow('addMemberCount');
     window.getJoinedWorkingGroupIDList = registeMethodOnWindow('getJoinedWorkingGroupIDList');
     window.getJoinedWorkingGroupList = registeMethodOnWindow('getJoinedWorkingGroupList');
+    window.getGroupMemberAllGroupIDs = registeMethodOnWindow('getGroupMemberAllGroupIDs');
+    window.getGroups = registeMethodOnWindow('getGroups');
     // groupRequest
     window.insertGroupRequest = registeMethodOnWindow('insertGroupRequest');
     window.deleteGroupRequest = registeMethodOnWindow('deleteGroupRequest');
@@ -256,7 +284,7 @@ export function initDatabaseAPI() {
     window.getGroupAdminID = registeMethodOnWindow('getGroupAdminID');
     window.getGroupMemberListByGroupID = registeMethodOnWindow('getGroupMemberListByGroupID');
     window.getGroupMemberListSplit = registeMethodOnWindow('getGroupMemberListSplit');
-    window.getGroupMemberOwnerAndAdmin = registeMethodOnWindow('getGroupMemberOwnerAndAdmin');
+    window.getGroupMemberOwnerAndAdminDB = registeMethodOnWindow('getGroupMemberOwnerAndAdmin');
     window.getGroupMemberOwner = registeMethodOnWindow('getGroupMemberOwner');
     window.getGroupMemberListSplitByJoinTimeFilter = registeMethodOnWindow('getGroupMemberListSplitByJoinTimeFilter');
     window.getGroupOwnerAndAdminByGroupID = registeMethodOnWindow('getGroupOwnerAndAdminByGroupID');
@@ -271,5 +299,8 @@ export function initDatabaseAPI() {
     // temp cache chat logs
     window.batchInsertTempCacheMessageList = registeMethodOnWindow('batchInsertTempCacheMessageList');
     window.InsertTempCacheMessage = registeMethodOnWindow('InsertTempCacheMessage');
+    // notification
+    window.getNotificationAllSeqs = registeMethodOnWindow('getNotificationAllSeqs');
+    window.setNotificationSeq = registeMethodOnWindow('setNotificationSeq');
 }
 export const workerPromise = rpc?.connect(5000);

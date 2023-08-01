@@ -1,8 +1,8 @@
-import { GroupSessionTypes } from "@/constants/enum";
+
 import useConversationStore from "@/store/modules/conversation";
 import { IMSDK } from "@/utils/imCommon";
 import { ConversationItem } from "open-im-sdk-wasm/lib/types/entity";
-import { GroupAtType } from "open-im-sdk-wasm/lib/types/enum";
+import { GroupAtType, SessionType } from "open-im-sdk-wasm/lib/types/enum";
 import { onBeforeRouteLeave } from "vue-router";
 
 export default function useConversationState() {
@@ -11,9 +11,7 @@ export default function useConversationState() {
   // group info
   const getCurrentGroupInfo = () => {
     if (
-      GroupSessionTypes.includes(
-        conversationStore.storeCurrentConversation.conversationType
-      )
+      conversationStore.storeCurrentConversation.conversationType === SessionType.WorkingGroup
     ) {
       conversationStore.getCurrentGroupInfoFromReq();
       conversationStore.getCurrentMemberInGroupFromReq();
@@ -23,11 +21,9 @@ export default function useConversationState() {
   // conversation state
   const checkConversationState = () => {
     if (conversationStore.storeCurrentConversation.unreadCount > 0) {
-      IMSDK.markMessageAsReadByConID({
-        conversationID:
-          conversationStore.storeCurrentConversation.conversationID,
-        msgIDList: [],
-      });
+      IMSDK.markConversationMessageAsRead(
+        conversationStore.storeCurrentConversation.conversationID
+      );
     }
     if (
       conversationStore.storeCurrentConversation.groupAtType !==

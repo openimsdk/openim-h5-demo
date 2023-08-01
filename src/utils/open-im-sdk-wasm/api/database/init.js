@@ -1,5 +1,5 @@
 import { DatabaseErrorCode } from '../../constant';
-import { locaBlacks, localFriends, localGroups, localFriendRequests, localChatLogs, localErrChatLogs, localGroupRequests, localAdminGroupRequests, localConversations, localUsers, localSuperGroups, localConversationUnreadMessages, localGroupMembers, tempCacheLocalChatLogs, } from '../../sqls';
+import { locaBlacks, localFriends, localGroups, localFriendRequests, localErrChatLogs, localGroupRequests, localAdminGroupRequests, localConversations, localUsers, localSuperGroups, localConversationUnreadMessages, localGroupMembers, tempCacheLocalChatLogs, localNotification, localUploads, } from '../../sqls';
 import { formatResponse } from '../../utils';
 import { getInstance, resetInstance } from './instance';
 export async function init(userId, dir) {
@@ -11,7 +11,7 @@ export async function init(userId, dir) {
         console.time('SDK => (performance measure) init database used ');
         const db = await getInstance(`${dir}${userId}.sqlite`);
         const results = [];
-        const execResultLocalChatLogs = localChatLogs(db);
+        const execResultLocalUploads = localUploads(db);
         const execResultLocalConversations = localConversations(db);
         const execResultLocalUsers = localUsers(db);
         const execResultLocalBlack = locaBlacks(db);
@@ -24,9 +24,10 @@ export async function init(userId, dir) {
         const execResultlocaFendRequest = localFriendRequests(db);
         const execResultLocalSuperGroups = localSuperGroups(db);
         const execResultTempCacheLocalChatLogs = tempCacheLocalChatLogs(db);
+        const execResultlocalNotification = localNotification(db);
         const execResultLocalConversationUnreadMessages = localConversationUnreadMessages(db);
         results.push(...[
-            execResultLocalChatLogs,
+            execResultLocalUploads,
             execResultLocalConversations,
             execResultLocalUsers,
             execResultLocalSuperGroups,
@@ -40,6 +41,7 @@ export async function init(userId, dir) {
             execResuLocalGroupRequest,
             execResuLocalAdminGroupRequest,
             execResultTempCacheLocalChatLogs,
+            execResultlocalNotification,
         ]);
         return formatResponse(results);
     }

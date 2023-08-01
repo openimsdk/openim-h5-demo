@@ -19,13 +19,11 @@ import NavBar from "@/components/NavBar/index.vue";
 import VirtualList from "@components/VirtualList";
 import GenericListItem from "@/components/GenericListItem/index.vue";
 import useGroupMemberList from "@/hooks/useGroupMemberList";
-import { PopoverAction, showLoadingToast } from "vant";
 import useCurrentMemberRole from "@/hooks/useCurrentMemberRole";
 import { GroupMemberItem } from "open-im-sdk-wasm/lib/types/entity";
-import { ContactChooseEnum } from "../chooseUser/data";
 import { MemberListActionEnum } from "./data";
 import CheckedFooter from "@/components/CheckedFooter/index.vue";
-import { AllowType, GroupRole } from "open-im-sdk-wasm/lib/types/enum";
+import { GroupMemberRole } from "open-im-sdk-wasm/lib/types/enum";
 import useContactStore from "@/store/modules/contact";
 import { IMSDK } from "@/utils/imCommon";
 import { feedbackToast } from "@/utils/common";
@@ -61,11 +59,11 @@ const title = computed(() => {
       return '群成员'
   }
 })
-const checkIsDisable = computed(() => (level: GroupRole) => {
-  if (level === GroupRole.Owner) {
+const checkIsDisable = computed(() => (level: GroupMemberRole) => {
+  if (level === GroupMemberRole.Owner) {
     return true
   }
-  if (level === GroupRole.Admin) {
+  if (level === GroupMemberRole.Admin) {
     return !isOwner.value
   }
   return false

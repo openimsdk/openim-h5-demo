@@ -9,49 +9,54 @@ import {
 
 let platform = 5;
 
+// new
 export const sendSms = (params: SendSmsParams) =>
   request.post(
-    "/account/code",
-    JSON.stringify({ ...params, operationID: Date.now() + "" })
+    "/account/code/send",
+    JSON.stringify({ ...params})
   );
 
+// new
 export const verifyCode = (params: VerifyCodeParams) =>
   request.post(
-    "/account/verify",
+    "/account/code/verify",
     JSON.stringify({
       ...params,
       operationID: Date.now() + "",
     })
   );
 
+// new
 export const register = (params: DemoRegisterParams) => {
   return request.post(
-    "/account/password",
+    "/account/register",
     JSON.stringify({
       ...params,
       platform,
-      operationID: Date.now() + "",
     })
   );
 };
 
+// new
 export const modify = (params: ModifyPasswordParams) =>
   request.post(
-    "/account/reset_password",
+    "/account/password/change",
     JSON.stringify({
       ...params,
       platform,
-      operationID: Date.now() + "",
     })
   );
 
+// new
 export const login = (params: DemoLoginParams) => {
   return request.post(
     "/account/login",
     JSON.stringify({
       ...params,
-      platform,
-      operationID: Date.now() + "",
+      verifyCode: "666666",
+      deviceID: "",
+      platform: 5,
+      account: "",
     })
   );
 };

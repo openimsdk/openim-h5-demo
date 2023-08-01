@@ -9,18 +9,18 @@
 </template>
   
 <script setup lang='ts'>
+import { BusinessAllowType } from '@/api/data';
 import { updateBusinessInfo } from '@/api/user';
 import DetailInfoItem from '@/components/DetailInfoItem/index.vue';
-import { isAllow } from '@/constants/enum';
 import useUserStore from '@/store/modules/user';
 import { feedbackToast } from '@/utils/common';
 
 const userStore = useUserStore();
 
-const checked = computed(()=>userStore.storeSelfInfo.allowBeep === isAllow.Allowed)
+const checked = computed(()=>userStore.storeSelfInfo.allowBeep === BusinessAllowType.Allow)
 const onUpdateValue = (newValue: boolean) => {
     updateBusinessInfo({
-        allowBeep: newValue ? isAllow.Allowed : isAllow.NotAllowed,
+        allowBeep: newValue ? BusinessAllowType.Allow : BusinessAllowType.NotAllow,
         userID: userStore.storeSelfInfo.userID,
     }).then(() => userStore.getSelfInfoFromReq())
         .catch(error => feedbackToast({ error }))

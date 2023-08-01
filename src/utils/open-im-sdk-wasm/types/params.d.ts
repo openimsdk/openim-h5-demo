@@ -1,25 +1,27 @@
-import { MessageEntity, OfflinePush, PicBaseInfo, AtUsersInfoItem, GroupInitInfo, Member, RtcInvite, FullUserItem, MessageItem } from './entity';
-import { OptType, AllowType, GroupJoinSource, GroupRole, GroupVerificationType, MessageType } from './enum';
-export declare type LoginParam = {
+import { MessageEntity, OfflinePush, PicBaseInfo, AtUsersInfoItem, GroupInitInfo, MessageItem, SelfUserInfo } from './entity';
+import { AllowType, GroupJoinSource, GroupVerificationType, MessageType, MessageReceiveOptType, GroupMemberRole, GroupMemberFilter, LogLevel } from './enum';
+export declare type InitAndLoginConfig = {
     userID: string;
     token: string;
     platformID: number;
-    apiAddress: string;
-    wsAddress: string;
-    logLevel?: number;
-    isNeedEncryption?: boolean;
+    apiAddr: string;
+    wsAddr: string;
+    logLevel?: LogLevel;
+    isLogStandardOutput?: boolean;
+    isExternalExtensions?: boolean;
+    tryParse?: boolean;
 };
 export declare type GetOneConversationParams = {
     sourceID: string;
     sessionType: number;
 };
 export declare type GetAdvancedHistoryMsgParams = {
-    userID: string;
-    groupID: string;
+    userID?: string;
+    groupID?: string;
     lastMinSeq: number;
     count: number;
     startClientMsgID: string;
-    conversationID?: string;
+    conversationID: string;
 };
 export declare type GetHistoryMsgParams = {
     userID: string;
@@ -28,17 +30,13 @@ export declare type GetHistoryMsgParams = {
     startClientMsgID: string;
     conversationID?: string;
 };
-export declare type MarkC2CParams = {
-    userID: string;
-    msgIDList: string[];
-};
 export declare type MarkNotiParams = {
     conversationID: string;
-    msgIDList: string[];
+    clientMsgIDList: string[];
 };
 export declare type GetGroupMemberParams = {
     groupID: string;
-    filter: number;
+    filter: GroupMemberFilter;
     offset: number;
     count: number;
 };
@@ -46,9 +44,14 @@ export declare type SendMsgParams = {
     recvID: string;
     groupID: string;
     offlinePushInfo?: OfflinePush;
-    message: string;
+    message: MessageItem;
     fileArrayBuffer?: ArrayBuffer;
     snpFileArrayBuffer?: ArrayBuffer;
+};
+export declare type SetMessageLocalExParams = {
+    conversationID: string;
+    clientMsgID: string;
+    localEx: string;
 };
 export declare type ImageMsgParams = {
     sourcePicture: PicBaseInfo;
@@ -87,7 +90,7 @@ export declare type QuoteMsgParams = {
 };
 export declare type AdvancedQuoteMsgParams = {
     text: string;
-    message: string;
+    message: MessageItem;
     messageEntityList?: MessageEntity[];
 };
 export declare type AdvancedMsgParams = {
@@ -112,14 +115,16 @@ export declare type PinCveParams = {
 };
 export declare type IsRecvParams = {
     conversationIDList: string[];
-    opt: OptType;
+    opt: MessageReceiveOptType;
 };
 export declare type UpdateMemberNameParams = {
     groupID: string;
     userID: string;
     GroupMemberNickname: string;
 };
-export declare type GroupBaseInfo = Partial<Omit<GroupInitInfo, 'groupType'>>;
+export declare type GroupBaseInfo = Partial<Omit<GroupInitInfo, 'groupType'>> & {
+    groupID: string;
+};
 export declare type JoinGroupParams = {
     groupID: string;
     reqMsg: string;
@@ -151,15 +156,11 @@ export declare type AccessGroupParams = {
 export declare type SetGroupRoleParams = {
     groupID: string;
     userID: string;
-    roleLevel: GroupRole;
+    roleLevel: GroupMemberRole;
 };
 export declare type SetGroupVerificationParams = {
     verification: GroupVerificationType;
     groupID: string;
-};
-export declare type RtcActionParams = {
-    opUserID: string;
-    invitation: RtcInvite;
 };
 export declare type setPrvParams = {
     conversationID: string;
@@ -169,15 +170,11 @@ export declare type setBurnDurationParams = {
     conversationID: string;
     burnDuration: number;
 };
-export declare type LoginParams = {
-    userID: string;
-    token: string;
-};
 export declare type AtMsgParams = {
     text: string;
     atUserIDList: string[];
     atUsersInfo?: AtUsersInfoItem[];
-    message?: string;
+    message?: MessageItem;
 };
 export declare type SoundMsgParams = {
     uuid: string;
@@ -222,14 +219,18 @@ export declare type GroupMsgReadParams = {
     msgIDList: string[];
 };
 export declare type InsertSingleMsgParams = {
-    message: string;
+    message: MessageItem;
     recvID: string;
     sendID: string;
 };
 export declare type InsertGroupMsgParams = {
-    message: string;
+    message: MessageItem;
     groupID: string;
     sendID: string;
+};
+export declare type AccessMessageParams = {
+    conversationID: string;
+    clientMsgID: string;
 };
 export declare type TypingUpdateParams = {
     recvID: string;
@@ -244,8 +245,8 @@ export declare type GetOneCveParams = {
     sessionType: number;
 };
 export declare type isRecvParams = {
-    conversationIDList: string[];
-    opt: OptType;
+    conversationID: string;
+    opt: MessageReceiveOptType;
 };
 export declare type SearchLocalParams = {
     conversationID: string;
@@ -302,79 +303,35 @@ export declare type SetMemberAuthParams = {
     groupID: string;
 };
 export declare type CreateGroupParams = {
-    groupBaseInfo: GroupInitInfo;
-    memberList: Member[];
+    memberUserIDs: string[];
+    groupInfo: GroupInitInfo;
+    adminUserIDs?: string[];
+    ownerUserID?: string;
 };
-export declare type GroupInfoParams = {
+export declare type GroupInfoParams = Partial<GroupInitInfo> & {
     groupID: string;
-    groupInfo: GroupBaseInfo;
+    needVerification: GroupVerificationType;
+    lookMemberInfo: AllowType;
+    applyMemberFriend: AllowType;
 };
 export declare type MemberNameParams = {
     groupID: string;
     userID: string;
-    GroupMemberNickname: string;
+    groupMemberNickname: string;
 };
 export declare type MemberExParams = {
     groupID: string;
     userID: string;
     ex: string;
 };
-export declare type GetSubDepParams = {
-    departmentID: string;
-    offset: number;
-    count: number;
-};
 export declare type FindMessageParams = {
     conversationID: string;
     clientMsgIDList: string[];
 };
-export declare type PartialUserItem = Partial<Omit<FullUserItem, 'userID'>> & {
-    userID: string;
+export declare type UploadFileParams = {
+    name: string;
+    contentType: string;
+    uuid: string;
+    file: File;
 };
-export declare type CustomSignalParams = {
-    roomID: string;
-    customInfo: string;
-};
-export declare type CreateMeetingParams = {
-    meetingName: string;
-    meetingHostUserID: string;
-    startTime: number;
-    meetingDuration: number;
-    inviteeUserIDList: string[];
-};
-export declare type JoinMeetingParams = {
-    meetingID: string;
-    meetingName: string;
-    participantNickname: string;
-};
-export declare type UpdateMeetingParams = {
-    roomID: string;
-    meetingName: string;
-    startTime: number;
-    endTime: number;
-    participantCanUnmuteSelf: boolean;
-    participantCanEnableVideo: boolean;
-    onlyHostInviteUser: boolean;
-    onlyHostShareScreen: boolean;
-    joinDisableMicrophone: boolean;
-    joinDisableVideo: boolean;
-    isMuteAllVideo: boolean;
-    isMuteAllMicrophone: boolean;
-    addCanScreenUserIDList: string[];
-    reduceCanScreenUserIDList: string[];
-    addDisableMicrophoneUserIDList: string[];
-    reduceDisableMicrophoneUserIDList: string[];
-    addDisableVideoUserIDList: string[];
-    reduceDisableVideoUserIDList: string[];
-    addPinedUserIDList: string[];
-    reducePinedUserIDList: string[];
-    addBeWatchedUserIDList: string[];
-    reduceBeWatchedUserIDList: string[];
-};
-export declare type MeetingOperateStreamParams = {
-    streamType: string;
-    roomID: string;
-    userID?: string;
-    mute: boolean;
-    muteAll: boolean;
-};
+export declare type PartialUserItem = Partial<SelfUserInfo>;

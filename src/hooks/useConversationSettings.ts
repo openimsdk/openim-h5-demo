@@ -1,8 +1,7 @@
-import { feedbackToast } from '@utils/common';
+import { feedbackToast } from "@utils/common";
 import useConversationStore from "@/store/modules/conversation";
 import useMessageStore from "@/store/modules/message";
 import { IMSDK } from "@/utils/imCommon";
-import { OptType } from "open-im-sdk-wasm/lib/types/enum";
 import { showConfirmDialog } from "vant";
 
 export default function useConversationSettings() {
@@ -27,33 +26,6 @@ export default function useConversationSettings() {
     switchLoading.pinLoading = false;
   };
 
-  const updateConversationRecvMsgState = async (
-    flag: boolean,
-    opt: OptType
-  ) => {
-    switchLoading.recvMsgLoading = true;
-    try {
-      await IMSDK.setConversationRecvMessageOpt({
-        conversationIDList: [
-          conversationStore.storeCurrentConversation.conversationID,
-        ],
-        opt: flag ? opt : OptType.Nomal,
-      });
-    } catch (error) {}
-    switchLoading.recvMsgLoading = false;
-  };
-
-  const updateConversationPrivateState = async () => {
-    switchLoading.privateLoading = true;
-    try {
-      await IMSDK.setOneConversationPrivateChat({
-        conversationID:
-          conversationStore.storeCurrentConversation.conversationID,
-        isPrivate: !conversationStore.storeCurrentConversation.isPrivateChat,
-      });
-    } catch (error) {}
-    switchLoading.privateLoading = false;
-  };
 
   const clearLogs = () => {
     showConfirmDialog({
@@ -64,18 +36,15 @@ export default function useConversationSettings() {
             resolve(true);
             return;
           }
-          const funcName = conversationStore.storeCurrentConversation.groupID
-            ? "clearGroupHistoryMessageFromLocalAndSvr"
-            : "clearC2CHistoryMessageFromLocalAndSvr";
-          IMSDK[funcName](
+          IMSDK.clearConversationAndDeleteAllMsg(
             conversationStore.storeCurrentConversation.groupID ||
               conversationStore.storeCurrentConversation.userID
           )
             .then(() => {
-                messageStore.clearHistoryMessage();
-                feedbackToast()
+              messageStore.clearHistoryMessage();
+              feedbackToast();
             })
-            .catch((error) => feedbackToast({error}))
+            .catch((error:unknown) => feedbackToast({ error }))
             .finally(() => resolve(true));
         });
       },
@@ -86,8 +55,6 @@ export default function useConversationSettings() {
     conversationStore,
     switchLoading,
     updateConversationPinState,
-    updateConversationRecvMsgState,
-    updateConversationPrivateState,
-    clearLogs
+    clearLogs,
   };
 }

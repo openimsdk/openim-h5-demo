@@ -1,11 +1,12 @@
 import request from "@utils/request";
 import { BusinessUserInfo } from "./data";
-import { getChatToken } from "@/utils/storage";
+import { getChatToken, getIMToken } from "@/utils/storage";
 import { AppConfig } from "@/store/modules/user";
 
+// new
 export const updateBusinessInfo = (params: Partial<BusinessUserInfo>) =>
   request.post(
-    "/user/update_user_info",
+    "/user/update",
     JSON.stringify({ ...params, operationID: Date.now() + "" }),
     {
       headers: {
@@ -14,30 +15,31 @@ export const updateBusinessInfo = (params: Partial<BusinessUserInfo>) =>
     }
   );
 
+// new
 export const getBusinessInfo = (userID: string) =>
-  request.post(
-    "/user/get_users_full_info",
-    JSON.stringify({ userIDList: [userID], operationID: Date.now() + "" }),
-    {
-      headers: {
-        token: getChatToken(),
-      },
-    }
-  );
+  request.post("/user/find/full", JSON.stringify({ userIDs: [userID] }), {
+    headers: {
+      token: getChatToken(),
+    },
+  });
 
+// new
 export const searchUserInfoByBusiness = (
   content: string
 ): Promise<{
-  totalNumber: number;
-  userFullInfoList: BusinessUserInfo[];
+  data: {
+    total: number;
+    users: BusinessUserInfo[];
+  };
 }> => {
   return request.post(
-    "/user/search_users_full_info",
+    "/user/search/full",
     JSON.stringify({
-      content,
-      pageNumber: 0,
-      showNumber: 20,
-      operationID: Date.now() + "",
+      keyword: content,
+      pagination: {
+        pageNumber: 1,
+        showNumber: 20,
+      },
     }),
     {
       headers: {
@@ -47,9 +49,10 @@ export const searchUserInfoByBusiness = (
   );
 };
 
+// new
 export const getAppConfig = (): Promise<{ data: AppConfig }> => {
   return request.post(
-    "/admin/init/get_client_config",
+    "/client_config/get",
     JSON.stringify({
       operationID: Date.now() + "",
     }),

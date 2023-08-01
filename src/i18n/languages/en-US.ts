@@ -270,6 +270,7 @@ export const lang = {
     singleMuteMessage: "{name} was banned by {operator} for {muteTime}",
     cancelSingleMuteMessage: "{operator} cancels the ban {name}",
     burnReadStatus: "burn after reading is {status}",
+    updateGroupNameMessage: "{operator} update group name to {name}",
   },
   messageTip: {
     getOnlineFailed: "Get user online status failed",

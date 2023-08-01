@@ -32,9 +32,11 @@ import self_info_qr from '@assets/images/self_info_qr.png'
 import dayjs from 'dayjs';
 import { useClipboard } from '@vueuse/core';
 import { closeToast, showLoadingToast, showToast, UploaderFileListItem, UploaderInstance } from 'vant';
-import { feedbackToast, switchUpload } from '@/utils/common';
+import { feedbackToast } from '@/utils/common';
 import { updateBusinessInfo } from '@/api/user';
 import { BusinessUserInfo } from '@/api/data';
+import { IMSDK } from '@/utils/imCommon';
+import { v4 as uuidV4 } from "uuid";
 
 const genderActions = [
     {
@@ -85,18 +87,25 @@ const updateUserInfo = (info: Partial<BusinessUserInfo>) => {
 }
 
 const afterReadFile = (data: UploaderFileListItem | UploaderFileListItem[]) => {
-    data = Array.isArray(data) ? data[0] : data
-    showLoadingToast({
-        message: '上传中',
-        forbidClick: true,
-        duration: 0
+  const fileData = Array.isArray(data) ? data[0] : data;
+  showLoadingToast({
+    message: "上传中",
+    forbidClick: true,
+    duration: 0,
+  });
+  IMSDK.uploadFile({
+    name: fileData.file?.name ?? "",
+    contentType: fileData.file?.type!,
+    uuid: uuidV4(),
+    file: fileData.file as File,
+  })
+    .then((res) => {
+      updateUserInfo({
+        faceURL: res.data.url,
+      });
     })
-    switchUpload(data.file!).then(({ data: { URL } }) => {
-        updateUserInfo({
-            faceURL: URL
-        })
-    }).finally(closeToast)
-}
+    .finally(closeToast);
+};
 
 const genderSelect = (_: unknown, gender: number) => {
     updateUserInfo({

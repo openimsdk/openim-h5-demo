@@ -1,4 +1,3 @@
-import useConversationStore from "@/store/modules/conversation";
 import { feedbackToast } from "@/utils/common";
 import { IMSDK, getCleanText } from "@/utils/imCommon";
 import { MessageItem } from "open-im-sdk-wasm/lib/types/entity";
@@ -7,8 +6,6 @@ import { Ref } from "vue";
 type CreateNomalMessageProps = {
   messageContent: Ref<string>;
 };
-
-const conversationStore = useConversationStore();
 
 export default function useCreateNomalMessage({
   messageContent,

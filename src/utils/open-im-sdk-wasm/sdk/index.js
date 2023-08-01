@@ -1,11 +1,14 @@
-import { initDatabaseAPI, workerPromise } from '../api';
+import { fileMapClear, fileMapSet, initDatabaseAPI, workerPromise, } from '../api';
 import Emitter from '../utils/emitter';
 import { v4 as uuidv4 } from 'uuid';
 import { getGO, initializeWasm, getGoExitPromsie } from './initialize';
+import { logBoxStyleValue } from '../utils';
 class SDK extends Emitter {
     wasmInitializedPromise;
     goExitPromise;
     goExisted = false;
+    tryParse = true;
+    isLogStandardOutput = true;
     constructor(url = '/openIM.wasm') {
         super();
         initDatabaseAPI();
@@ -24,9 +27,14 @@ class SDK extends Emitter {
             });
         }
     }
+    _logWrap(...args) {
+        if (this.isLogStandardOutput) {
+            console.info(...args);
+        }
+    }
     _invoker(functionName, func, args, processor) {
         return new Promise(async (resolve, reject) => {
-            // console.info(`SDK => [OperationID:${args[0]}] (invoked by js) run ${functionName} with args ${JSON.stringify(args)}`);
+            this._logWrap(`%cSDK =>%c [OperationID:${args[0]}] (invoked by js) run ${functionName} with args ${JSON.stringify(args)}`, 'font-size:14px; background:#7CAEFF; border-radius:4px; padding-inline:4px;', '');
             let response = {
                 operationID: args[0],
                 event: (functionName.slice(0, 1).toUpperCase() +
@@ -38,56 +46,49 @@ class SDK extends Emitter {
                 }
                 let data = await func(...args);
                 if (processor) {
-                    // console.info(
-                    //   `SDK => [OperationID:${
-                    //     args[0]
-                    //   }] (invoked by js) run ${functionName} with response before processor ${JSON.stringify(
-                    //     data
-                    //   )}`
-                    // );
+                    this._logWrap(`%cSDK =>%c [OperationID:${args[0]}] (invoked by js) run ${functionName} with response before processor ${JSON.stringify(data)}`, logBoxStyleValue('#FFDC19'), '');
                     data = processor(data);
                 }
-                try {
-                    data = JSON.parse(data);
-                } catch (error) {}
+                if (this.tryParse) {
+                    try {
+                        data = JSON.parse(data);
+                    }
+                    catch (error) {
+                        console.log('SDK => parse error ', error);
+                    }
+                }
                 response.data = data;
                 resolve(response);
             }
             catch (error) {
-                // console.info(
-                //   `SDK => [OperationID:${
-                //     args[0]
-                //   }] (invoked by js) run ${functionName} with error ${JSON.stringify(
-                //     error
-                //   )}`
-                // );
+                this._logWrap(`%cSDK =>%c [OperationID:${args[0]}] (invoked by js) run ${functionName} with error ${JSON.stringify(error)}`, logBoxStyleValue('#EE4245'), '');
                 response = {
                     ...response,
                     ...error,
                 };
                 reject(response);
             }
-            // console.info(
-            //   `SDK => [OperationID:${
-            //     args[0]
-            //   }] (invoked by js) run ${functionName} with response ${JSON.stringify(
-            //     response
-            //   )}`
-            // );
-            // return response as WsResponse;
         });
     }
     login = async (params, operationID = uuidv4()) => {
-        // console.info(`SDK => (invoked by js) run login with args ${JSON.stringify({
-        //     params,
-        //     operationID,
-        // })}`);
+        this._logWrap(`SDK => (invoked by js) run login with args ${JSON.stringify({
+            params,
+            operationID,
+        })}`);
         await workerPromise;
         await this.wasmInitializedPromise;
         window.commonEventFunc(event => {
             try {
-                // console.info('SDK => received event ', event);
+                console.info(`%cSDK =>%c received event %c${event}%c `, logBoxStyleValue('#282828', '#ffffff'), '', 'color: #4f2398;', '');
                 const parsed = JSON.parse(event);
+                if (this.tryParse) {
+                    try {
+                        parsed.data = JSON.parse(parsed.data);
+                    }
+                    catch (error) {
+                        console.log('SDK => parse error ', error);
+                    }
+                }
                 this.emit(parsed.event, parsed);
             }
             catch (error) {
@@ -95,64 +96,54 @@ class SDK extends Emitter {
             }
         });
         const config = {
-            platform: params.platformID,
-            api_addr: params.apiAddress,
-            ws_addr: params.wsAddress,
-            log_level: params.logLevel || 6,
-            is_need_encryption: params.isNeedEncryption || false,
+            platformID: params.platformID,
+            apiAddr: params.apiAddr,
+            wsAddr: params.wsAddr,
+            dataDir: './',
+            logLevel: params.logLevel || 5,
+            isLogStandardOutput: params.isLogStandardOutput || true,
+            logFilePath: './',
+            isExternalExtensions: params.isExternalExtensions || false,
         };
+        this.tryParse = params.tryParse ?? true;
+        this.isLogStandardOutput = config.isLogStandardOutput;
         window.initSDK(operationID, JSON.stringify(config));
         return await window.login(operationID, params.userID, params.token);
     };
     logout = (operationID = uuidv4()) => {
+        fileMapClear();
         return this._invoker('logout', window.logout, [operationID]);
     };
     getAllConversationList = (operationID = uuidv4()) => {
         return this._invoker('getAllConversationList', window.getAllConversationList, [operationID]);
     };
     getOneConversation = (params, operationID = uuidv4()) => {
-        return this._invoker('getOneConversation', window.getOneConversation, [
-            operationID,
-            params.sessionType,
-            params.sourceID,
-        ]);
+        return this._invoker('getOneConversation', window.getOneConversation, [operationID, params.sessionType, params.sourceID]);
     };
     getAdvancedHistoryMessageList = (params, operationID = uuidv4()) => {
         return this._invoker('getAdvancedHistoryMessageList', window.getAdvancedHistoryMessageList, [operationID, JSON.stringify(params)]);
     };
-    getHistoryMessageList = (params, operationID = uuidv4()) => {
-        return this._invoker('getHistoryMessageList', window.getHistoryMessageList, [operationID, JSON.stringify(params)]);
+    getAdvancedHistoryMessageListReverse = (params, operationID = uuidv4()) => {
+        return this._invoker('getAdvancedHistoryMessageListReverse', window.getAdvancedHistoryMessageListReverse, [operationID, JSON.stringify(params)]);
     };
-    getGroupsInfo = (params, operationID = uuidv4()) => {
-        return this._invoker('getGroupsInfo', window.getGroupsInfo, [
+    getSpecifiedGroupsInfo = (params, operationID = uuidv4()) => {
+        return this._invoker('getSpecifiedGroupsInfo', window.getSpecifiedGroupsInfo, [operationID, JSON.stringify(params)]);
+    };
+    deleteConversationAndDeleteAllMsg = (conversationID, operationID = uuidv4()) => {
+        return this._invoker('deleteConversationAndDeleteAllMsg', window.deleteConversationAndDeleteAllMsg, [operationID, conversationID]);
+    };
+    markConversationMessageAsRead = (data, operationID = uuidv4()) => {
+        return this._invoker('markConversationMessageAsRead', window.markConversationMessageAsRead, [operationID, data]);
+    };
+    markMessagesAsReadByMsgID = (params, operationID = uuidv4()) => {
+        return this._invoker('markMessagesAsReadByMsgID', window.markMessagesAsReadByMsgID, [
             operationID,
-            JSON.stringify(params),
+            params.conversationID,
+            JSON.stringify(params.clientMsgIDList),
         ]);
-    };
-    deleteConversationFromLocalAndSvr = (conversationID, operationID = uuidv4()) => {
-        return this._invoker('deleteConversationFromLocalAndSvr', window.deleteConversationFromLocalAndSvr, [operationID, conversationID]);
-    };
-    markC2CMessageAsRead = (params, operationID = uuidv4()) => {
-        return this._invoker('markC2CMessageAsRead', window.markC2CMessageAsRead, [
-            operationID,
-            params.userID,
-            JSON.stringify(params.msgIDList),
-        ]);
-    };
-    markMessageAsReadByConID = (params, operationID = uuidv4()) => {
-        return this._invoker('markMessageAsReadByConID', window.markMessageAsReadByConID, [operationID, params.conversationID, JSON.stringify(params.msgIDList)]);
-    };
-    markNotifyMessageHasRead = (conversationID, operationID = uuidv4()) => {
-        return this._invoker('markNotifyMessageHasRead', window.markNotifyMessageHasRead, [operationID, conversationID, '[]']);
     };
     getGroupMemberList = (params, operationID = uuidv4()) => {
-        return this._invoker('getGroupMemberList', window.getGroupMemberList, [
-            operationID,
-            params.groupID,
-            params.filter,
-            params.offset,
-            params.count,
-        ]);
+        return this._invoker('getGroupMemberList', window.getGroupMemberList, [operationID, params.groupID, params.filter, params.offset, params.count]);
     };
     createTextMessage = (text, operationID = uuidv4()) => {
         return this._invoker('createTextMessage', window.createTextMessage, [operationID, text], data => {
@@ -162,6 +153,18 @@ class SDK extends Emitter {
     };
     createImageMessage = (params, operationID = uuidv4()) => {
         return this._invoker('createImageMessage', window.createImageMessageByURL, [
+            operationID,
+            JSON.stringify(params.sourcePicture),
+            JSON.stringify(params.bigPicture),
+            JSON.stringify(params.snapshotPicture),
+        ], data => {
+            // compitable with old version sdk
+            return data[0];
+        });
+    };
+    createImageMessageByFile = (params, operationID = uuidv4()) => {
+        fileMapSet(params.sourcePicture.uuid, params.file);
+        return this._invoker('createImageMessageByFile', window.createImageMessageByURL, [
             operationID,
             JSON.stringify(params.sourcePicture),
             JSON.stringify(params.bigPicture),
@@ -183,17 +186,17 @@ class SDK extends Emitter {
             return data[0];
         });
     };
-    createAdvancedQuoteMessage(params, operationID = uuidv4()) {
+    createAdvancedQuoteMessage = (params, operationID = uuidv4()) => {
         return this._invoker('createAdvancedQuoteMessage', window.createAdvancedQuoteMessage, [
             operationID,
             params.text,
-            params.message,
+            JSON.stringify(params.message),
             JSON.stringify(params.messageEntityList),
         ], data => {
             // compitable with old version sdk
             return data[0];
         });
-    }
+    };
     createAdvancedTextMessage = (params, operationID = uuidv4()) => {
         return this._invoker('createAdvancedTextMessage', window.createAdvancedTextMessage, [operationID, params.text, JSON.stringify(params.messageEntityList)], data => {
             // compitable with old version sdk
@@ -210,7 +213,7 @@ class SDK extends Emitter {
         };
         return this._invoker('sendMessage', window.sendMessage, [
             operationID,
-            params.message,
+            JSON.stringify(params.message),
             params.recvID,
             params.groupID,
             JSON.stringify(offlinePushInfo),
@@ -226,7 +229,7 @@ class SDK extends Emitter {
         };
         return this._invoker('sendMessageNotOss', window.sendMessageNotOss, [
             operationID,
-            params.message,
+            JSON.stringify(params.message),
             params.recvID,
             params.groupID,
             JSON.stringify(offlinePushInfo),
@@ -242,12 +245,20 @@ class SDK extends Emitter {
         };
         return this._invoker('sendMessageByBuffer', window.sendMessageByBuffer, [
             operationID,
-            params.message,
+            JSON.stringify(params.message),
             params.recvID,
             params.groupID,
             JSON.stringify(offlinePushInfo),
             params.fileArrayBuffer,
             params.snpFileArrayBuffer,
+        ]);
+    };
+    setMessageLocalEx = (params, operationID = uuidv4()) => {
+        return this._invoker('setMessageLocalEx', window.setMessageLocalEx, [
+            operationID,
+            params.conversationID,
+            params.clientMsgID,
+            params.localEx,
         ]);
     };
     exportDB(operationID = uuidv4()) {
@@ -256,17 +267,18 @@ class SDK extends Emitter {
     getHistoryMessageListReverse = (params, operationID = uuidv4()) => {
         return this._invoker('getHistoryMessageListReverse', window.getHistoryMessageListReverse, [operationID, JSON.stringify(params)]);
     };
-    revokeMessage = (params, operationID = uuidv4()) => {
+    revokeMessage = (data, operationID = uuidv4()) => {
         return this._invoker('revokeMessage', window.revokeMessage, [
             operationID,
-            params,
+            data.conversationID,
+            data.clientMsgID,
         ]);
     };
-    setOneConversationPrivateChat = (params, operationID = uuidv4()) => {
-        return this._invoker('setOneConversationPrivateChat', window.setOneConversationPrivateChat, [operationID, params.conversationID, params.isPrivate]);
+    setConversationPrivateChat = (params, operationID = uuidv4()) => {
+        return this._invoker('setConversationPrivateChat', window.setConversationPrivateChat, [operationID, params.conversationID, params.isPrivate]);
     };
-    setOneConversationBurnDuration = (params, operationID = uuidv4()) => {
-        return this._invoker('setOneConversationBurnDuration', window.setOneConversationBurnDuration, [operationID, params.conversationID, params.burnDuration]);
+    setConversationBurnDuration = (params, operationID = uuidv4()) => {
+        return this._invoker('setConversationBurnDuration', window.setConversationBurnDuration, [operationID, params.conversationID, params.burnDuration]);
     };
     getLoginStatus = (operationID = uuidv4()) => {
         return this._invoker('getLoginStatus', window.getLoginStatus, [operationID], data => {
@@ -274,13 +286,19 @@ class SDK extends Emitter {
             return data[0];
         });
     };
-    getLoginUser = (operationID = uuidv4()) => {
-        return this._invoker('getLoginUser', window.getLoginUser, [operationID]);
+    setAppBackgroundStatus = (data, operationID = uuidv4()) => {
+        return this._invoker('setAppBackgroundStatus', window.setAppBackgroundStatus, [operationID, data]);
     };
-    getSelfUserInfo = (operationID = uuidv4()) => {
-        return this._invoker('getSelfUserInfo', window.getSelfUserInfo, [
+    networkStatusChanged = (operationID = uuidv4()) => {
+        return this._invoker('networkStatusChanged ', window.networkStatusChanged, [operationID]);
+    };
+    getLoginUser = (operationID = uuidv4()) => {
+        return this._invoker('getLoginUser', window.getLoginUser, [
             operationID,
         ]);
+    };
+    getSelfUserInfo = (operationID = uuidv4()) => {
+        return this._invoker('getSelfUserInfo', window.getSelfUserInfo, [operationID]);
     };
     getUsersInfo = (data, operationID = uuidv4()) => {
         return this._invoker('getUsersInfo', window.getUsersInfo, [
@@ -300,7 +318,7 @@ class SDK extends Emitter {
             data.text,
             JSON.stringify(data.atUserIDList),
             JSON.stringify(data.atUsersInfo),
-            data.message,
+            JSON.stringify(data.message) ?? '',
         ], data => {
             // compitable with old version sdk
             return data[0];
@@ -312,14 +330,36 @@ class SDK extends Emitter {
             return data[0];
         });
     };
+    createSoundMessageByFile = (data, operationID = uuidv4()) => {
+        fileMapSet(data.uuid, data.file);
+        return this._invoker('createSoundMessageByFile', window.createSoundMessageByURL, [operationID, JSON.stringify(data)], data => {
+            // compitable with old version sdk
+            return data[0];
+        });
+    };
     createVideoMessage = (data, operationID = uuidv4()) => {
         return this._invoker('createVideoMessage', window.createVideoMessageByURL, [operationID, JSON.stringify(data)], data => {
             // compitable with old version sdk
             return data[0];
         });
     };
+    createVideoMessageByFile = (data, operationID = uuidv4()) => {
+        fileMapSet(data.videoUUID, data.videoFile);
+        fileMapSet(data.snapshotUUID, data.snapFile);
+        return this._invoker('createVideoMessageByFile', window.createVideoMessageByURL, [operationID, JSON.stringify(data)], data => {
+            // compitable with old version sdk
+            return data[0];
+        });
+    };
     createFileMessage = (data, operationID = uuidv4()) => {
         return this._invoker('createFileMessage', window.createFileMessageByURL, [operationID, JSON.stringify(data)], data => {
+            // compitable with old version sdk
+            return data[0];
+        });
+    };
+    createFileMessageByFile = (data, operationID = uuidv4()) => {
+        fileMapSet(data.uuid, data.file);
+        return this._invoker('createFileMessageByFile', window.createFileMessageByURL, [operationID, JSON.stringify(data)], data => {
             // compitable with old version sdk
             return data[0];
         });
@@ -366,7 +406,7 @@ class SDK extends Emitter {
         });
     };
     createForwardMessage = (data, operationID = uuidv4()) => {
-        return this._invoker('createForwardMessage ', window.createForwardMessage, [operationID, data], data => {
+        return this._invoker('createForwardMessage ', window.createForwardMessage, [operationID, JSON.stringify(data)], data => {
             // compitable with old version sdk
             return data[0];
         });
@@ -384,16 +424,20 @@ class SDK extends Emitter {
         });
     };
     createCardMessage = (data, operationID = uuidv4()) => {
-        return this._invoker('createCardMessage ', window.createCardMessage, [operationID, data], data => {
+        return this._invoker('createCardMessage ', window.createCardMessage, [operationID, JSON.stringify(data)], data => {
             // compitable with old version sdk
             return data[0];
         });
     };
     deleteMessageFromLocalStorage = (data, operationID = uuidv4()) => {
-        return this._invoker('deleteMessageFromLocalStorage ', window.deleteMessageFromLocalStorage, [operationID, data]);
+        return this._invoker('deleteMessageFromLocalStorage ', window.deleteMessageFromLocalStorage, [operationID, data.conversationID, data.clientMsgID]);
     };
-    deleteMessageFromLocalAndSvr = (data, operationID = uuidv4()) => {
-        return this._invoker('deleteMessageFromLocalAndSvr ', window.deleteMessageFromLocalAndSvr, [operationID, data]);
+    deleteMessage = (data, operationID = uuidv4()) => {
+        return this._invoker('deleteMessage ', window.deleteMessage, [
+            operationID,
+            data.conversationID,
+            data.clientMsgID,
+        ]);
     };
     deleteAllConversationFromLocal = (operationID = uuidv4()) => {
         return this._invoker('deleteAllConversationFromLocal ', window.deleteAllConversationFromLocal, [operationID]);
@@ -404,17 +448,11 @@ class SDK extends Emitter {
     deleteAllMsgFromLocalAndSvr = (operationID = uuidv4()) => {
         return this._invoker('deleteAllMsgFromLocalAndSvr ', window.deleteAllMsgFromLocalAndSvr, [operationID]);
     };
-    markGroupMessageHasRead = (data, operationID = uuidv4()) => {
-        return this._invoker('markGroupMessageHasRead ', window.markGroupMessageHasRead, [operationID, data]);
-    };
-    markGroupMessageAsRead = (data, operationID = uuidv4()) => {
-        return this._invoker('markGroupMessageAsRead ', window.markGroupMessageAsRead, [operationID, data.groupID, JSON.stringify(data.msgIDList)]);
-    };
     insertSingleMessageToLocalStorage = (data, operationID = uuidv4()) => {
-        return this._invoker('insertSingleMessageToLocalStorage ', window.insertSingleMessageToLocalStorage, [operationID, data.message, data.recvID, data.sendID]);
+        return this._invoker('insertSingleMessageToLocalStorage ', window.insertSingleMessageToLocalStorage, [operationID, JSON.stringify(data.message), data.recvID, data.sendID]);
     };
     insertGroupMessageToLocalStorage = (data, operationID = uuidv4()) => {
-        return this._invoker('insertGroupMessageToLocalStorage ', window.insertGroupMessageToLocalStorage, [operationID, data.message, data.groupID, data.sendID]);
+        return this._invoker('insertGroupMessageToLocalStorage ', window.insertGroupMessageToLocalStorage, [operationID, JSON.stringify(data.message), data.groupID, data.sendID]);
     };
     typingStatusUpdate = (data, operationID = uuidv4()) => {
         return this._invoker('typingStatusUpdate ', window.typingStatusUpdate, [
@@ -423,17 +461,14 @@ class SDK extends Emitter {
             data.msgTip,
         ]);
     };
-    clearC2CHistoryMessage = (data, operationID = uuidv4()) => {
-        return this._invoker('clearC2CHistoryMessage ', window.clearC2CHistoryMessage, [operationID, data]);
+    clearConversationAndDeleteAllMsg = (data, operationID = uuidv4()) => {
+        return this._invoker('clearConversationAndDeleteAllMsg ', window.clearConversationAndDeleteAllMsg, [operationID, data]);
     };
-    clearC2CHistoryMessageFromLocalAndSvr = (data, operationID = uuidv4()) => {
-        return this._invoker('clearC2CHistoryMessageFromLocalAndSvr ', window.clearC2CHistoryMessageFromLocalAndSvr, [operationID, data]);
-    };
-    clearGroupHistoryMessage = (data, operationID = uuidv4()) => {
-        return this._invoker('clearGroupHistoryMessage ', window.clearGroupHistoryMessage, [operationID, data]);
-    };
-    clearGroupHistoryMessageFromLocalAndSvr = (data, operationID = uuidv4()) => {
-        return this._invoker('clearGroupHistoryMessageFromLocalAndSvr ', window.clearGroupHistoryMessageFromLocalAndSvr, [operationID, data]);
+    hideConversation = (data, operationID = uuidv4()) => {
+        return this._invoker('hideConversation ', window.hideConversation, [
+            operationID,
+            data,
+        ]);
     };
     getConversationListSplit = (data, operationID = uuidv4()) => {
         return this._invoker('getConversationListSplit ', window.getConversationListSplit, [operationID, data.offset, data.count]);
@@ -451,11 +486,7 @@ class SDK extends Emitter {
         ]);
     };
     setConversationDraft = (data, operationID = uuidv4()) => {
-        return this._invoker('setConversationDraft ', window.setConversationDraft, [
-            operationID,
-            data.conversationID,
-            data.draftText,
-        ]);
+        return this._invoker('setConversationDraft ', window.setConversationDraft, [operationID, data.conversationID, data.draftText]);
     };
     pinConversation = (data, operationID = uuidv4()) => {
         return this._invoker('pinConversation ', window.pinConversation, [
@@ -471,13 +502,10 @@ class SDK extends Emitter {
         return this._invoker('getConversationRecvMessageOpt ', window.getConversationRecvMessageOpt, [operationID, JSON.stringify(data)]);
     };
     setConversationRecvMessageOpt = (data, operationID = uuidv4()) => {
-        return this._invoker('setConversationRecvMessageOpt ', window.setConversationRecvMessageOpt, [operationID, JSON.stringify(data.conversationIDList), data.opt]);
+        return this._invoker('setConversationRecvMessageOpt ', window.setConversationRecvMessageOpt, [operationID, data.conversationID, data.opt]);
     };
     searchLocalMessages = (data, operationID = uuidv4()) => {
-        return this._invoker('searchLocalMessages ', window.searchLocalMessages, [
-            operationID,
-            JSON.stringify(data),
-        ]);
+        return this._invoker('searchLocalMessages ', window.searchLocalMessages, [operationID, JSON.stringify(data)]);
     };
     addFriend = (data, operationID = uuidv4()) => {
         return this._invoker('addFriend ', window.addFriend, [
@@ -486,19 +514,16 @@ class SDK extends Emitter {
         ]);
     };
     searchFriends = (data, operationID = uuidv4()) => {
-        return this._invoker('searchFriends ', window.searchFriends, [
-            operationID,
-            JSON.stringify(data),
-        ]);
+        return this._invoker('searchFriends ', window.searchFriends, [operationID, JSON.stringify(data)]);
     };
-    getDesignatedFriendsInfo = (data, operationID = uuidv4()) => {
-        return this._invoker('getDesignatedFriendsInfo ', window.getDesignatedFriendsInfo, [operationID, JSON.stringify(data)]);
+    getSpecifiedFriendsInfo = (data, operationID = uuidv4()) => {
+        return this._invoker('getSpecifiedFriendsInfo ', window.getSpecifiedFriendsInfo, [operationID, JSON.stringify(data)]);
     };
-    getRecvFriendApplicationList = (operationID = uuidv4()) => {
-        return this._invoker('getRecvFriendApplicationList ', window.getRecvFriendApplicationList, [operationID]);
+    getFriendApplicationListAsRecipient = (operationID = uuidv4()) => {
+        return this._invoker('getFriendApplicationListAsRecipient ', window.getFriendApplicationListAsRecipient, [operationID]);
     };
-    getSendFriendApplicationList = (operationID = uuidv4()) => {
-        return this._invoker('getSendFriendApplicationList ', window.getSendFriendApplicationList, [operationID]);
+    getFriendApplicationListAsApplicant = (operationID = uuidv4()) => {
+        return this._invoker('getFriendApplicationListAsApplicant ', window.getFriendApplicationListAsApplicant, [operationID]);
     };
     getFriendList = (operationID = uuidv4()) => {
         return this._invoker('getFriendList ', window.getFriendList, [operationID]);
@@ -555,12 +580,14 @@ class SDK extends Emitter {
             JSON.stringify(data.userIDList),
         ]);
     };
-    getGroupMembersInfo = (data, operationID = uuidv4()) => {
-        return this._invoker('getGroupMembersInfo ', window.getGroupMembersInfo, [
+    isJoinGroup = (data, operationID = uuidv4()) => {
+        return this._invoker('isJoinGroup ', window.isJoinGroup, [
             operationID,
-            data.groupID,
-            JSON.stringify(data.userIDList),
+            data,
         ]);
+    };
+    getSpecifiedGroupMembersInfo = (data, operationID = uuidv4()) => {
+        return this._invoker('getSpecifiedGroupMembersInfo ', window.getSpecifiedGroupMembersInfo, [operationID, data.groupID, JSON.stringify(data.userIDList)]);
     };
     getGroupMemberListByJoinTimeFilter = (data, operationID = uuidv4()) => {
         return this._invoker('getGroupMemberListByJoinTimeFilter ', window.getGroupMemberListByJoinTimeFilter, [
@@ -574,10 +601,7 @@ class SDK extends Emitter {
         ]);
     };
     searchGroupMembers = (data, operationID = uuidv4()) => {
-        return this._invoker('searchGroupMembers ', window.searchGroupMembers, [
-            operationID,
-            JSON.stringify(data),
-        ]);
+        return this._invoker('searchGroupMembers ', window.searchGroupMembers, [operationID, JSON.stringify(data)]);
     };
     setGroupApplyMemberFriend = (data, operationID = uuidv4()) => {
         return this._invoker('setGroupApplyMemberFriend ', window.setGroupApplyMemberFriend, [operationID, data.groupID, data.rule]);
@@ -586,26 +610,22 @@ class SDK extends Emitter {
         return this._invoker('setGroupLookMemberInfo ', window.setGroupLookMemberInfo, [operationID, data.groupID, data.rule]);
     };
     getJoinedGroupList = (operationID = uuidv4()) => {
-        return this._invoker('getJoinedGroupList ', window.getJoinedGroupList, [
-            operationID,
-        ]);
+        return this._invoker('getJoinedGroupList ', window.getJoinedGroupList, [operationID]);
     };
     createGroup = (data, operationID = uuidv4()) => {
         return this._invoker('createGroup ', window.createGroup, [
             operationID,
-            JSON.stringify(data.groupBaseInfo),
-            JSON.stringify(data.memberList),
+            JSON.stringify(data),
         ]);
     };
     setGroupInfo = (data, operationID = uuidv4()) => {
         return this._invoker('setGroupInfo ', window.setGroupInfo, [
             operationID,
-            data.groupID,
-            JSON.stringify(data.groupInfo),
+            JSON.stringify(data),
         ]);
     };
     setGroupMemberNickname = (data, operationID = uuidv4()) => {
-        return this._invoker('setGroupMemberNickname ', window.setGroupMemberNickname, [operationID, data.groupID, data.userID, data.GroupMemberNickname]);
+        return this._invoker('setGroupMemberNickname ', window.setGroupMemberNickname, [operationID, data.groupID, data.userID, data.groupMemberNickname]);
     };
     setGroupMemberInfo = (data, operationID = uuidv4()) => {
         return this._invoker('setGroupMemberInfo ', window.setGroupMemberInfo, [
@@ -628,7 +648,10 @@ class SDK extends Emitter {
         ]);
     };
     quitGroup = (data, operationID = uuidv4()) => {
-        return this._invoker('quitGroup ', window.quitGroup, [operationID, data]);
+        return this._invoker('quitGroup ', window.quitGroup, [
+            operationID,
+            data,
+        ]);
     };
     dismissGroup = (data, operationID = uuidv4()) => {
         return this._invoker('dismissGroup ', window.dismissGroup, [
@@ -653,50 +676,17 @@ class SDK extends Emitter {
             data.newOwnerUserID,
         ]);
     };
-    getSendGroupApplicationList = (operationID = uuidv4()) => {
-        return this._invoker('getSendGroupApplicationList ', window.getSendGroupApplicationList, [operationID]);
+    getGroupApplicationListAsApplicant = (operationID = uuidv4()) => {
+        return this._invoker('getGroupApplicationListAsApplicant ', window.getGroupApplicationListAsApplicant, [operationID]);
     };
-    getRecvGroupApplicationList = (operationID = uuidv4()) => {
-        return this._invoker('getRecvGroupApplicationList ', window.getRecvGroupApplicationList, [operationID]);
+    getGroupApplicationListAsRecipient = (operationID = uuidv4()) => {
+        return this._invoker('getGroupApplicationListAsRecipient ', window.getGroupApplicationListAsRecipient, [operationID]);
     };
     acceptGroupApplication = (data, operationID = uuidv4()) => {
         return this._invoker('acceptGroupApplication ', window.acceptGroupApplication, [operationID, data.groupID, data.fromUserID, data.handleMsg]);
     };
     refuseGroupApplication = (data, operationID = uuidv4()) => {
         return this._invoker('refuseGroupApplication ', window.refuseGroupApplication, [operationID, data.groupID, data.fromUserID, data.handleMsg]);
-    };
-    signalingInvite = (data, operationID = uuidv4()) => {
-        return this._invoker('signalingInvite ', window.signalingInvite, [
-            operationID,
-            JSON.stringify({ invitation: data }),
-        ]);
-    };
-    signalingInviteInGroup = (data, operationID = uuidv4()) => {
-        return this._invoker('signalingInviteInGroup ', window.signalingInviteInGroup, [operationID, JSON.stringify({ invitation: data })]);
-    };
-    signalingAccept = (data, operationID = uuidv4()) => {
-        return this._invoker('signalingAccept ', window.signalingAccept, [
-            operationID,
-            JSON.stringify(data),
-        ]);
-    };
-    signalingReject = (data, operationID = uuidv4()) => {
-        return this._invoker('signalingReject ', window.signalingReject, [
-            operationID,
-            JSON.stringify(data),
-        ]);
-    };
-    signalingCancel = (data, operationID = uuidv4()) => {
-        return this._invoker('signalingCancel ', window.signalingCancel, [
-            operationID,
-            JSON.stringify(data),
-        ]);
-    };
-    signalingHungUp = (data, operationID = uuidv4()) => {
-        return this._invoker('signalingHungUp ', window.signalingHungUp, [
-            operationID,
-            JSON.stringify(data),
-        ]);
     };
     resetConversationGroupAtType = (data, operationID = uuidv4()) => {
         return this._invoker('resetConversationGroupAtType ', window.resetConversationGroupAtType, [operationID, data]);
@@ -705,70 +695,26 @@ class SDK extends Emitter {
         return this._invoker('setGroupMemberRoleLevel ', window.setGroupMemberRoleLevel, [operationID, data.groupID, data.userID, data.roleLevel]);
     };
     setGroupVerification = (data, operationID = uuidv4()) => {
-        return this._invoker('setGroupVerification ', window.setGroupVerification, [
-            operationID,
-            data.groupID,
-            data.verification,
-        ]);
+        return this._invoker('setGroupVerification ', window.setGroupVerification, [operationID, data.groupID, data.verification]);
     };
-    setGlobalRecvMessageOpt = (data, operationID = uuidv4()) => {
-        return this._invoker('setGlobalRecvMessageOpt ', window.setGlobalRecvMessageOpt, [operationID, data.opt]);
+    getGroupMemberOwnerAndAdmin = (data, operationID = uuidv4()) => {
+        return this._invoker('getGroupMemberOwnerAndAdmin ', window.getGroupMemberOwnerAndAdmin, [operationID, data]);
     };
-    newRevokeMessage = (data, operationID = uuidv4()) => {
-        return this._invoker('newRevokeMessage ', window.newRevokeMessage, [
-            operationID,
-            data,
-        ]);
+    setGlobalRecvMessageOpt = (opt, operationID = uuidv4()) => {
+        return this._invoker('setGlobalRecvMessageOpt ', window.setGlobalRecvMessageOpt, [operationID, opt]);
     };
     findMessageList = (data, operationID = uuidv4()) => {
-        return this._invoker('findMessageList ', window.findMessageList, [
+        return this._invoker('findMessageList ', window.findMessageList, [operationID, JSON.stringify(data)]);
+    };
+    uploadFile = (data, operationID = uuidv4()) => {
+        fileMapSet(data.uuid, data.file);
+        return this._invoker('uploadFile ', window.uploadFile, [
             operationID,
-            JSON.stringify(data),
-        ]);
-    };
-    wakeUp = (operationID = uuidv4()) => {
-        return this._invoker('wakeUp', window.wakeUp, [operationID]);
-    };
-    signalingGetRoomByGroupID = (groupID, operationID = uuidv4()) => {
-        return this._invoker('signalingGetRoomByGroupID ', window.signalingGetRoomByGroupID, [operationID, groupID]);
-    };
-    signalingGetTokenByRoomID = (roomID, operationID = uuidv4()) => {
-        return this._invoker('signalingGetTokenByRoomID ', window.signalingGetTokenByRoomID, [operationID, roomID]);
-    };
-    signalingSendCustomSignal = (data, operationID = uuidv4()) => {
-        return this._invoker('signalingSendCustomSignal ', window.signalingSendCustomSignal, [operationID, data.customInfo, data.roomID]);
-    };
-    signalingCreateMeeting = (data, operationID = uuidv4()) => {
-        return this._invoker('signalingCreateMeeting ', window.signalingCreateMeeting, [operationID, JSON.stringify(data)]);
-    };
-    signalingJoinMeeting = (data, operationID = uuidv4()) => {
-        return this._invoker('signalingJoinMeeting ', window.signalingJoinMeeting, [
-            operationID,
-            JSON.stringify(data),
-        ]);
-    };
-    signalingUpdateMeetingInfo = (data, operationID = uuidv4()) => {
-        return this._invoker('signalingUpdateMeetingInfo ', window.signalingUpdateMeetingInfo, [operationID, JSON.stringify(data)]);
-    };
-    signalingCloseRoom = (roomID, operationID = uuidv4()) => {
-        return this._invoker('signalingCloseRoom ', window.signalingCloseRoom, [
-            operationID,
-            roomID,
-        ]);
-    };
-    signalingGetMeetings = (operationID = uuidv4()) => {
-        return this._invoker('signalingGetMeetings ', window.signalingGetMeetings, [
-            operationID,
-        ]);
-    };
-    signalingOperateStream = (data, operationID = uuidv4()) => {
-        return this._invoker('signalingOperateStream ', window.signalingOperateStream, [
-            operationID,
-            data.streamType,
-            data.roomID,
-            data.userID,
-            data.mute,
-            data.muteAll,
+            JSON.stringify({
+                ...data,
+                filepath: '',
+                cause: '',
+            }),
         ]);
     };
 }

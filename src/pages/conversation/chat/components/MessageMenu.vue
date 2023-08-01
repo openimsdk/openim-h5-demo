@@ -17,7 +17,7 @@
 
 <script setup lang='ts'>
 import { ExedMessageItem, MessageMenuType } from './MessageItem/data';
-import { GroupRole, MessageType, SessionType } from 'open-im-sdk-wasm/lib/types/enum';
+import { MessageType } from 'open-im-sdk-wasm/lib/types/enum';
 
 import copy_icon from '@/assets/images/chating_message_copy.png'
 import forward from '@/assets/images/chating_message_forward.png'
@@ -36,7 +36,7 @@ import useUserStore from '@/store/modules/user';
 import emitter from '@/utils/events';
 import { ToastWrapperInstance } from 'vant/lib/toast/types';
 
-const canCopyTypes = [MessageType.ATTEXTMESSAGE, MessageType.TEXTMESSAGE, MessageType.QUOTEMESSAGE]
+const canCopyTypes = [MessageType.AtTextMessage, MessageType.TextMessage, MessageType.QuoteMessage]
 
 
 type MessageMenuProps = {
@@ -63,28 +63,10 @@ const menuList = [
         type: MessageMenuType.Delete,
     },
     {
-        title: '转发',
-        icon: forward,
-        hidden: false,
-        type: MessageMenuType.ForWard,
-    },
-    {
-        title: '回复',
-        icon: reply,
-        hidden: false,
-        type: MessageMenuType.Replay,
-    },
-    {
         title: '撤回',
         icon: revoke,
         hidden: false,
         type: MessageMenuType.Revoke,
-    },
-    {
-        title: '多选',
-        icon: multiple,
-        hidden: false,
-        type: MessageMenuType.Multiple,
     },
 ]
 
@@ -128,10 +110,10 @@ onLongPress(
 )
 
 const getCopyText = () => {
-    if (props.message.contentType === MessageType.ATTEXTMESSAGE) {
-        return props.message.atElem.text;
+    if (props.message.contentType === MessageType.AtTextMessage) {
+        return props.message.atTextElem.text;
     }
-    if (props.message.contentType === MessageType.QUOTEMESSAGE) {
+    if (props.message.contentType === MessageType.QuoteMessage) {
         return props.message.quoteElem.text;
     }
     return props.message.content;
@@ -153,43 +135,38 @@ const menuClick = (type: MessageMenuType) => {
             break;
         case MessageMenuType.Delete:
             showLoading()
-            IMSDK.deleteMessageFromLocalAndSvr(JSON.stringify(props.message))
+            IMSDK.deleteMessage({
+                conversationID: conversationStore.currentConversation.conversationID,
+                clientMsgID: props.message.clientMsgID
+            })
                 .then(() => messageStore.deleteOneMessage(props.message))
                 .catch(error => feedbackToast({ error }))
                 .finally(() => loadingToast?.close())
             break;
-        case MessageMenuType.ForWard:
-            router.push({
-                path: 'chooseUser',
-                state: {
-                    chooseType: ContactChooseEnum.ForwardMessage,
-                    extraData: JSON.stringify(props.message)
-                }
-            })
-            break;
-        case MessageMenuType.Multiple:
-            break;
-        case MessageMenuType.Replay:
-            break;
         case MessageMenuType.Revoke:
             showLoading()
-            IMSDK.newRevokeMessage(JSON.stringify(props.message))
+            IMSDK.revokeMessage({
+                conversationID: conversationStore.currentConversation.conversationID,
+                clientMsgID: props.message.clientMsgID
+            })
                 .then(() => {
                     messageStore.updateOneMessage({
                         ...props.message,
-                        contentType: MessageType.ADVANCEREVOKEMESSAGE,
-                        content: JSON.stringify({
-                            clientMsgID: props.message.clientMsgID,
-                            revokeTime: Date.now(),
-                            revokerID: userStore.storeSelfInfo.userID,
-                            revokerNickname: '你',
-                            revokerRole: 0,
-                            seq: props.message.seq,
-                            sessionType: props.message.sessionType,
-                            sourceMessageSendID: props.message.sendID,
-                            sourceMessageSendTime: props.message.sendTime,
-                            sourceMessageSenderNickname: props.message.senderNickname,
-                        })
+                        contentType: MessageType.RevokeMessage,
+                        notificationElem: {
+                            detail: JSON.stringify({
+                                clientMsgID: props.message.clientMsgID,
+                                revokeTime: Date.now(),
+                                revokerID:  userStore.storeSelfInfo.userID,
+                                revokerNickname: "你",
+                                revokerRole: 0,
+                                seq: props.message.seq,
+                                sessionType: props.message.sessionType,
+                                sourceMessageSendID: props.message.sendID,
+                                sourceMessageSendTime: props.message.sendTime,
+                                sourceMessageSenderNickname: props.message.senderNickname,
+                            }),
+                        },
                     })
                 })
                 .catch(error => feedbackToast({ error }))

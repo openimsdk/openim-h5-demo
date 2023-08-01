@@ -1,4 +1,6 @@
 import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
+
 const serves = axios.create({
   baseURL: process.env.CHAT_URL,
   timeout: 5000,
@@ -8,6 +10,7 @@ const serves = axios.create({
 serves.interceptors.request.use(
   (config) => {
     // 设置发送之前数据需要做什么处理
+    config.headers!.operationID = config.headers!.operationID ?? uuidv4();
     return config;
   },
   (err) => Promise.reject(err)
