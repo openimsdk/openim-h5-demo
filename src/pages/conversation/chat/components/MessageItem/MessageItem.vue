@@ -11,7 +11,7 @@
           <component :message="source" :is-self-msg="isSelfMsg"
             :disabled="showCheck || isActive" :is="getRenderComp"></component>
         </MessageMenu>
-        <MessageReadState v-if="isSelfMsg"
+        <MessageReadState v-if="isSelfMsg && !source.groupID"
           :message="source"/>
       </div>
     </div>

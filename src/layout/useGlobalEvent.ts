@@ -19,9 +19,7 @@ import {
 import useMessageStore, { ExMessageItem } from "@/store/modules/message";
 import emitter from "@/utils/events";
 import { useDebounceFn, useThrottleFn } from "@vueuse/core";
-import {
-  clearIMProfile,
-} from "@/utils/storage";
+import { clearIMProfile } from "@/utils/storage";
 import { showLoadingToast } from "vant";
 import { ToastWrapperInstance } from "vant/lib/toast/types";
 import { feedbackToast } from "@/utils/common";
@@ -77,11 +75,6 @@ export function useGlobalEvent() {
     IMSDK.on(CbEvents.OnGroupMemberAdded, groupMemberAddedHandler);
     IMSDK.on(CbEvents.OnGroupMemberDeleted, groupMemberDeletedHandler);
     IMSDK.on(CbEvents.OnGroupMemberInfoChanged, groupMemberInfoChangedHandler);
-    // rtc
-    // IMSDK.on(CbEvents.ONRECEIVENEWINVITATION, newInvitationHandler);
-    // IMSDK.on(CbEvents.ONINVITEEACCEPTEDBYOTHERDEVICE, otherHandler);
-    // IMSDK.on(CbEvents.ONINVITEEREJECTEDBYOTHERDEVICE, otherHandler);
-    // application
     IMSDK.on(CbEvents.OnFriendApplicationAdded, friendApplicationAddedHandler);
     IMSDK.on(
       CbEvents.OnFriendApplicationAccepted,
@@ -103,19 +96,13 @@ export function useGlobalEvent() {
   };
 
   const selfUpdateHandler = ({ data }: any) => {
-    const imUserInfo = data;
     userStore.updateSelfInfo({
-      ...imUserInfo,
       ...userStore.storeSelfInfo,
-      globalRecvMsgOpt: imUserInfo.globalRecvMsgOpt,
+      ...data,
     });
   };
   const connectingHandler = () => {};
-  const connectFailedHandler = ({ errCode }: any) => {
-    if (errCode == 705) {
-      tryOut("当前登录已过期,请重新登录");
-    }
-  };
+  const connectFailedHandler = () => {};
   const connectSuccessHandler = () => {};
   const kickHandler = () => tryOut("您的账号已在其他设备登录,请重新登录");
   const expiredHandler = () => tryOut("当前登录已过期,请重新登录");
@@ -235,7 +222,7 @@ export function useGlobalEvent() {
       ...conversationStore.storeConversationList,
       ...cacheConversationList,
     ].find((conversation) => {
-      if (newServerMsg.sessionType===SessionType.WorkingGroup) {
+      if (newServerMsg.sessionType === SessionType.WorkingGroup) {
         return newServerMsg.groupID === conversation.groupID;
       }
       return newServerMsg.sendID === conversation.userID;

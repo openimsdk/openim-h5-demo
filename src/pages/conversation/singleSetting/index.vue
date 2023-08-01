@@ -6,7 +6,7 @@
             <div class="flex flex-col mr-6">
                 <Avatar :size="48" :src="conversationStore.storeCurrentConversation.faceURL"
                     :desc="conversationStore.storeCurrentConversation.showName" @click="toUser" />
-                <span class="w-12 truncate mt-2">{{ conversationStore.storeCurrentConversation.showName }}</span>
+                <span class="w-12 text-center truncate mt-2">{{ conversationStore.storeCurrentConversation.showName }}</span>
             </div>
             <img width="48" :src="single_setting_add" alt="" @click="createGroup" />
         </div>
