@@ -5,6 +5,7 @@
 </template>
 
 <script setup lang='ts'>
+import { SessionType } from 'open-im-sdk-wasm/lib/types/enum';
 import { ExedMessageItem } from './data';
 
 
@@ -13,7 +14,12 @@ type MessageReadStateProps = {
 }
 
 const props = defineProps<MessageReadStateProps>();
-const readStateStr = computed(() => props.message.isRead ? '已读' : '未读')
+const readStateStr = computed(() => {
+    if(props.message.sessionType === SessionType.Single){
+        return props.message.isRead ? '已读' : '未读';
+    }
+    return ''
+})
 </script>
 
 <style lang='scss' scoped></style>

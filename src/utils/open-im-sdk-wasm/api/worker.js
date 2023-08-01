@@ -21,7 +21,7 @@ insertGroupRequest, deleteGroupRequest, updateGroupRequest, getSendGroupApplicat
 // friend
 insertFriend, deleteFriend, updateFriend, getAllFriendList, searchFriendList, getFriendInfoList, getFriendInfoByFriendUserID, 
 // groupMember
-batchInsertGroupMember, deleteGroupAllMembers, deleteGroupMember, getAllGroupMemberList, getAllGroupMemberUserIDList, getGroupAdminID, getGroupMemberCount, getGroupMemberInfoByGroupIDUserID, getGroupMemberListByGroupID, getGroupMemberListSplit, getGroupMemberListSplitByJoinTimeFilter, getGroupMemberOwner, getGroupMemberOwnerAndAdmin, getGroupMemberUIDListByGroupID, getGroupOwnerAndAdminByGroupID, getGroupSomeMemberInfo, insertGroupMember, searchGroupMembers, updateGroupMember, updateGroupMemberField, 
+batchInsertGroupMember, deleteGroupAllMembers, deleteGroupMember, getAllGroupMemberList, getAllGroupMemberUserIDList, getGroupAdminID, getGroupMemberCount, getGroupMemberInfoByGroupIDUserID, getGroupMemberListByGroupID, getGroupMemberListSplit, getGroupMemberListSplitByJoinTimeFilter, getGroupMemberOwner, getGroupMemberOwnerAndAdmin, getGroupMemberUIDListByGroupID, getGroupOwnerAndAdminByGroupID, getGroupSomeMemberInfo, insertGroupMember, searchGroupMembers, updateGroupMember, updateGroupMemberField, getUserJoinedGroupIDs, 
 // temp cache chatlogs
 batchInsertTempCacheMessageList, InsertTempCacheMessage, getAllSingleConversationIDList, getAllConversationIDList, getPageFriendList, getGroupMemberAllGroupIDs, getAlreadyExistSeqList, markConversationAllMessageAsRead, searchAllMessageByContentType, deleteConversationMsgs, markConversationMessageAsRead, markConversationMessageAsReadBySeqs, markDeleteConversationAllMessages, getUnreadMessage, getConversationPeerNormalMsgSeq, getConversationNormalMsgSeq, deleteConversationAllMessages, getMessagesByClientMsgIDs, getMessagesBySeqs, getMessageBySeq, getAllConversations, 
 // upload
@@ -169,6 +169,7 @@ rpc.registerMethod('deleteGroupAllMembers', deleteGroupAllMembers);
 rpc.registerMethod('updateGroupMember', updateGroupMember);
 rpc.registerMethod('updateGroupMemberField', updateGroupMemberField);
 rpc.registerMethod('searchGroupMembers', searchGroupMembers);
+rpc.registerMethod('getUserJoinedGroupIDs', getUserJoinedGroupIDs);
 // groupRequest
 rpc.registerMethod('insertGroupRequest', insertGroupRequest);
 rpc.registerMethod('deleteGroupRequest', deleteGroupRequest);

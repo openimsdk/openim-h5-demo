@@ -95,7 +95,7 @@ declare class SDK extends Emitter {
     getSpecifiedFriendsInfo: (data: string[], operationID?: string) => Promise<WsResponse<FriendUserItem[]>>;
     getFriendApplicationListAsRecipient: (operationID?: string) => Promise<WsResponse<FriendApplicationItem[]>>;
     getFriendApplicationListAsApplicant: (operationID?: string) => Promise<WsResponse<FriendApplicationItem[]>>;
-    getFriendList: (operationID?: string) => Promise<WsResponse<FullUserItem[]>>;
+    getFriendList: (operationID?: string) => Promise<WsResponse<FriendUserItem[]>>;
     setFriendRemark: <T>(data: RemarkFriendParams, operationID?: string) => Promise<WsResponse<T>>;
     checkFriend: (data: string[], operationID?: string) => Promise<WsResponse<FriendshipInfo[]>>;
     acceptFriendApplication: <T>(data: AccessFriendParams, operationID?: string) => Promise<WsResponse<T>>;

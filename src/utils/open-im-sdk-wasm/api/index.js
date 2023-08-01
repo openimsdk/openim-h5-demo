@@ -265,6 +265,7 @@ export function initDatabaseAPI() {
     window.getJoinedWorkingGroupIDList = registeMethodOnWindow('getJoinedWorkingGroupIDList');
     window.getJoinedWorkingGroupList = registeMethodOnWindow('getJoinedWorkingGroupList');
     window.getGroupMemberAllGroupIDs = registeMethodOnWindow('getGroupMemberAllGroupIDs');
+    window.getUserJoinedGroupIDs = registeMethodOnWindow('getUserJoinedGroupIDs');
     window.getGroups = registeMethodOnWindow('getGroups');
     // groupRequest
     window.insertGroupRequest = registeMethodOnWindow('insertGroupRequest');

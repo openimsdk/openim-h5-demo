@@ -100,6 +100,7 @@ export declare type FullUserItem = {
     publicInfo: PublicUserItem | null;
 };
 export declare type PublicUserItem = {
+    gender: number;
     nickname: string;
     userID: string;
     faceURL: string;
