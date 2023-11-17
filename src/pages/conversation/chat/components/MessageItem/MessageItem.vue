@@ -14,15 +14,10 @@
           <span>{{ " " }}</span>
           <span v-if="!isSing">{{ source.senderNickname }}</span>
         </div>
-        <MessageMenu :message="source" :disabled="showCheck || isActive" :isSelfMsg="isSelfMsg">
-          <MessageSendState v-if="isSelfMsg" :message="source" />
-          <component :message="source" :is-self-msg="isSelfMsg" :announce-content="groupAnnounceData.notification"
-            :disabled="showCheck || isActive" :is="getRenderComp"></component>
-          <MessageSendState v-if="!isSelfMsg" :message="source" />
-        </MessageMenu>
-        <QuoteMessageRenderer v-if="source.contentType === MessageType.QuoteMessage" :message="source" />
-        <MessageReadState v-if="isSelfMsg && !groupAnnounceData.notification && source.status === MessageStatus.Succeed"
-          :message="source" :disabled="showCheck" />
+        <MessageSendState v-if="isSelfMsg" :message="source" />
+        <component :message="source" :is-self-msg="isSelfMsg" :announce-content="groupAnnounceData.notification"
+          :disabled="showCheck || isActive" :is="getRenderComp"></component>
+        <MessageSendState v-if="!isSelfMsg" :message="source" />
       </div>
     </div>
   </div>
@@ -38,9 +33,9 @@ import useUserStore from "@/store/modules/user";
 import { ExedMessageItem } from "./data";
 import { useMessageIsRead } from "./useMessageIsRead";
 import useContactStore from "@/store/modules/contact";
-import emitter from "@/utils/events";
 import useConversationStore from "@/store/modules/conversation";
 import { formatMessageTime } from '@/utils/imCommon'
+import MessageSendState from './MessageSendState.vue'
 
 interface MessageItemProps {
   source: ExedMessageItem;
@@ -76,7 +71,6 @@ const groupAnnounceData = computed(() => {
 const getRenderComp = computed(() => {
   switch (props.source.contentType) {
     case MessageType.TextMessage:
-    case MessageType.QuoteMessage:
       return TextMessageRenderer;
     case MessageType.VideoMessage:
     case MessageType.PictureMessage:
@@ -94,15 +88,6 @@ useMessageIsRead({
   isGroupAnnounce: !!groupAnnounceData.value.notification,
   clientMsgID: props.source.clientMsgID,
 });
-
-const tryAtUser = () => {
-  emitter.emit("AT_SOMEONE", {
-    data: [{
-      userID: groupAnnounceData.value.opUser?.userID ?? props.source.sendID,
-      nickname: groupAnnounceData.value.opUser?.nickname ?? props.source.senderNickname,
-    }]
-  })
-}
 
 const toDetails = async () => {
   if (props.showCheck) {
