@@ -1,156 +1,111 @@
 <template>
-  <div class="page_container !bg-white px-10 text-[#171A1D] relative">
-    <img class="w-9 h-[34px] my-[5vh]" :src="registe_back" alt="">
+  <div class="page_container px-10 relative">
+    <img class="w-6 h-6 mt-[5vh]" :src="login_back" alt="" @click="$router.back">
 
-    <div class="text-3xl font-semibold">请完善个人信息</div>
+    <div class="text-2xl text-primary font-semibold mt-12">{{ $t('setInfo') }}</div>
 
-    <BaseInfoRow class="mt-12" title="头像" @click="chooseAvatar">
-      <Avatar v-if="baseInfo.faceURL" :src="baseInfo.faceURL" />
-      <van-icon v-else color="#b2b2b2" size="20" name="photograph" />
-    </BaseInfoRow>
-    <BaseInfoRow title="昵称" @click="editNickname">
-      <div class="max-w-[200px] truncate">{{ baseInfo.nickname }}</div>
-    </BaseInfoRow>
-    <BaseInfoRow title="性别" @click="showGenderPicker = true">
-      <span>{{ comptGenderStr }}</span>
-    </BaseInfoRow>
-    <BaseInfoRow title="生日" @click="showBirthPicker = true">
-      <span>{{ comptBirthStr }}</span>
-    </BaseInfoRow>
+    <div class="mt-20">
+      <div class="text-sm mb-1 text-sub-text">{{ $t('name') }}</div>
+      <div class="border border-gap-text rounded-lg">
+        <van-field class="!py-1" clearable v-model="baseInfo.nickname" name="nickname" type="text"
+          :placeholder="$t('placeholder.inputNickname')">
+        </van-field>
+      </div>
+    </div>
 
-    <div class="mt-[20vh]">
+    <div class="mt-5">
+      <div class="text-sm mb-1 text-sub-text">{{ $t('password') }}</div>
+      <div class="border border-gap-text rounded-lg">
+        <van-field class="!py-1" clearable v-model="baseInfo.password" name="password" type="password"
+          :placeholder="$t('placeholder.inputPassword')">
+        </van-field>
+      </div>
+      <div class="text-xs mt-0.5 text-sub-text">{{ $t('passwordRequired') }}</div>
+    </div>
+
+    <div class="mt-5">
+      <div class="text-sm mb-1 text-sub-text">{{ $t('confirmPassword') }}</div>
+      <div class="border border-gap-text rounded-lg">
+        <van-field class="!py-1" clearable v-model="baseInfo.confirmPassword" name="confirmPassword" type="password"
+          :placeholder="$t('placeholder.reConfirmPassword')">
+        </van-field>
+      </div>
+    </div>
+
+    <div class="mt-28">
       <van-button block type="primary" native-type="submit" :loading="loading" @click="login">
-        立即注册
+        {{ $t('nowRegister') }}
       </van-button>
     </div>
 
-    <van-dialog v-model:show="nicknameData.show" title="昵称" show-cancel-button @confirm="confirmNickname"
-      @closed="nicknameData.content = ''">
-      <van-field maxlength="20" v-model="nicknameData.content" />
-    </van-dialog>
-
-    <van-action-sheet v-model:show="showGenderPicker" :actions="genderActions" cancel-text="取消" close-on-click-action
-      @cancel="showGenderPicker = false" @select="genderSelect" />
-
-    <van-action-sheet v-model:show="showBirthPicker" cancel-text="取消" @cancel="showBirthPicker = false">
-      <van-date-picker v-model="currentDate" title="选择日期" :min-date="new Date(1970, 0, 1)" :max-date="new Date()"
-        @confirm="confirmDate" @cancel="showBirthPicker = false" />
-    </van-action-sheet>
   </div>
 </template>
 
 <script setup lang='ts'>
-import registe_back from '@assets/images/registe_back.png'
-import BaseInfoRow from './BaseInfoRow.vue';
-import dayjs from 'dayjs';
-import Avatar from '@/components/Avatar/index.vue';
-import { BaseData } from '../verifyCode/index.vue';
+import md5 from 'md5';
+import login_back from '@assets/images/login_back.png'
 import { register } from '@/api/login';
-import { IMSDK, initStore } from '@/utils/imCommon';
 import { setIMProfile } from '@/utils/storage';
 import { feedbackToast } from '@/utils/common';
-import { onBeforeRouteUpdate } from 'vue-router';
-import md5 from 'md5';
+import { BaseData } from '../verifyCode/index.vue';
 
 const props = defineProps<{
-  baseData: BaseData & { verificationCode: string; password: string }
+  baseData: BaseData & { verificationCode: string }
 }>()
 const router = useRouter();
-const genderActions = [
-  {
-    name: '保密'
-  },
-  {
-    name: '男'
-  },
-  {
-    name: '女'
-  },
-]
+const { t } = useI18n()
 
-
-const nicknameData = reactive({
-  show: false,
-  content: ''
-})
-const showGenderPicker = ref(false)
-const showBirthPicker = ref(false)
+const passwordRegExp = /^(?=.*[0-9])(?=.*[a-zA-Z]).{6,20}$/
 const loading = ref(false)
-
 const baseInfo = reactive({
-  faceURL: history.state.avatar || '',
+  faceURL: '',
   nickname: '',
+  password: '',
+  confirmPassword: '',
   gender: 0,
   birth: 0
 })
 
-const comptGenderStr = computed(() => {
-  if (baseInfo.gender === 1) {
-    return '男'
-  }
-  if (baseInfo.gender === 2) {
-    return '女'
-  }
-  return '保密'
-})
-const comptBirthStr = computed(() => baseInfo.birth ? dayjs(baseInfo.birth).format("YYYY-MM-DD") : '-')
-const currentDate = computed(() => dayjs(baseInfo.birth).format("YYYY-MM-DD").split('-'))
-
-const chooseAvatar = () => {
-  router.push({
-    path: 'chooseAvatar',
-    state: {
-      baseData: JSON.stringify(props.baseData)
-    }
-  })
-}
-
-const editNickname = () => {
-  nicknameData.show = true
-  nicknameData.content = baseInfo.nickname
-}
-const confirmNickname = () => {
-  baseInfo.nickname = nicknameData.content
-}
-
-const genderSelect = (_: unknown, gender: number) => {
-  baseInfo.gender = gender
-}
-
-const confirmDate = ({ selectedValues }: any) => {
-  baseInfo.birth = new Date(selectedValues[0], selectedValues[1], selectedValues[2]).getTime()
-  showBirthPicker.value = false
-}
-
 const login = async () => {
-  localStorage.setItem("IMAccount",props.baseData.phoneNumber)
+  if (!passwordRegExp.test(baseInfo.password)) {
+    feedbackToast({
+      message: t('messageTip.correctPassword'),
+      error: t('messageTip.correctPassword')
+    })
+    return
+  }
+  if (baseInfo.password !== baseInfo.confirmPassword) {
+    feedbackToast({
+      message: t('messageTip.rePassword'),
+      error: t('messageTip.rePassword')
+    })
+    return
+  }
+  localStorage.setItem("IMAccount", props.baseData.phoneNumber)
+  loading.value = true
   try {
     const { data: { chatToken, imToken, userID } } = await register({
       verifyCode: props.baseData.verificationCode,
-      deviceID:'',
-      user:{
+      deviceID: '',
+      user: {
         ...baseInfo,
-        birth: baseInfo.birth / 1000,
         phoneNumber: props.baseData.phoneNumber,
         areaCode: props.baseData.areaCode,
-        password: md5(props.baseData.password),
+        password: md5(baseInfo.password),
       },
     })
     setIMProfile({ chatToken, imToken, userID })
-    await IMSDK.login({
-      userID,
-      token: imToken,
-      apiAddr: process.env.API_URL!,
-      wsAddr: process.env.WS_URL!,
-      platformID: 5,
-    });
-    initStore();
     router.push('conversation')
   } catch (error) {
-    feedbackToast({ error, message: '注册失败！' })
+    loading.value = false
+    feedbackToast({ error, message: t('messageTip.registerFailed') })
   }
 }
 
 </script>
 
-<style lang='scss' scoped></style>
+<style lang='scss' scoped>
+.page_container {
+  background: linear-gradient(180deg, rgba(0, 137, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+}
+</style>

@@ -1,16 +1,15 @@
 <template>
   <div class="page_container">
-    <NavBar title="工作通知"/>
+    <NavBar :title="$t('notification')" />
     <div class="flex-1 overflow-hidden relative">
-    <virtual-list ref="vsl" class="my_scrollbar h-full overflow-y-auto !flex-col"
-      :data-key="'clientMsgID'" :data-sources="messageStore.storeHistoryMessageList" :bottomThreshold="160"
-      :data-component="NotifyMessageItem"
-      :estimate-size="88" @onBottom="onToBottom" @resized="onItemRendered">
-    </virtual-list>
-    <div v-show="initLoading" class="!absolute top-0 h-full w-full flex justify-center items-center bg-white">
-      <van-loading type="spinner" />
+      <virtual-list ref="vsl" class="my_scrollbar h-full overflow-y-auto !flex-col" :data-key="'clientMsgID'"
+        :data-sources="messageStore.storeHistoryMessageList" :bottomThreshold="160" :data-component="NotifyMessageItem"
+        :estimate-size="88" @onBottom="onToBottom" @resized="onItemRendered">
+      </virtual-list>
+      <div v-show="initLoading" class="!absolute top-0 h-full w-full flex justify-center items-center bg-white">
+        <van-loading type="spinner" />
+      </div>
     </div>
-  </div>
   </div>
 </template>
 
@@ -39,20 +38,18 @@ const initLoading = toRef(
 
 const checkUnRead = () => {
   if (conversationStore.storeCurrentConversation.unreadCount > 0) {
-      IMSDK.markConversationMessageAsRead(conversationStore.storeCurrentConversation.conversationID);
-    }
+    IMSDK.markConversationMessageAsRead(conversationStore.storeCurrentConversation.conversationID);
+  }
 }
 
-onBeforeMount(()=>{
+onBeforeMount(() => {
   checkUnRead()
 })
 
-onBeforeUnmount(()=>{
+onBeforeUnmount(() => {
   checkUnRead();
 })
 
 </script>
 
-<style lang='scss' scoped>
-
-</style>
+<style lang='scss' scoped></style>

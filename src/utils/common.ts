@@ -1,9 +1,16 @@
 import { showToast } from "vant";
 import PinYin from "./pinyin";
 
+import excel from '@/assets/images/messageItem/excel.png'
+import ppt from "@/assets/images/messageItem/ppt.png";
+import word from "@/assets/images/messageItem/word.png";
+import zip from "@/assets/images/messageItem/zip.png";
+import pdf from "@/assets/images/messageItem/pdf.png";
+import unknown from "@/assets/images/messageItem/unknown.png";
+
 // i18n
 import { i18n } from "@/i18n";
-import { FriendUserItem } from "open-im-sdk-wasm/lib/types/entity";
+import { FriendUserItem } from "@/utils/open-im-sdk-wasm/types/entity";
 // @ts-ignore
 const { t } = i18n.global;
 
@@ -27,6 +34,17 @@ export const feedbackToast = (config?: FeedbackToastParams) => {
   if (error) {
     console.error(message, error);
   }
+};
+
+export const removeDefaultBehavior = (event: any) => {
+  event = event || window.event;
+  if (event.preventDefault) event.preventDefault();
+  if (event.returnValue) event.returnValue = false;
+
+  if (event.stopPropagation) {
+    event.stopPropagation();
+  }
+  return false;
 };
 
 export const sec2Time = (seconds: number) => {
@@ -85,13 +103,21 @@ export const secFormat = (sec: any) => {
   return h + ":" + s;
 };
 
-export const blobToDataURL = (blob: File, cb: (base64: string) => void) => {
-  let reader = new FileReader();
-  reader.onload = function (evt) {
-    let base64 = evt.target?.result;
-    cb(base64 as string);
-  };
-  reader.readAsDataURL(blob);
+export const copy2Text = (text: string) => {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text);
+  } else {
+    var textarea = document.createElement("textarea");
+    document.body.appendChild(textarea);
+    textarea.style.position = "fixed";
+    textarea.style.clip = "rect(0 0 0 0)";
+    textarea.style.top = "10px";
+    textarea.value = text;
+    textarea.select();
+    document.execCommand("copy", true);
+    document.body.removeChild(textarea);
+  }
+  feedbackToast({ message: t("messageTip.copySuccess") });
 };
 
 export const getPicInfo = (file: File): Promise<HTMLImageElement> => {
@@ -109,7 +135,8 @@ export const getMediaDuration = (path: string): Promise<number> => {
   return new Promise((resolve, reject) => {
     const vel = new Audio(path);
     vel.onloadedmetadata = async function () {
-      resolve(vel.duration);
+      // resolve(vel.duration);
+      resolve(Number(vel.duration.toFixed()));
     };
   });
 };
@@ -158,8 +185,23 @@ export const base64toFile = (base64Str: string) => {
   });
 };
 
+export const contentEditableDivRange = () => {
+  const selection = window.getSelection(),
+    range = selection!.getRangeAt(0),
+    br = document.createElement("br"),
+    textNode = document.createTextNode("\u00a0"); //Passing " " directly will not end up being shown correctly
+  range.deleteContents(); //required or not?
+  range.insertNode(br);
+  range.collapse(false);
+  range.insertNode(textNode);
+  range.selectNodeContents(textNode);
+  selection!.removeAllRanges();
+  selection!.addRange(range);
+  document.execCommand("delete");
+};
+
 export const genAvatar = (str: string, size: number) => {
-  let colors = ["#5496EB"];
+  let colors = ["#0089FF"];
   let cvs = document.createElement("canvas");
   const fontRadio = str ? 0.4 : 0.2;
   cvs.setAttribute("width", size as unknown as string);
@@ -171,11 +213,7 @@ export const genAvatar = (str: string, size: number) => {
   ctx!.font = size * fontRadio + "px Arial";
   ctx!.textBaseline = "middle";
   ctx!.textAlign = "center";
-  ctx!.fillText(
-    str ? str.slice(str.length > 1 ? -2 : -1) : "UnKnow",
-    size / 2,
-    size / 2
-  );
+  ctx!.fillText(str ? str.slice(-1) : "UnKnow", size / 2, size / 2);
   return cvs.toDataURL("image/png", 1);
 };
 
@@ -293,12 +331,45 @@ export const checkIsSafari = () =>
   /^((?!chrome|android).)*safari/i.test(navigator.userAgent) &&
   /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-export const downloadFile = (filePath: string, filename: string) => {
-  const linkNode = document.createElement("a");
-  linkNode.download = filename;
-  linkNode.style.display = "none";
-  linkNode.href = filePath;
-  document.body.appendChild(linkNode);
-  linkNode.click();
-  document.body.removeChild(linkNode);
+
+export const getFileType = (name: string) => {
+  const idx = name.lastIndexOf(".");
+  return name.slice(idx + 1);
 };
+
+export const secondsToTime = (seconds: number) => {
+  let minutes = 0; // min
+  let hours = 0; // hour
+  let days = 0; // day
+  if (seconds > 60) {
+    minutes = parseInt((seconds / 60) as unknown as string);
+    seconds = parseInt((seconds % 60) as unknown as string);
+    if (minutes > 60) {
+      hours = parseInt((minutes / 60) as unknown as string);
+      minutes = parseInt((minutes % 60) as unknown as string);
+      if (hours > 24) {
+        days = parseInt((hours / 24) as unknown as string);
+        hours = parseInt((hours % 24) as unknown as string);
+      }
+    }
+  }
+  let result = "";
+  if (seconds > 0) {
+    result = t("date.second", { num: parseInt(seconds as unknown as string) });
+  }
+  if (minutes > 0) {
+    result =
+      t("date.minute", { num: parseInt(minutes as unknown as string) }) +
+      result;
+  }
+  if (hours > 0) {
+    result =
+      t("date.hour", { num: parseInt(hours as unknown as string) }) + result;
+  }
+  if (days > 0) {
+    result =
+      t("date.day", { num: parseInt(days as unknown as string) }) + result;
+  }
+  return result;
+};
+

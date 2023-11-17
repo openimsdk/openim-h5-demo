@@ -1,32 +1,27 @@
 <template>
-  <div class="px-[22px] py-3 flex items-start">
+  <div class="px-[22px] py-3 flex items-start border-b border-b-gap-text">
     <Avatar :src="getIcon" :size="iconSize" :is-group="showGroupAvatar" />
-    <div class="flex justify-between items-start w-full h-full ml-4 relative">
+    <div class="flex justify-between items-center w-full h-full ml-4 relative">
       <div>
         <div>{{ getTitle }}</div>
         <div v-if="isGroup" class="flex flex-col text-xs text-[#666]">
-          <div class="mt-[6px] mb-3">
-            <span>申请加入</span>
-            <span class="text-[#418AE5] ml-1">{{ source.groupName }}</span>
+          <div class="my-1">
+            <span>{{ $t('applyJoin') }}</span>
+            <span class="text-primary ml-1">{{ source.groupName }}</span>
           </div>
-          <div class="mb-1">申请理由：</div>
+          <div>{{ $t('groupApplyDesc') }}{{ source.reqMsg || '' }}</div>
         </div>
-        <div class="text-[#999] text-[13px]">{{ source.reqMsg || '无' }}</div>
+        <div v-else class="text-[#999] text-[13px]">{{ source.reqMsg || '' }}</div>
       </div>
-      <div class="absolute right-0">
-        <span v-if="showStateStr" class="text-xs text-[#898989]">{{ stateStr }}</span>
-        <span v-if="showGreeting" class="text-xs text-[#418AE5]">打招呼</span>
-        <van-button v-if="showActionBtn" size="small" plain hairline type="primary" @click.stop="acceptApplication">同意
-        </van-button>
+      <div>
+        <span v-if="!showActionBtn" class="text-xs text-[#898989]">{{ stateStr }}</span>
+        <van-button v-else size="small" hairline type="primary" @click="toDetails">{{ $t('buttons.toDetail') }}</van-button>
       </div>
-      <div v-if="!noBorder" class="h-[1px] w-full bg-[#F1F1F1] absolute -bottom-3" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { feedbackToast } from "@/utils/common";
-import { IMSDK } from "@/utils/imCommon";
 import Avatar from "../Avatar/index.vue";
 import { ApplicationItemSource, ApplicationTypeEnum } from "./data";
 
@@ -38,23 +33,10 @@ type ApplicationItemProps = {
   total?: number;
 };
 
-const recivedTypes = [
-  ApplicationTypeEnum.RecivedFriendApplication,
-  ApplicationTypeEnum.RecivedGroupApplication,
-];
-
+const { t } = useI18n()
+const router = useRouter();
 const props = withDefaults(defineProps<ApplicationItemProps>(), {
   iconSize: 42,
-});
-
-const accessLoading = ref(false)
-
-
-const noBorder = computed(() => {
-  if (props.index !== undefined && props.total !== undefined) {
-    return props.index === props.total - 1;
-  }
-  return false;
 });
 
 const isGroup = props.type === ApplicationTypeEnum.SentGroupApplication || props.type === ApplicationTypeEnum.RecivedGroupApplication
@@ -90,44 +72,25 @@ const getIcon = computed(() => {
   }
 });
 
-const showGreeting = computed(
-  () => !isGroup && props.source.handleResult === 1
-);
-
-const isRecv = recivedTypes.includes(props.type)
-
-const showStateStr = computed(() => {
-  if (
-    (isRecv && props.source.handleResult === 0) ||
-    showGreeting.value
-  ) {
-    return false;
-  }
-  return true;
-});
-
-const showActionBtn = computed(() => props.source.handleResult === 0 && isRecv)
+const showActionBtn = computed(() => props.source.handleResult === 0)
 
 const stateStr = computed(() => {
   if (props.source.handleResult === 1) {
-    return "已同意";
+    return t('approved');
   }
   if (props.source.handleResult === -1) {
-    return "已拒绝";
+    return t('rejected');
   }
-  return "处理中";
 });
 
-const acceptApplication = () => {
-  accessLoading.value = true
-  const funcName = isGroup ? 'acceptGroupApplication' : 'acceptFriendApplication';
-  IMSDK[funcName]({
-    groupID: props.source.groupID!,
-    fromUserID: props.source.userID!,
-    toUserID: props.source.fromUserID!,
-    handleMsg: ''
-  }).catch((error) => feedbackToast({ error }))
-    .finally(() => accessLoading.value = false)
+const toDetails = () => {
+  router.push({
+    path: 'applicationDetails',
+    query: {
+      application: JSON.stringify(props.source),
+      type: props.type
+    }
+  })
 }
 
 </script>

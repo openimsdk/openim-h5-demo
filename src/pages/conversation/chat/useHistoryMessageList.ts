@@ -6,7 +6,13 @@ import { useThrottleFn } from "@vueuse/core";
 const messageStore = useMessageStore();
 const conversationStore = useConversationStore();
 
-export default function useHistoryMessageList() {
+type UseHistoryMessageListProps = {
+  cancelMultiple: () => void;
+};
+
+export default function useHistoryMessageList({
+  cancelMultiple,
+}: UseHistoryMessageListProps) {
   const vsl = ref();
   const overflow = ref(false);
   const isFirstPage = ref(true);
@@ -15,6 +21,20 @@ export default function useHistoryMessageList() {
     lastMinSeq: 0,
   });
   const initLoading = ref(false);
+  const notScroll = ref(false);
+
+  const unReadCount = computed(
+    () =>
+      messageStore.storeHistoryMessageList.filter(
+        (message) => message.isAppend === true
+      ).length
+  );
+
+  const onScoll = useThrottleFn(() => {
+    notScroll.value =
+      vsl.value.getScrollSize() - vsl.value.getOffset() >
+      vsl.value.getClientSize() * 1.3;
+  }, 500);
 
   const onTotop = async () => {
     if (messageStore.storeHistoryMessageHasMore && !loadState.loading) {
@@ -84,19 +104,54 @@ export default function useHistoryMessageList() {
     }
   };
 
-  const setVirtualListToBottom = () => {
+  const setVirtualListToBottom = (isAppend?: boolean) => {
+    if (isAppend && notScroll.value) {
+      return;
+    }
     if (vsl.value) {
       nextTick(() => vsl.value.scrollToBottom());
+    }
+  };
+
+  const setVirtualListToIndex = (idx: number) => {
+    if (vsl.value) {
+      vsl.value.scrollToIndex(idx);
+    }
+  };
+
+  const scroll2ClientMsgID = (clientMsgID: string) => {
+    const idx = messageStore.storeHistoryMessageList.findIndex(
+      (message) => message.clientMsgID === clientMsgID
+    );
+    if (idx > -1) {
+      messageStore.storeHistoryMessageList[idx].jump = true;
+      setTimeout(() => {
+        messageStore.storeHistoryMessageList[idx].jump = false;
+      }, 3000);
+      setVirtualListToIndex(idx);
+    }
+  };
+
+  const scrollToUnread = () => {
+    const idx = messageStore.storeHistoryMessageList.findIndex(
+      (message) => message.isAppend === true && !message.isRead
+    );
+    console.log(idx);
+
+    if (idx > -1) {
+      setVirtualListToIndex(idx);
     }
   };
 
   // events
   const setEventListener = () => {
     emitter.on("CHAT_MAIN_SCROLL_TO_BOTTOM", setVirtualListToBottom);
+    emitter.on("CHAT_MAIN_SCROLL_TO_CLIENTMSGID", scroll2ClientMsgID);
   };
 
   const disposeEvemtListener = () => {
     emitter.off("CHAT_MAIN_SCROLL_TO_BOTTOM", setVirtualListToBottom);
+    emitter.off("CHAT_MAIN_SCROLL_TO_CLIENTMSGID", scroll2ClientMsgID);
   };
 
   onMounted(() => {
@@ -110,6 +165,7 @@ export default function useHistoryMessageList() {
     () => conversationStore.storeCurrentConversation.conversationID,
     async (newVal) => {
       if (newVal) {
+        cancelMultiple();
         isFirstPage.value = true;
         messageStore.resetHistoryMessageList();
         initLoading.value = true;
@@ -131,7 +187,11 @@ export default function useHistoryMessageList() {
     overflow,
     initLoading,
     loadState,
+    notScroll,
+    unReadCount,
     onTotop,
     onItemRendered,
+    onScoll,
+    scrollToUnread,
   };
 }

@@ -26,6 +26,7 @@ const conversationRouters: Array<RouteRecordRaw> = [
     name: "PreviewVideo",
     props: ({ query }) => ({
       url: query.url,
+      poster: query.poster,
     }),
     component: () => import("@pages/conversation/previewVideo/index.vue"),
   },

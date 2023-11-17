@@ -35,6 +35,7 @@ export declare enum CbEvents {
     OnFriendDeleted = "OnFriendDeleted",
     OnJoinedGroupAdded = "OnJoinedGroupAdded",
     OnJoinedGroupDeleted = "OnJoinedGroupDeleted",
+    OnGroupDismissed = "OnGroupDismissed",
     OnGroupMemberAdded = "OnGroupMemberAdded",
     OnGroupMemberDeleted = "OnGroupMemberDeleted",
     OnGroupApplicationAdded = "OnGroupApplicationAdded",
@@ -43,5 +44,23 @@ export declare enum CbEvents {
     OnGroupMemberInfoChanged = "OnGroupMemberInfoChanged",
     OnGroupApplicationAccepted = "OnGroupApplicationAccepted",
     OnGroupApplicationRejected = "OnGroupApplicationRejected",
-    UploadComplete = "UploadComplete"
+    UploadComplete = "UploadComplete",
+    OnRecvCustomBusinessMessage = "OnRecvCustomBusinessMessage",
+    OnUserStatusChanged = "OnUserStatusChanged",
+
+    // rtc
+    OnReceiveNewInvitation = 'OnReceiveNewInvitation',
+    OnInviteeAccepted = 'OnInviteeAccepted',
+    OnInviteeRejected = 'OnInviteeRejected',
+    OnInvitationCancelled = 'OnInvitationCancelled',
+    OnHangUp = 'OnHangUp',
+    OnInvitationTimeout = 'OnInvitationTimeout',
+    OnInviteeAcceptedByOtherDevice = 'OnInviteeAcceptedByOtherDevice',
+    OnInviteeRejectedByOtherDevice = 'OnInviteeRejectedByOtherDevice',
+
+    // meeting
+    OnStreamChange = 'OnStreamChange',
+    OnRoomParticipantConnected = 'OnRoomParticipantConnected',
+    OnRoomParticipantDisconnected = 'OnRoomParticipantDisconnected',
+    OnReceiveCustomSignal = 'OnReceiveCustomSignal'
 }

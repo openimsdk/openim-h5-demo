@@ -1,18 +1,28 @@
 <template>
   <div ref="messageContainerRef" class="message_item"
-    :class="{ 'message_item_self': isSelfMsg}"
-   >
+    :class="{ 'message_item_self': isSelfMsg, 'message_item_checked': showCheck, 'message_item_active': isActive || source.jump }"
+    @click="clickMessage">
+    <van-checkbox class="check_wrap" v-if="showCheck" v-model="source.checked" :disabled="source.disabled" @click.stop>
+    </van-checkbox>
     <div class="message_container_wrap">
-      <Avatar ref="avatarRef" :size="42" :src="source.senderFaceUrl"
-        :desc="source.senderNickname" @click="toDetails" />
+      <Avatar ref="avatarRef" :size="42" :src="source.senderFaceUrl" :desc="source.senderNickname" @click="toDetails" />
       <div class="message_container">
-        <div class="max-w-[240px] text-xs text-[#666] mb-1 truncate">{{ source.senderNickname }}</div>
-        <MessageMenu :message="source" :disabled="showCheck || isActive">
-          <component :message="source" :is-self-msg="isSelfMsg"
+        <div class="max-w-[240px] text-xs text-[#666] mb-1 truncate">
+          <span className="text-[var(--sub-text)]">
+            {{ formatMessageTime(source.sendTime) }}
+          </span>
+          <span>{{ " " }}</span>
+          <span v-if="!isSing">{{ source.senderNickname }}</span>
+        </div>
+        <MessageMenu :message="source" :disabled="showCheck || isActive" :isSelfMsg="isSelfMsg">
+          <MessageSendState v-if="isSelfMsg" :message="source" />
+          <component :message="source" :is-self-msg="isSelfMsg" :announce-content="groupAnnounceData.notification"
             :disabled="showCheck || isActive" :is="getRenderComp"></component>
+          <MessageSendState v-if="!isSelfMsg" :message="source" />
         </MessageMenu>
-        <MessageReadState v-if="isSelfMsg"
-          :message="source"/>
+        <QuoteMessageRenderer v-if="source.contentType === MessageType.QuoteMessage" :message="source" />
+        <MessageReadState v-if="isSelfMsg && !groupAnnounceData.notification && source.status === MessageStatus.Succeed"
+          :message="source" :disabled="showCheck" />
       </div>
     </div>
   </div>
@@ -23,14 +33,14 @@ import Avatar from "@/components/Avatar/index.vue";
 import TextMessageRenderer from "./TextMessageRenderer.vue";
 import MediaMessageRenderer from "./MediaMessageRenderer.vue";
 import CatchMsgRenderer from "./CatchMsgRenderer.vue";
-import MessageReadState from "./MessageReadState.vue";
-import { AllowType, MessageType } from "open-im-sdk-wasm/lib/types/enum";
+import { AllowType, MessageStatus, MessageType, SessionType } from "@/utils/open-im-sdk-wasm/types/enum";
 import useUserStore from "@/store/modules/user";
 import { ExedMessageItem } from "./data";
 import { useMessageIsRead } from "./useMessageIsRead";
-import MessageMenu from "../MessageMenu.vue";
 import useContactStore from "@/store/modules/contact";
+import emitter from "@/utils/events";
 import useConversationStore from "@/store/modules/conversation";
+import { formatMessageTime } from '@/utils/imCommon'
 
 interface MessageItemProps {
   source: ExedMessageItem;
@@ -48,10 +58,25 @@ const { source, showCheck } = toRefs(props);
 const messageContainerRef = ref();
 const avatarRef = ref();
 
+const isSing = computed(() => conversationStore.currentConversation.conversationType === SessionType.Single);
 const isSelfMsg = computed(() => userStore.selfInfo.userID === source.value.sendID);
+const groupAnnounceData = computed(() => {
+  let detail
+  if (props.source.contentType === MessageType.GroupAnnouncementUpdated) {
+    try {
+      detail = JSON.parse(props.source.notificationElem?.detail)
+    } catch (e) {
+    }
+  }
+  return {
+    notification: detail?.group?.notification,
+    opUser: detail?.opUser
+  }
+})
 const getRenderComp = computed(() => {
   switch (props.source.contentType) {
     case MessageType.TextMessage:
+    case MessageType.QuoteMessage:
       return TextMessageRenderer;
     case MessageType.VideoMessage:
     case MessageType.PictureMessage:
@@ -66,8 +91,19 @@ useMessageIsRead({
   isSelfMsg,
   isRead: props.source.isRead,
   isPreView: props.isPreView!,
+  isGroupAnnounce: !!groupAnnounceData.value.notification,
   clientMsgID: props.source.clientMsgID,
 });
+
+const tryAtUser = () => {
+  emitter.emit("AT_SOMEONE", {
+    data: [{
+      userID: groupAnnounceData.value.opUser?.userID ?? props.source.sendID,
+      nickname: groupAnnounceData.value.opUser?.nickname ?? props.source.senderNickname,
+    }]
+  })
+}
+
 const toDetails = async () => {
   if (props.showCheck) {
     return;
@@ -75,7 +111,14 @@ const toDetails = async () => {
   if (props.source.groupID && conversationStore.storeCurrentGroupInfo.lookMemberInfo === AllowType.NotAllowed) {
     return;
   }
-  contactStore.getUserCardData(props.source.sendID, props.source.groupID)
+  contactStore.getUserCardData(groupAnnounceData.value.opUser?.userID ?? props.source.sendID, props.source.groupID)
+}
+
+const clickMessage = () => {
+  if (!props.showCheck) {
+    return;
+  }
+  props.source.checked = !props.source.checked
 }
 
 </script>
@@ -97,9 +140,9 @@ const toDetails = async () => {
   }
 
   .need_bg {
-    padding: 8px 12px;
-    border-radius: 4px;
-    background-color: #F0F0F0;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background-color: #F4F5F7;
   }
 
   .message_container_wrap {
@@ -138,7 +181,8 @@ const toDetails = async () => {
     }
 
     .need_bg {
-      background-color: #DCEBFE;
+      border-radius: 6px;
+      background-color: #CCE7FE;
     }
 
     .message_container_wrap {

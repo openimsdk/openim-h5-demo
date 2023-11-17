@@ -1,37 +1,38 @@
 <template>
-    <div class="page_container">
-        <NavBar :title="'添加'" />
+  <div class="page_container">
+    <NavBar :title="$t('add')" />
 
-        <div class="text-[#999] text-xs my-2 ml-[22px]">创建或加入群聊</div>
-        <AddMenuItem :icon="contact_add_create_group" :title="'创建群聊'" :sub-title="'创建群聊，全面使用司聊'" border
-            @click="chooseGroupType" />
-        <AddMenuItem :icon="contact_add_join_group" :title="'加入群聊'" :sub-title="'与成员一起沟通协作'"
-            @click="$router.push('switchJoinGroup')" />
-
-        <div class="text-[#999] text-xs my-2 ml-[22px]">添加好友</div>
-        <AddMenuItem :icon="contact_add_search_user" :title="'搜索好友'" :sub-title="'通过手机号/ID搜索添加'" border
-            @click="$router.push({path:'searchToJoin',query:{isGroup:'false'}})" />
-        <AddMenuItem :icon="contact_add_scan" :title="'扫一扫'" :sub-title="'扫描二维码名片'" />
-
-    </div>
+    <div class="mt-[10px]"></div>
+    <AddMenuItem :icon="add_scan" :title="$t('scanQr')" :sub-title="$t('scanQrCodeDesc')" @click="$router.push('scanPage')" border />
+    <AddMenuItem :icon="add_search_user" :title="$t('addFriend')" :sub-title="$t('addFriendDesc')" border
+      @click="$router.push({ path: 'searchToJoin', query: { isGroup: 'false' } })" />
+    <AddMenuItem :icon="add_create_group" :title="$t('createGroup')" :sub-title="$t('createGroupDesc')" border
+      @click="chooseGroupType" />
+    <AddMenuItem :icon="add_join_group" :title="$t('joinGroup')" :sub-title="$t('joinGroupDesc')"
+      @click="$router.push({ path: 'searchToJoin', query: { isGroup: 'true' } })" />
+  </div>
 </template>
 
 <script setup lang='ts'>
 import NavBar from '@/components/NavBar/index.vue';
 import AddMenuItem from './components/AddMenuItem.vue';
-import contact_add_create_group from '@assets/images/contact_add_create_group.png'
-import contact_add_join_group from '@assets/images/contact_add_join_group.png'
-import contact_add_search_user from '@assets/images/contact_add_search_user.png'
-import contact_add_scan from '@assets/images/contact_add_scan.png'
+import add_create_group from '@assets/images/contact/add_create_group.png'
+import add_join_group from '@assets/images/contact/add_join_group.png'
+import add_search_user from '@assets/images/contact/add_search_user.png'
+import add_scan from '@assets/images/contact/add_scan.png'
+import { GroupType } from '@/utils/open-im-sdk-wasm/types/enum';
 
 const router = useRouter()
 
 const chooseGroupType = () => {
-    router.push('createGroup')
+  router.push({
+    path: 'createGroup',
+    query: {
+      groupType: GroupType.WorkingGroup
+    }
+  })
 }
 
 </script>
 
-<style lang='scss' scoped>
-
-</style>
+<style lang='scss' scoped></style>

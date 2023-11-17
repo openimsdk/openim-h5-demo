@@ -2,7 +2,7 @@
   <div class="h-full flex flex-col overflow-hidden">
     <ChatHeader />
     <ChatContent />
-    <ChatFooter  />
+    <ChatFooter/>
   </div>
 </template>
 
@@ -13,7 +13,6 @@ import ChatFooter from "./components/ChatFooter/ChatFooter.vue";
 import useConversationState from "./useConversationState";
 
 useConversationState()
-
 </script>
 
 <style lang='scss' scoped>

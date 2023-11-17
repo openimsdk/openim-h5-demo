@@ -1,5 +1,5 @@
 import { CbEvents } from '../constant';
-import { GroupType, SessionType, MessageType, Platform, MessageStatus, GroupStatus, GroupVerificationType, AllowType, GroupJoinSource, GroupMemberRole, MessageReceiveOptType, GroupAtType, LogLevel, ApplicationHandleResult, Relationship } from './enum';
+import { GroupType, SessionType, MessageType, Platform, MessageStatus, GroupStatus, GroupVerificationType, AllowType, GroupJoinSource, GroupMemberRole, MessageReceiveOptType, GroupAtType, LogLevel, ApplicationHandleResult, Relationship, OnlineState } from './enum';
 export declare type WSEvent<T = unknown> = {
     event: CbEvents;
     data: T;
@@ -43,20 +43,10 @@ export declare type AtUsersInfoItem = {
     atUserID: string;
     groupNickname: string;
 };
-export declare type GroupInitInfo = {
-    groupID?: string;
-    groupType: GroupType;
-    groupName: string;
-    introduction?: string;
-    notification?: string;
-    faceURL?: string;
-    ex?: string;
-};
 export declare type GroupApplicationItem = {
     createTime: number;
     creatorUserID: string;
     ex: string;
-    gender: number;
     groupFaceURL: string;
     groupID: string;
     groupName: string;
@@ -81,7 +71,6 @@ export declare type FriendApplicationItem = {
     createTime: number;
     ex: string;
     fromFaceURL: string;
-    fromGender: number;
     fromNickname: string;
     fromUserID: string;
     handleMsg: string;
@@ -90,7 +79,6 @@ export declare type FriendApplicationItem = {
     handlerUserID: string;
     reqMsg: string;
     toFaceURL: string;
-    toGender: number;
     toNickname: string;
     toUserID: string;
 };
@@ -99,8 +87,13 @@ export declare type FullUserItem = {
     friendInfo: FriendUserItem | null;
     publicInfo: PublicUserItem | null;
 };
+export declare type FullUserItemWithCache = {
+    blackInfo: BlackUserItem | null;
+    friendInfo: FriendUserItem | null;
+    publicInfo: PublicUserItem | null;
+    groupMemberInfo: GroupMemberItem | null;
+};
 export declare type PublicUserItem = {
-    gender: number;
     nickname: string;
     userID: string;
     faceURL: string;
@@ -142,7 +135,6 @@ export declare type BlackUserItem = {
     createTime: number;
     ex: string;
     faceURL: string;
-    gender: number;
     nickname: string;
     operatorUserID: string;
     ownerUserID: string;
@@ -193,9 +185,12 @@ export declare type ConversationItem = {
     latestMsgSendTime: number;
     draftText: string;
     draftTextTime: number;
+    burnDuration: number;
+    msgDestructTime: number;
     isPinned: boolean;
     isNotInGroup: boolean;
     isPrivateChat: boolean;
+    isMsgDestruct: boolean;
     attachedInfo: string;
     ex: string;
 };
@@ -238,7 +233,7 @@ export declare type MessageItem = {
     notificationElem: NotificationElem;
     advancedTextElem: AdvancedTextElem;
     typingElem: TypingElem;
-    attachedInfoElem: AttachedInfoElem;
+    attachedInfoElem?: AttachedInfoElem;
 };
 export declare type TextElem = {
     content: string;
@@ -324,6 +319,7 @@ export declare type UploadProgress = {
 };
 export declare type GroupHasReadInfo = {
     hasReadCount: number;
+    unreadCount: number;
     hasReadUserIDList: string[];
     groupMemberCount: number;
 };
@@ -413,3 +409,31 @@ export declare type AdvancedGetMessageResult = {
     errMsg: string;
     messageList: MessageItem[];
 };
+export declare type RtcInvite = {
+    inviterUserID: string;
+    inviteeUserIDList: string[];
+    customData?: string;
+    groupID: string;
+    roomID: string;
+    timeout: number;
+    mediaType: string;
+    sessionType: number;
+    platformID: number;
+    initiateTime?: number;
+    busyLineUserIDList?: string[];
+};
+export declare type UserOnlineState = {
+    platformIDs?: Platform[];
+    status: OnlineState;
+    userID: string;
+};
+export declare type GroupMessageReceiptInfo = {
+    conversationID:       string;
+    groupMessageReadInfo: GroupMessageReadInfo[];
+}
+export declare type GroupMessageReadInfo = {
+    clientMsgID:  string;
+    hasReadCount: number;
+    unreadCount:  number;
+    readMembers: GroupMemberItem[];
+}

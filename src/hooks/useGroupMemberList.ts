@@ -1,17 +1,19 @@
 import useConversationStore from "@/store/modules/conversation";
 import { feedbackToast } from "@/utils/common";
 import { IMSDK } from "@/utils/imCommon";
-import { CbEvents } from "open-im-sdk-wasm/lib/constant";
-import { GroupMemberItem, WSEvent } from "open-im-sdk-wasm/lib/types/entity";
+import { CbEvents } from "@/utils/open-im-sdk-wasm/constant";
+import { GroupMemberItem, WSEvent } from "@/utils/open-im-sdk-wasm/types/entity";
 
 const conversationStore = useConversationStore();
 
 export type FetchStateType = {
   offset: number;
+  searchOffset: number;
   count: number;
   loading: boolean;
   hasMore: boolean;
   groupMemberList: GroupMemberItem[];
+  searchMemberList: GroupMemberItem[];
 };
 
 export default function useGroupMemberList(
@@ -22,15 +24,42 @@ export default function useGroupMemberList(
 
   const fetchState = reactive<FetchStateType>({
     offset: 0,
+    searchOffset: 0,
     count: 20,
     loading: false,
     hasMore: true,
     groupMemberList: [],
+    searchMemberList: [],
   });
+
+  const searchMember = (keyword: string) => {
+    fetchState.loading = true;
+    IMSDK.searchGroupMembers<GroupMemberItem[]>({
+      groupID: groupID ?? conversationStore.storeCurrentGroupInfo.groupID,
+      offset: fetchState.searchOffset,
+      count: 20,
+      keywordList: [keyword],
+      isSearchMemberNickname: true,
+      isSearchUserID: false,
+    })
+      .then(({ data }) => {
+        fetchState.searchMemberList = [...fetchState.searchMemberList, ...data];
+        fetchState.hasMore = data.length === fetchState.count;
+        fetchState.searchOffset += 20;
+        console.log(fetchState.searchMemberList);
+      })
+      .catch((error) =>
+        feedbackToast({
+          message: t("getMemberFailed"),
+          error,
+        })
+      )
+      .finally(() => (fetchState.loading = false));
+  };
 
   const getMemberData = () => {
     fetchState.loading = true;
-    IMSDK.getGroupMemberList({
+    IMSDK.getGroupMemberList<GroupMemberItem[]>({
       groupID: groupID ?? conversationStore.storeCurrentGroupInfo.groupID,
       offset: fetchState.offset,
       count: 20,
@@ -51,7 +80,8 @@ export default function useGroupMemberList(
       .finally(() => (fetchState.loading = false));
   };
 
-  const groupMemberInfoChangedHandler = ({ data:member }: WSEvent<GroupMemberItem>) => {
+  const groupMemberInfoChangedHandler = ({ data }: any) => {
+    const member = data;
     if (member.groupID === fetchState.groupMemberList[0]?.groupID) {
       const idx = fetchState.groupMemberList.findIndex(
         (item) => item.userID === member.userID
@@ -60,10 +90,11 @@ export default function useGroupMemberList(
     }
   };
 
-  const groupMemberCountHandler = ({ data:member }: WSEvent<GroupMemberItem>) => {
+  const groupMemberCountHandler = ({ data }: any) => {
     if (!needRefresh) {
       return;
     }
+    const member = data;
     if (member.groupID === fetchState.groupMemberList[0]?.groupID) {
       fetchState.offset = 0;
       fetchState.groupMemberList = [];
@@ -110,5 +141,6 @@ export default function useGroupMemberList(
   return {
     fetchState,
     getMemberData,
+    searchMember,
   };
 }

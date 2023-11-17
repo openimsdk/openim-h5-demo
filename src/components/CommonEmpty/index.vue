@@ -1,23 +1,21 @@
 <template>
-    <van-empty class="mt-[10vh]" :image="common_empty" image-size="80" :description="description" />
+  <van-empty class="mt-[10vh]" :image="image" :image-size="size" :description="description ?? $t('noData')" />
 </template>
 
 <script setup lang='ts'>
 import common_empty from '@assets/images/common_empty.png'
 
 type CommonEmptyProps = {
-    description?: string;
-    image?: string;
+  description?: string;
+  image?: string;
+  size?: number
 }
 
 withDefaults(defineProps<CommonEmptyProps>(), {
-    description: "暂无数据",
-    image: common_empty
+  image: common_empty,
+  size: 120
 })
-
 
 </script>
 
-<style lang='scss' scoped>
-
-</style>
+<style lang='scss' scoped></style>

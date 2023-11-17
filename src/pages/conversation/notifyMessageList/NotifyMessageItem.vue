@@ -13,13 +13,14 @@
 
 <script setup lang='ts'>
 import Avatar from '@/components/Avatar/index.vue';
-import { MessageItem } from 'open-im-sdk-wasm/lib/types/entity';
+import { MessageItem } from '@/utils/open-im-sdk-wasm/types/entity';
 
 const emit = defineEmits([]);
 const props = defineProps<{ source: MessageItem }>();
 
 const notifyContent = computed(() => {
     try {
+        console.log(props.source.notificationElem.detail);
         return JSON.parse(props.source.notificationElem.detail)
     } catch (error) {
         return {}

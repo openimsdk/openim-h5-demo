@@ -3,7 +3,8 @@
 </template>
 
 <script setup lang="ts">
-import { formatEmoji, parseBr } from "@/utils/imCommon";
+import { formatLink, parseBr } from "@/utils/imCommon";
+import { MessageType } from "@/utils/open-im-sdk-wasm/types/enum";
 import { ExedMessageItem } from "./data";
 
 type TextMsgRendererProps = {
@@ -13,8 +14,11 @@ type TextMsgRendererProps = {
 const props = defineProps<TextMsgRendererProps>();
 
 const content = computed(() => {
-  let msgStr = props.message.textElem.content;;
-  return formatEmoji(parseBr(msgStr));
+  let msgStr = '';
+  if (props.message.contentType === MessageType.TextMessage) {
+    msgStr = props.message.textElem.content;
+  }
+  return parseBr(formatLink(msgStr))
 });
 </script>
 
@@ -22,11 +26,5 @@ const content = computed(() => {
 .text_content {
   word-break: break-all;
   word-wrap: break-word;
-
-  :deep(.emoji_el) {
-    padding-right: 2px;
-    vertical-align: sub;
-    width: 24px;
-  }
 }
 </style>

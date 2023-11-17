@@ -54,7 +54,7 @@ class SDK extends Emitter {
                         data = JSON.parse(data);
                     }
                     catch (error) {
-                        console.log('SDK => parse error ', error);
+                        // parse error
                     }
                 }
                 response.data = data;
@@ -86,7 +86,7 @@ class SDK extends Emitter {
                         parsed.data = JSON.parse(parsed.data);
                     }
                     catch (error) {
-                        console.log('SDK => parse error ', error);
+                        // parse error
                     }
                 }
                 this.emit(parsed.event, parsed);
@@ -142,6 +142,12 @@ class SDK extends Emitter {
             JSON.stringify(params.clientMsgIDList),
         ]);
     };
+    sendGroupMessageReadReceipt = (params, operationID = uuidv4()) => {
+        return this._invoker('sendGroupMessageReadReceipt', window.sendGroupMessageReadReceipt, [operationID, params.conversationID, JSON.stringify(params.clientMsgIDList)]);
+    };
+    getGroupMessageReaderList = (params, operationID = uuidv4()) => {
+        return this._invoker('getGroupMessageReaderList', window.getGroupMessageReaderList, [operationID, params.conversationID, params.clientMsgID, params.filter, params.offset, params.count]);
+    };
     getGroupMemberList = (params, operationID = uuidv4()) => {
         return this._invoker('getGroupMemberList', window.getGroupMemberList, [operationID, params.groupID, params.filter, params.offset, params.count]);
     };
@@ -163,9 +169,11 @@ class SDK extends Emitter {
         });
     };
     createImageMessageByFile = (params, operationID = uuidv4()) => {
+        params.sourcePicture.uuid = `${params.sourcePicture.uuid}/${params.file.name}`;
         fileMapSet(params.sourcePicture.uuid, params.file);
         return this._invoker('createImageMessageByFile', window.createImageMessageByURL, [
             operationID,
+            params.sourcePath,
             JSON.stringify(params.sourcePicture),
             JSON.stringify(params.bigPicture),
             JSON.stringify(params.snapshotPicture),
@@ -306,6 +314,9 @@ class SDK extends Emitter {
             JSON.stringify(data),
         ]);
     };
+    getUsersInfoWithCache = (data, operationID = uuidv4()) => {
+        return this._invoker('getUsersInfoWithCache', window.getUsersInfoWithCache, [operationID, JSON.stringify(data.userIDList), data.groupID]);
+    };
     setSelfInfo = (data, operationID = uuidv4()) => {
         return this._invoker('setSelfInfo', window.setSelfInfo, [
             operationID,
@@ -331,6 +342,7 @@ class SDK extends Emitter {
         });
     };
     createSoundMessageByFile = (data, operationID = uuidv4()) => {
+        data.uuid = `${data.uuid}/${data.file.name}`
         fileMapSet(data.uuid, data.file);
         return this._invoker('createSoundMessageByFile', window.createSoundMessageByURL, [operationID, JSON.stringify(data)], data => {
             // compitable with old version sdk
@@ -344,8 +356,10 @@ class SDK extends Emitter {
         });
     };
     createVideoMessageByFile = (data, operationID = uuidv4()) => {
+        data.videoUUID = `${data.videoUUID}/${data.videoFile.name}`;
+        data.snapshotUUID = `${data.snapshotUUID}/${data.snapshotFile.name}`;
         fileMapSet(data.videoUUID, data.videoFile);
-        fileMapSet(data.snapshotUUID, data.snapFile);
+        fileMapSet(data.snapshotUUID, data.snapshotFile);
         return this._invoker('createVideoMessageByFile', window.createVideoMessageByURL, [operationID, JSON.stringify(data)], data => {
             // compitable with old version sdk
             return data[0];
@@ -358,6 +372,7 @@ class SDK extends Emitter {
         });
     };
     createFileMessageByFile = (data, operationID = uuidv4()) => {
+        data.uuid = `${data.uuid}/${data.file.name}`;
         fileMapSet(data.uuid, data.file);
         return this._invoker('createFileMessageByFile', window.createFileMessageByURL, [operationID, JSON.stringify(data)], data => {
             // compitable with old version sdk
@@ -707,6 +722,7 @@ class SDK extends Emitter {
         return this._invoker('findMessageList ', window.findMessageList, [operationID, JSON.stringify(data)]);
     };
     uploadFile = (data, operationID = uuidv4()) => {
+        data.uuid = `${data.uuid}/${data.file.name}`;
         fileMapSet(data.uuid, data.file);
         return this._invoker('uploadFile ', window.uploadFile, [
             operationID,
@@ -717,6 +733,105 @@ class SDK extends Emitter {
             }),
         ]);
     };
+    signalingInvite = (data, operationID = uuidv4()) => {
+        return this._invoker('signalingInvite ', window.signalingInvite, [
+            operationID,
+            JSON.stringify(data),
+        ]);
+    };
+    signalingInviteInGroup = (data, operationID = uuidv4()) => {
+        return this._invoker('signalingInviteInGroup ', window.signalingInviteInGroup, [operationID, JSON.stringify(data)]);
+    };
+    signalingAccept = (data, operationID = uuidv4()) => {
+        return this._invoker('signalingAccept ', window.signalingAccept, [
+            operationID,
+            JSON.stringify(data),
+        ]);
+    };
+    signalingReject = (data, operationID = uuidv4()) => {
+        return this._invoker('signalingReject ', window.signalingReject, [
+            operationID,
+            JSON.stringify(data),
+        ]);
+    };
+    signalingCancel = (data, operationID = uuidv4()) => {
+        return this._invoker('signalingCancel ', window.signalingCancel, [
+            operationID,
+            JSON.stringify(data),
+        ]);
+    };
+    signalingHungUp = (data, operationID = uuidv4()) => {
+        return this._invoker('signalingHungUp ', window.signalingHungUp, [
+            operationID,
+            JSON.stringify(data),
+        ]);
+    };
+    signalingGetRoomByGroupID = (groupID, operationID = uuidv4()) => {
+        return this._invoker('signalingGetRoomByGroupID ', window.signalingGetRoomByGroupID, [operationID, groupID]);
+    };
+    signalingGetTokenByRoomID = (roomID, operationID = uuidv4()) => {
+        return this._invoker('signalingGetTokenByRoomID ', window.signalingGetTokenByRoomID, [operationID, roomID]);
+    };
+    signalingSendCustomSignal = (data, operationID = uuidv4()) => {
+        return this._invoker('signalingSendCustomSignal ', window.signalingSendCustomSignal, [operationID, data.customInfo, data.roomID]);
+    };
+    signalingCreateMeeting = (data, operationID = uuidv4()) => {
+        return this._invoker('signalingCreateMeeting ', window.signalingCreateMeeting, [operationID, JSON.stringify(data)]);
+    };
+    signalingJoinMeeting = (data, operationID = uuidv4()) => {
+        return this._invoker('signalingJoinMeeting ', window.signalingJoinMeeting, [
+            operationID,
+            JSON.stringify({
+                roomID: data,
+            }),
+        ]);
+    };
+    signalingUpdateMeetingInfo = (data, operationID = uuidv4()) => {
+        return this._invoker('signalingUpdateMeetingInfo ', window.signalingUpdateMeetingInfo, [operationID, JSON.stringify(data)]);
+    };
+    signalingCloseRoom = (roomID, operationID = uuidv4()) => {
+        return this._invoker('signalingCloseRoom ', window.signalingCloseRoom, [
+            operationID,
+            roomID,
+        ]);
+    };
+    signalingGetMeetings = (operationID = uuidv4()) => {
+        return this._invoker('signalingGetMeetings ', window.signalingGetMeetings, [
+            operationID,
+        ]);
+    };
+    signalingOperateStream = (data, operationID = uuidv4()) => {
+        return this._invoker('signalingOperateStream ', window.signalingOperateStream, [
+            operationID,
+            data.streamType,
+            data.roomID,
+            data.userID,
+            data.mute,
+            data.muteAll,
+        ]);
+    }
+    setConversationIsMsgDestruct = (data, operationID = uuidv4()) => {
+        return this._invoker('setConversationIsMsgDestruct ', window.setConversationIsMsgDestruct, [operationID, data.conversationID, data.isMsgDestruct]);
+    };
+    setConversationMsgDestructTime = (data, operationID = uuidv4()) => {
+        return this._invoker('setConversationMsgDestructTime ', window.setConversationMsgDestructTime, [operationID, data.conversationID, data.msgDestructTime]);
+    };
+    subscribeUsersStatus = (data, operationID = uuidv4()) => {
+        return this._invoker('subscribeUsersStatus ', window.subscribeUsersStatus, [operationID, JSON.stringify(data)]);
+    };
+    unsubscribeUsersStatus = (data, operationID = uuidv4()) => {
+        return this._invoker('unsubscribeUsersStatus ', window.unsubscribeUsersStatus, [operationID, JSON.stringify(data)]);
+    };
+    getUserStatus = (data, operationID = uuidv4()) => {
+        return this._invoker('getUserStatus ', window.getUserStatus, [
+            operationID,
+            JSON.stringify(data)
+        ]);
+    };
+    getSubscribeUsersStatus = (operationID = uuidv4()) => {
+        return this._invoker('getSubscribeUsersStatus ', window.getSubscribeUsersStatus, [operationID]);
+    };
+    fileMapSet = (uuid, file) => fileMapSet(uuid, file);
 }
 let instance;
 export function getSDK(url = '/openIM.wasm') {

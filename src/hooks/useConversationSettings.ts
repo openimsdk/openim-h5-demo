@@ -2,9 +2,11 @@ import { feedbackToast } from "@utils/common";
 import useConversationStore from "@/store/modules/conversation";
 import useMessageStore from "@/store/modules/message";
 import { IMSDK } from "@/utils/imCommon";
+import { MessageReceiveOptType } from "@/utils/open-im-sdk-wasm/types/enum";
 import { showConfirmDialog } from "vant";
 
 export default function useConversationSettings() {
+  const { t } = useI18n();
   const conversationStore = useConversationStore();
   const messageStore = useMessageStore();
 
@@ -26,10 +28,24 @@ export default function useConversationSettings() {
     switchLoading.pinLoading = false;
   };
 
+  const updateConversationRecvMsgState = async (
+    flag: boolean,
+    opt: MessageReceiveOptType
+  ) => {
+    switchLoading.recvMsgLoading = true;
+    try {
+      await IMSDK.setConversationRecvMessageOpt({
+        conversationID:
+          conversationStore.storeCurrentConversation.conversationID,
+        opt: flag ? opt : MessageReceiveOptType.Nomal,
+      });
+    } catch (error) {}
+    switchLoading.recvMsgLoading = false;
+  };
 
   const clearLogs = () => {
     showConfirmDialog({
-      message: "是否清空聊天记录？",
+      message: t("popover.clearChatHistory"),
       beforeClose: (action: string) => {
         return new Promise((resolve) => {
           if (action !== "confirm") {
@@ -37,24 +53,24 @@ export default function useConversationSettings() {
             return;
           }
           IMSDK.clearConversationAndDeleteAllMsg(
-            conversationStore.storeCurrentConversation.groupID ||
-              conversationStore.storeCurrentConversation.userID
+            conversationStore.storeCurrentConversation.conversationID
           )
             .then(() => {
               messageStore.clearHistoryMessage();
               feedbackToast();
             })
-            .catch((error:unknown) => feedbackToast({ error }))
+            .catch((error: unknown) => feedbackToast({ error }))
             .finally(() => resolve(true));
         });
       },
-    }).catch(() => {});
+    });
   };
 
   return {
     conversationStore,
     switchLoading,
     updateConversationPinState,
+    updateConversationRecvMsgState,
     clearLogs,
   };
 }

@@ -1,8 +1,10 @@
-
+import { GroupSessionTypes } from "@/constants/enum";
 import useConversationStore from "@/store/modules/conversation";
+import useMessageStore from "@/store/modules/message";
+import emitter from "@/utils/events";
 import { IMSDK } from "@/utils/imCommon";
-import { ConversationItem } from "open-im-sdk-wasm/lib/types/entity";
-import { GroupAtType, SessionType } from "open-im-sdk-wasm/lib/types/enum";
+import { ConversationItem } from "@/utils/open-im-sdk-wasm/types/entity";
+import { GroupAtType } from "@/utils/open-im-sdk-wasm/types/enum";
 import { onBeforeRouteLeave } from "vue-router";
 
 export default function useConversationState() {
@@ -11,7 +13,9 @@ export default function useConversationState() {
   // group info
   const getCurrentGroupInfo = () => {
     if (
-      conversationStore.storeCurrentConversation.conversationType === SessionType.WorkingGroup
+      GroupSessionTypes.includes(
+        conversationStore.storeCurrentConversation.conversationType
+      )
     ) {
       conversationStore.getCurrentGroupInfoFromReq();
       conversationStore.getCurrentMemberInGroupFromReq();
@@ -52,7 +56,9 @@ export default function useConversationState() {
     if (to.name === "Conversation") {
       checkConversationState();
       conversationStore.updateCurrentConversation({} as ConversationItem);
+      conversationStore.updateQuoteMessage();
     }
     next();
   });
+
 }

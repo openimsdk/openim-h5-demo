@@ -1,10 +1,19 @@
 import { IMSDK } from "@/utils/imCommon";
+import {
+  FriendUserItem,
+  GroupItem,
+  BlackUserItem,
+  FriendApplicationItem,
+  GroupApplicationItem,
+  GroupMemberItem,
+  FullUserItem,
+} from "@/utils/open-im-sdk-wasm/types/entity";
 import { defineStore } from "pinia";
 import store from "../index";
 import { feedbackToast } from "@/utils/common";
 import router from "@/router";
-import { BlackUserItem, FriendApplicationItem, FriendUserItem, FullUserItem, GroupApplicationItem, GroupItem, GroupMemberItem, PublicUserItem } from "@/utils/open-im-sdk-wasm/types/entity";
 import { BusinessUserInfo } from "@/api/data";
+import { i18nt } from "@/i18n";
 
 interface StateType {
   friendList: FriendUserItem[];
@@ -14,6 +23,8 @@ interface StateType {
   sendFriendApplicationList: FriendApplicationItem[];
   recvGroupApplicationList: GroupApplicationItem[];
   sendGroupApplicationList: GroupApplicationItem[];
+  unHandleFriendApplicationNum: number;
+  unHandleGroupApplicationNum: number;
   userCardData: UserCardData;
 }
 
@@ -31,6 +42,8 @@ const useStore = defineStore("contact", {
     sendFriendApplicationList: [],
     recvGroupApplicationList: [],
     sendGroupApplicationList: [],
+    unHandleFriendApplicationNum: 0,
+    unHandleGroupApplicationNum: 0,
     userCardData: {},
   }),
   getters: {
@@ -41,13 +54,24 @@ const useStore = defineStore("contact", {
     storeSendFriendApplicationList: (store) => store.sendFriendApplicationList,
     storeRecvGroupApplicationList: (store) => store.recvGroupApplicationList,
     storeSendGroupApplicationList: (store) => store.sendGroupApplicationList,
+    storeUnHandleFriendApplicationNum: (store) =>
+      store.unHandleFriendApplicationNum,
+    storeUnHandleGroupApplicationNum: (store) =>
+      store.unHandleGroupApplicationNum,
     storeUserCardData: (store) => store.userCardData,
   },
   actions: {
     async getFriendListFromReq() {
       try {
         const { data } = await IMSDK.getFriendList();
-        this.friendList = data.map((user) => user.friendInfo!);
+
+        // let tmpList: FriendItem[] = [];
+        // data.map(
+        //   (item: TotalUserStruct) =>
+        //     !item.blackInfo && tmpList.push(item.friendInfo!)
+        // );
+        // this.friendList = data.map((user: FullUserItem) => user.friendInfo);
+        this.friendList = (data as any).map((user: any) => user.friendInfo);
       } catch (error) {
         console.error(error);
       }
@@ -73,7 +97,7 @@ const useStore = defineStore("contact", {
     },
     async getGroupListFromReq() {
       try {
-        const { data } = await IMSDK.getJoinedGroupList();
+        const { data } = await IMSDK.getJoinedGroupList<GroupItem[]>();
         this.groupList = data;
       } catch (error) {
         console.error(error);
@@ -96,7 +120,7 @@ const useStore = defineStore("contact", {
     },
     async getBlackListFromReq() {
       try {
-        const { data } = await IMSDK.getBlackList();
+        const { data } = await IMSDK.getBlackList<BlackUserItem[]>();
         this.blackList = data;
       } catch (error) {
         console.error(error);
@@ -119,7 +143,9 @@ const useStore = defineStore("contact", {
     },
     async getRecvFriendApplicationListFromReq() {
       try {
-        const { data } = await IMSDK.getFriendApplicationListAsRecipient();
+        const { data } = await IMSDK.getFriendApplicationListAsRecipient<
+          FriendApplicationItem[]
+        >();
         this.recvFriendApplicationList = data;
       } catch (error) {
         console.error(error);
@@ -146,7 +172,9 @@ const useStore = defineStore("contact", {
     },
     async getSendFriendApplicationListFromReq() {
       try {
-        const { data } = await IMSDK.getFriendApplicationListAsApplicant();
+        const { data } = await IMSDK.getFriendApplicationListAsApplicant<
+          FriendApplicationItem[]
+        >();
         this.sendFriendApplicationList = data;
       } catch (error) {
         console.error(error);
@@ -173,7 +201,9 @@ const useStore = defineStore("contact", {
     },
     async getRecvGroupApplicationListFromReq() {
       try {
-        const { data } = await IMSDK.getGroupApplicationListAsRecipient();
+        const { data } = await IMSDK.getGroupApplicationListAsRecipient<
+          GroupApplicationItem[]
+        >();
         this.recvGroupApplicationList = data;
       } catch (error) {
         console.error(error);
@@ -200,7 +230,9 @@ const useStore = defineStore("contact", {
     },
     async getSendGroupApplicationListFromReq() {
       try {
-        const { data } = await IMSDK.getGroupApplicationListAsApplicant();
+        const { data } = await IMSDK.getGroupApplicationListAsApplicant<
+          GroupApplicationItem[]
+        >();
         this.sendGroupApplicationList = data;
       } catch (error) {
         console.error(error);
@@ -225,6 +257,12 @@ const useStore = defineStore("contact", {
         this.sendGroupApplicationList.push(item);
       }
     },
+    updateUnHandleFriendApplicationNum(num: number) {
+      this.unHandleFriendApplicationNum = num;
+    },
+    updateUnHandleGroupApplicationNum(num: number) {
+      this.unHandleGroupApplicationNum = num;
+    },
     setUserCardData(data: UserCardData) {
       this.userCardData = { ...data };
       router.push("userCard");
@@ -238,15 +276,17 @@ const useStore = defineStore("contact", {
       this.userCardData.groupMemberInfo = { ...item };
     },
     async getUserCardData(sourceID: string, groupID?: string) {
-      let baseInfo: any
+      let baseInfo: any;
       let groupMemberInfo: GroupMemberItem | undefined;
       baseInfo = this.friendList.find((item) => item.userID === sourceID);
       if (!baseInfo) {
-        const { data } = await IMSDK.getUsersInfo([sourceID]);
-        baseInfo = data[0]?.friendInfo ?? data[0]?.publicInfo;
+        const { data } = await IMSDK.getUsersInfo<FullUserItem[]>([sourceID]);
+        baseInfo = data[0]?.friendInfo ?? data[0]?.publicInfo ?? undefined;
       }
       if (groupID) {
-        const { data } = await IMSDK.getSpecifiedGroupMembersInfo({
+        const { data } = await IMSDK.getSpecifiedGroupMembersInfo<
+          GroupMemberItem[]
+        >({
           groupID,
           userIDList: [sourceID],
         });
@@ -258,12 +298,24 @@ const useStore = defineStore("contact", {
       };
       if (!baseInfo) {
         feedbackToast({
-          error: "获取用户信息失败！",
-          message: "获取用户信息失败！",
+          error: i18nt("messageTip.getUserInfoFailed"),
+          message: i18nt("messageTip.getUserInfoFailed"),
         });
         return;
       }
       router.push("userCard");
+    },
+    clearContactStore() {
+      this.friendList = [];
+      this.groupList = [];
+      this.blackList = [];
+      this.recvFriendApplicationList = [];
+      this.sendFriendApplicationList = [];
+      this.recvGroupApplicationList = [];
+      this.sendGroupApplicationList = [];
+      this.unHandleFriendApplicationNum = 0;
+      this.unHandleGroupApplicationNum = 0;
+      this.userCardData = {};
     },
   },
 });

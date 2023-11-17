@@ -1,7 +1,8 @@
-import { CustomType } from "@/constants/enum";
+import { CustomMessageType, GroupSystemMessageTypes } from "@/constants/enum";
 import dayjs from "dayjs";
 
-import { feedbackToast, sec2Time } from "./common";
+import { sec2Time, secondsToTime } from "./common";
+import { isThisYear } from "date-fns";
 
 import useContactStore from "@store/modules/contact";
 import useConversationStore from "@store/modules/conversation";
@@ -19,15 +20,8 @@ import {
   PublicUserItem,
   AtTextElem,
 } from "@/utils/open-im-sdk-wasm/types/entity";
-import {
-  GroupAtType,
-  MessageType,
-  SessionType,
-} from "@/utils/open-im-sdk-wasm/types/enum";
-import { getSDK } from "./open-im-sdk-wasm";
-import { getOnlineStateFromSvr } from "@/api/im_api";
-import { imageEmojis } from "@/constants/emoji";
-import router from "@/router";
+import { getSDK } from "@/utils/open-im-sdk-wasm";
+import { MessageType } from "./open-im-sdk-wasm/types/enum";
 // @ts-ignore
 const { t } = i18n.global;
 
@@ -61,51 +55,9 @@ export const IMSDK = getSDK("./openIM.wasm");
 export const AddFriendQrCodePrefix = "io.openim.app/addFriend/";
 export const AddGroupQrCodePrefix = "io.openim.app/joinGroup/";
 
-const switchCustomMsg = (cMsg: any) => {
-  switch (cMsg.customType) {
-    case CustomType.MassMsg:
-      return t("messageDesc.notificationMessage");
-    case CustomType.Call:
-      return t("messageDesc.rtcMessage");
-    default:
-      return "";
-  }
-};
-
 export const tipMessaggeFormat = (msg: MessageItem) => {
-  const conversationStore = useConversationStore();
   const userStore = useUserStore();
-
-  const currentConversation = conversationStore.currentConversation;
   const selfID = userStore.selfInfo.userID;
-
-  if (msg.contentType === MessageType.RevokeMessage) {
-    let revoker, operator, isAdminRevoke;
-    try {
-      const data = JSON.parse(msg.notificationElem.detail);
-      const revokerID = data.revokerID;
-      revoker =
-        revokerID === selfID
-          ? t("you")
-          : currentConversation.conversationType === SessionType.WorkingGroup
-          ? currentConversation?.showName
-          : data.revokerNickname;
-      isAdminRevoke = data.revokerID !== data.sourceMessageSendID;
-      operator = data.sourceMessageSendNickname;
-    } catch (error) {
-      isAdminRevoke = msg.sendID !== selfID;
-      operator = t("you");
-      revoker = isAdminRevoke ? msg.senderNickname : operator;
-    }
-
-    if (isAdminRevoke) {
-      return t("notificationTipMessage.advanceRevokeMessage", {
-        operator,
-        revoker,
-      });
-    }
-    return t("notificationTipMessage.revokeMessage", { revoker });
-  }
 
   const getName = (user: PublicUserItem) => {
     return user.userID === selfID ? t("you") : user.nickname;
@@ -118,112 +70,136 @@ export const tipMessaggeFormat = (msg: MessageItem) => {
       const groupCreatedDetail = JSON.parse(msg.notificationElem.detail);
       const groupCreatedUser = groupCreatedDetail.opUser;
       return t("notificationTipMessage.createGroupMessage", {
-        creator: getName(groupCreatedUser),
+        creator: linkWrap({
+          userID: groupCreatedUser.userID,
+          groupID: msg.groupID,
+          name: getName(groupCreatedUser),
+        }),
       });
     case MessageType.GroupInfoUpdated:
       const groupUpdateDetail = JSON.parse(msg.notificationElem.detail);
       const groupUpdateUser = groupUpdateDetail.opUser;
-      if (groupUpdateDetail.group.notification) {
-        return t("notificationTipMessage.updateGroupAnnouncementMessage", {
-          operator: getName(groupUpdateUser),
-        });
-      }
-      return t("notificationTipMessage.updateGroupInfoMessage", {
-        operator: getName(groupUpdateUser),
+      return t("notificationTipMessage.updateGroupAnnouncementMessage", {
+        operator: linkWrap({
+          userID: groupCreatedUser.userID,
+          groupID: msg.groupID,
+          name: getName(groupUpdateUser),
+        }),
       });
     case MessageType.GroupOwnerTransferred:
       const transferDetails = JSON.parse(msg.notificationElem.detail);
       const transferOpUser = transferDetails.opUser;
       const newOwner = transferDetails.newGroupOwner;
       return t("notificationTipMessage.transferGroupMessage", {
-        owner: getName(transferOpUser),
-        newOwner: getName(newOwner),
+        owner: linkWrap({
+          userID: transferOpUser.userID,
+          groupID: msg.groupID,
+          name: getName(transferOpUser),
+        }),
+        newOwner: linkWrap({
+          userID: newOwner.userID,
+          groupID: msg.groupID,
+          name: getName(newOwner),
+        }),
       });
     case MessageType.MemberQuit:
       const quitDetails = JSON.parse(msg.notificationElem.detail);
       const quitUser = quitDetails.quitUser;
       return t("notificationTipMessage.quitGroupMessage", {
-        name: getName(quitUser),
+        name: linkWrap({
+          userID: quitUser.userID,
+          groupID: msg.groupID,
+          name: getName(quitUser),
+        }),
       });
     case MessageType.MemberInvited:
       const inviteDetails = JSON.parse(msg.notificationElem.detail);
       const inviteOpUser = inviteDetails.opUser;
       const invitedUserList = inviteDetails.invitedUserList ?? [];
       let inviteStr = "";
-      invitedUserList.find(
-        (user: any, idx: number) =>
-          (inviteStr += getName(user) + " ") && idx > 3
+      invitedUserList.slice(0, 3).map(
+        (user: any) =>
+          (inviteStr += `${linkWrap({
+            userID: user.userID,
+            groupID: msg.groupID,
+            name: getName(user),
+          })}、`)
       );
+      inviteStr = inviteStr.slice(0, -1);
       return t("notificationTipMessage.invitedToGroupMessage", {
-        operator: getName(inviteOpUser),
-        invitedUser: `${inviteStr}${invitedUserList.length > 3 ? "..." : ""}`,
+        operator: linkWrap({
+          userID: inviteOpUser.userID,
+          groupID: msg.groupID,
+          name: getName(inviteOpUser),
+        }),
+        invitedUser: `${inviteStr}${
+          invitedUserList.length > 3
+            ? `${t("messageDescription.somePerson", {
+                num: invitedUserList.length,
+              })}`
+            : ""
+        }`,
       });
     case MessageType.MemberKicked:
       const kickDetails = JSON.parse(msg.notificationElem.detail);
       const kickOpUser = kickDetails.opUser;
       const kickdUserList = kickDetails.kickedUserList ?? [];
       let kickStr = "";
-      kickdUserList.find(
-        (user: any, idx: number) => (kickStr += getName(user) + " ") && idx > 3
+      kickdUserList.slice(0, 3).map(
+        (user: any) =>
+          (kickStr += `${linkWrap({
+            userID: user.userID,
+            groupID: msg.groupID,
+            name: getName(user),
+          })}、`)
       );
-      return t("notificationTipMessage.kickInGroupMessage", {
-        operator: getName(kickOpUser),
-        kickedUser: `${kickStr}${kickdUserList.length > 3 ? "..." : ""}`,
+      kickStr = kickStr.slice(0, -1);
+      return t("messageDescription.kickInGroupMessage", {
+        operator: linkWrap({
+          userID: kickOpUser.userID,
+          groupID: msg.groupID,
+          name: getName(kickOpUser),
+        }),
+        kickedUser: `${kickStr}${
+          kickdUserList.length > 3
+            ? `${t("messageDescription.somePerson", {
+                num: kickdUserList.length,
+              })}`
+            : ""
+        }`,
       });
     case MessageType.MemberEnter:
       const enterDetails = JSON.parse(msg.notificationElem.detail);
       const enterUser = enterDetails.entrantUser;
       return t("notificationTipMessage.joinGroupMessage", {
-        name: getName(enterUser),
+        name: linkWrap({
+          userID: enterUser.userID,
+          groupID: msg.groupID,
+          name: getName(enterUser),
+        }),
       });
     case MessageType.GroupDismissed:
       const dismissDetails = JSON.parse(msg.notificationElem.detail);
       const dismissUser = dismissDetails.opUser;
       return t("notificationTipMessage.disbanedGroupMessage", {
-        operator: getName(dismissUser),
-      });
-    case MessageType.GroupMuted:
-      const GROUPMUTEDDetails = JSON.parse(msg.notificationElem.detail);
-      const groupMuteOpUser = GROUPMUTEDDetails.opUser;
-      return t("notificationTipMessage.allMuteMessage", {
-        operator: getName(groupMuteOpUser),
-      });
-    case MessageType.GroupCancelMuted:
-      const GROUPCANCELMUTEDDetails = JSON.parse(msg.notificationElem.detail);
-      const groupCancelMuteOpUser = GROUPCANCELMUTEDDetails.opUser;
-      return t("notificationTipMessage.cancelAllMuteMessage", {
-        operator: getName(groupCancelMuteOpUser),
-      });
-    case MessageType.GroupMemberMuted:
-      const gmMutedDetails = JSON.parse(msg.notificationElem.detail);
-      const muteTime = sec2Time(gmMutedDetails.mutedSeconds);
-      return t("notificationTipMessage.singleMuteMessage", {
-        operator: getName(gmMutedDetails.opUser),
-        name: getName(gmMutedDetails.mutedUser),
-        muteTime,
-      });
-    case MessageType.GroupMemberCancelMuted:
-      const gmcMutedDetails = JSON.parse(msg.notificationElem.detail);
-      return t("notificationTipMessage.cancelSingleMuteMessage", {
-        operator: getName(gmcMutedDetails.opUser),
-        name: getName(gmcMutedDetails.mutedUser),
+        operator: linkWrap({
+          userID: dismissUser.userID,
+          groupID: msg.groupID,
+          name: getName(dismissUser),
+        }),
       });
     case MessageType.GroupNameUpdated:
       const groupNameDetails = JSON.parse(msg.notificationElem.detail);
-      return t("notificationTipMessage.updateGroupNameMessage", {
-        operator: groupNameDetails.opUser.nickname,
+      return t("messageDescription.updateGroupNameMessage", {
+        operator: linkWrap({
+          userID: groupNameDetails.opUser.userID,
+          groupID: msg.groupID,
+          name: getName(groupNameDetails.opUser),
+        }),
         name: groupNameDetails.group.groupName,
       });
-    case MessageType.BurnMessageChange:
-      const burnDetails = JSON.parse(msg.notificationElem.detail);
-      return t("notificationTipMessage.burnReadStatus", {
-        status: burnDetails.isPrivate ? t("on") : t("off"),
-      });
-    case MessageType.OANotification:
-      const customNoti = JSON.parse(msg.notificationElem.detail);
-      return customNoti.text;
     default:
-      return msg.notificationElem.detail;
+      return "";
   }
 };
 
@@ -245,32 +221,41 @@ export const formatConversionTime = (timestemp: number): string => {
 
   return fromNowStr;
 };
-export const parseAt = (atel: AtTextElem) => {
-  let mstr = atel.text;
-  const pattern = /@\S+\s/g;
-  const arr = mstr.match(pattern);
-  const atUserList = atel.atUsersInfo ?? [];
-  arr?.map((match) => {
-    const member = atUserList.find(
-      (user) => user.atUserID === match.slice(1, -1)
-    );
-    if (member) {
-      mstr = mstr.replace(
-        match,
-        `<span style="color: #3e44ff"> @${member.groupNickname} </span>`
-      );
-    } else {
-      mstr = mstr.replace(
-        match,
-        `<span style="color: #3e44ff"> ${match}</span>`
-      );
-    }
-  });
-  return mstr;
+
+export const formatMessageTime = (
+  timestemp: number,
+  keepSameYear = false
+): string => {
+  if (!timestemp) return "";
+
+  const isRecent = dayjs().diff(timestemp, "day") < 7;
+  const keepYear = keepSameYear || !isThisYear(timestemp);
+
+  if (!isRecent && !keepYear) {
+    return dayjs(timestemp).format("M/D HH:mm");
+  }
+
+  return dayjs(timestemp).calendar();
+};
+
+const linkWrap = ({
+  userID,
+  name,
+  groupID,
+}: {
+  userID: string;
+  name: string;
+  groupID: string;
+}) => {
+  return `<span class='link-el truncate inline-block align-bottom' onclick='userClick("${userID}","${
+    groupID ?? ""
+  }")'>${name}</span>`;
 };
 
 export const parseBr = (text: string) => {
-  return text.replace(new RegExp("\\n", "g"), "<br>");
+  return text
+    .replace(new RegExp("\\n", "g"), "<br>")
+    .replace(new RegExp("\n", "g"), "<br>");
 };
 
 export const getCleanText = (text: string) => {
@@ -280,79 +265,31 @@ export const getCleanText = (text: string) => {
 export const formatMessageByType = (message: MessageItem): string => {
   const userStore = useUserStore();
   const selfUserID = userStore.storeSelfInfo.userID;
+
   const isSelf = (id: string) => id === userStore.storeSelfInfo.userID;
   const getName = (user: PublicUserItem) => {
     return user.userID === selfUserID ? t("you") : user.nickname;
   };
+
   switch (message.contentType) {
     case MessageType.TextMessage:
       return message.textElem?.content;
-    case MessageType.AtTextMessage:
-      let mstr = message.atTextElem.text;
-      const pattern = /@\S+\s/g;
-      const arr = mstr.match(pattern);
-      arr?.map((a) => {
-        const member = (message.atTextElem.atUsersInfo ?? []).find(
-          (gm) => gm.atUserID === a.slice(1, -1)
-        );
-        if (member) {
-          const reg = new RegExp(a, "g");
-          mstr = mstr.replace(reg, `@${member.groupNickname} `);
-        }
-      });
-      return mstr;
     case MessageType.PictureMessage:
-      return t("messageDesc.imageMessage");
+      return t("messageDescription.imageMessage");
     case MessageType.VideoMessage:
-      return t("messageDesc.videoMessage");
-    case MessageType.VoiceMessage:
-      return t("messageDesc.voiceMessage");
-    case MessageType.LocationMessage:
-      const locationInfo = JSON.parse(message.locationElem.description);
-      return t("messageDesc.locationMessage", {
-        location: locationInfo.name,
-      });
-    case MessageType.CardMessage:
-      return t("messageDesc.cardMessage");
-    case MessageType.MergeMessage:
-      return t("messageDesc.mergeMessage");
-    case MessageType.FileMessage:
-      return t("messageDesc.FileMessage") + message.fileElem.fileName;
-    case MessageType.RevokeMessage:
-      const data = JSON.parse(message.notificationElem.detail);
-      const revokerID = data.revokerID;
-      const revoker = isSelf(revokerID) ? t("you") : data.revokerNickname;
-      const isAdminRevoke = data.revokerID !== data.sourceMessageSendID;
-      if (isAdminRevoke) {
-        return t("notificationTipMessage.advanceRevokeMessage", {
-          operator: data.sourceMessageSendNickname,
-          revoker,
-        });
-      }
-      return t("notificationTipMessage.revokeMessage", { revoker });
-    case MessageType.CustomMessage:
-      const customEl = message.customElem;
-      const customData = JSON.parse(customEl.data);
-      //   if (customData.customType) {
-      //     return switchCustomMsg(customData);
-      //   }
-      return t("messageDesc.customMessage");
-    case MessageType.QuoteMessage:
-      return message.quoteElem.text || t("messageDesc.quoteMessage");
-    case MessageType.FaceMessage:
-      return t("messageDesc.faceMessage");
+      return t("messageDescription.videoMessage");
     case MessageType.FriendAdded:
-      return t("notificationTipMessage.alreadyFriendMessage");
+      return t("messageDescription.alreadyFriendMessage");
     case MessageType.MemberEnter:
       const enterDetails = JSON.parse(message.notificationElem.detail);
       const enterUser = enterDetails.entrantUser;
-      return t("notificationTipMessage.joinGroupMessage", {
+      return t("messageDescription.joinGroupMessage", {
         name: getName(enterUser),
       });
     case MessageType.GroupCreated:
       const groupCreatedDetail = JSON.parse(message.notificationElem.detail);
       const groupCreatedUser = groupCreatedDetail.opUser;
-      return t("notificationTipMessage.createGroupMessage", {
+      return t("messageDescription.createGroupMessage", {
         creator: getName(groupCreatedUser),
       });
     case MessageType.MemberInvited:
@@ -360,100 +297,70 @@ export const formatMessageByType = (message: MessageItem): string => {
       const inviteOpUser = inviteDetails.opUser;
       const invitedUserList = inviteDetails.invitedUserList ?? [];
       let inviteStr = "";
-      invitedUserList.find(
-        (user: any, idx: number) =>
-          (inviteStr += `${getName(user)} `) && idx > 3
-      );
+      invitedUserList
+        .slice(0, 3)
+        .map((user: any) => (inviteStr += `${getName(user)}、`));
+      inviteStr = inviteStr.slice(0, -1);
       return t("notificationTipMessage.invitedToGroupMessage", {
         operator: getName(inviteOpUser),
-        invitedUser: `${inviteStr}${invitedUserList.length > 3 ? "..." : ""}`,
+        invitedUser: `${inviteStr}${
+          invitedUserList.length > 3
+            ? `${t("messageDescription.somePerson", {
+                num: invitedUserList.length,
+              })}`
+            : ""
+        }`,
       });
     case MessageType.MemberKicked:
       const kickDetails = JSON.parse(message.notificationElem.detail);
       const kickOpUser = kickDetails.opUser;
       const kickdUserList = kickDetails.kickedUserList ?? [];
       let kickStr = "";
-      kickdUserList.find(
-        (user: any, idx: number) => (kickStr += `${getName(user)} `) && idx > 3
-      );
-      return t("notificationTipMessage.kickInGroupMessage", {
+      kickdUserList
+        .slice(0, 3)
+        .map((user: any) => (kickStr += `${getName(user)}、`));
+      kickStr = kickStr.slice(0, -1);
+      return t("messageDescription.kickInGroupMessage", {
         operator: getName(kickOpUser),
-        kickedUser: `${kickStr}${kickdUserList.length > 3 ? "..." : ""}`,
+        kickedUser: `${kickStr}${
+          kickdUserList.length > 3
+            ? `${t("messageDescription.somePerson", {
+                num: kickdUserList.length,
+              })}`
+            : ""
+        }`,
       });
     case MessageType.MemberQuit:
       const quitDetails = JSON.parse(message.notificationElem.detail);
       const quitUser = quitDetails.quitUser;
-      return t("notificationTipMessage.quitGroupMessage", {
+      return t("messageDescription.quitGroupMessage", {
         name: getName(quitUser),
       });
     case MessageType.GroupInfoUpdated:
       const groupUpdateDetail = JSON.parse(message.notificationElem.detail);
       const groupUpdateUser = groupUpdateDetail.opUser;
-      return t("notificationTipMessage.updateGroupInfoMessage", {
+      return t("messageDescription.updateGroupInfoMessage", {
         operator: getName(groupUpdateUser),
       });
     case MessageType.GroupOwnerTransferred:
       const transferDetails = JSON.parse(message.notificationElem.detail);
       const transferOpUser = transferDetails.opUser;
       const newOwner = transferDetails.newGroupOwner;
-      return t("notificationTipMessage.transferGroupMessage", {
+      return t("messageDescription.transferGroupMessage", {
         owner: getName(transferOpUser),
         newOwner: getName(newOwner),
       });
     case MessageType.GroupDismissed:
       const dismissDetails = JSON.parse(message.notificationElem.detail);
       const dismissUser = dismissDetails.opUser;
-      return t("notificationTipMessage.disbanedGroupMessage", {
+      return t("messageDescription.disbanedGroupMessage", {
         operator: getName(dismissUser),
-      });
-    case MessageType.GroupMuted:
-      const GROUPMUTEDDetails = JSON.parse(message.notificationElem.detail);
-      const groupMuteOpUser = GROUPMUTEDDetails.opUser;
-      return t("notificationTipMessage.allMuteMessage", {
-        operator: getName(groupMuteOpUser),
-      });
-    case MessageType.GroupCancelMuted:
-      const GROUPCANCELMUTEDDetails = JSON.parse(
-        message.notificationElem.detail
-      );
-      const groupCancelMuteOpUser = GROUPCANCELMUTEDDetails.opUser;
-      return t("notificationTipMessage.cancelAllMuteMessage", {
-        operator: getName(groupCancelMuteOpUser),
-      });
-    case MessageType.GroupMemberMuted:
-      const gmMutedDetails = JSON.parse(message.notificationElem.detail);
-      const muteTime = sec2Time(gmMutedDetails.muteTime);
-      return t("notificationTipMessage.singleMuteMessage", {
-        operator: getName(gmMutedDetails.opUser),
-        name: getName(gmMutedDetails.mutedUser),
-        muteTime,
-      });
-    case MessageType.GroupMemberCancelMuted:
-      const gmcMutedDetails = JSON.parse(message.notificationElem.detail);
-      return t("notificationTipMessage.cancelSingleMuteMessage", {
-        operator: getName(gmcMutedDetails.opUser),
-        name: getName(gmcMutedDetails.mutedUser),
-      });
-    case MessageType.GroupAnnouncementUpdated:
-      const groupAnnouncementDetails = JSON.parse(
-        message.notificationElem.detail
-      );
-      return t("notificationTipMessage.updateGroupAnnouncementMessage", {
-        operator: getName(groupAnnouncementDetails.opUser),
       });
     case MessageType.GroupNameUpdated:
       const groupNameDetails = JSON.parse(message.notificationElem.detail);
-      return t("notificationTipMessage.updateGroupNameMessage", {
+      return t("messageDescription.updateGroupNameMessage", {
         operator: getName(groupNameDetails.opUser),
         name: groupNameDetails.group.groupName,
-      });
-    case MessageType.OANotification:
-      const customNoti = JSON.parse(message.notificationElem.detail);
-      return customNoti.text;
-    case MessageType.BurnMessageChange:
-      const burnDetails = JSON.parse(message.notificationElem.detail);
-      return t("notificationTipMessage.burnReadStatus", {
-        status: burnDetails.isPrivate ? t("on") : t("off"),
       });
     default:
       return "";
@@ -508,87 +415,6 @@ export const conversationSort = (conversationList: ConversationItem[]) => {
   return filterArr;
 };
 
-export const toSpecifiedConversation = (
-  sourceID: string,
-  sessionType: SessionType
-) => {
-  return new Promise<void>(async (resolve, reject) => {
-    let conversationInfo = null;
-    const conversationStore = useConversationStore();
-
-    if (sessionType === SessionType.Single) {
-      conversationInfo = conversationStore.storeConversationList.find(
-        (item) => item.userID === sourceID
-      );
-    } else {
-      conversationInfo = conversationStore.storeConversationList.find(
-        (item) => item.groupID === sourceID
-      );
-    }
-
-    if (!conversationInfo) {
-      try {
-        const { data } = await IMSDK.getOneConversation({
-          sourceID,
-          sessionType,
-        });
-        console.log(data);
-
-        conversationInfo = data;
-      } catch (error) {
-        feedbackToast({
-          message: t("getConversationFailed"),
-          error,
-        });
-        reject();
-      }
-    }
-    conversationStore.updateCurrentConversation(
-      conversationInfo as ConversationItem
-    );
-    router.push({
-      path: "chat",
-    });
-    resolve();
-  });
-};
-
-const switchOnline = (oType: string, details?: any[]) => {
-  switch (oType) {
-    case "offline":
-      return t("offline");
-    case "online":
-      let str = "";
-      details?.map((detail) => {
-        if (detail.status === "online") {
-          str += `${detail.platform}/`;
-        }
-      });
-      return `${str.slice(0, -1)} ${t("online")}`;
-    default:
-      return "";
-  }
-};
-
-export const getDesignatedUserOnlineState = (
-  userID: string
-): Promise<string> => {
-  return new Promise(async (resolve) => {
-    let statusObj = {} as any;
-    try {
-      const { data } = await getOnlineStateFromSvr([userID]);
-      statusObj = data[0];
-    } catch (e) {
-      resolve(t("offline"));
-    }
-    const onlineStr = switchOnline(
-      statusObj.status,
-      statusObj.detailPlatformStatus
-    );
-    resolve(onlineStr);
-  });
-};
-
 export const getFrequentContacts = () => {
   const userStore = useUserStore();
   const currentUser = userStore.storeSelfInfo.userID;
@@ -602,12 +428,27 @@ export const getFrequentContacts = () => {
   return myFrequentContacts;
 };
 
-export const formatEmoji = (str: string) => {
-  imageEmojis.map((emoji) => {
-    if (str.includes(emoji.context)) {
-      let imgStr = `<img class="emoji_display" src="${emoji.src}" alt="${emoji.context}" />`;
-      str = str.replace(emoji.reg, imgStr);
-    }
-  });
-  return str;
+export const getConversationContent = (message: MessageItem) => {
+  const userStore = useUserStore();
+  if (
+    !message.groupID ||
+    GroupSystemMessageTypes.includes(message.contentType) ||
+    message.sendID === userStore.storeSelfInfo.userID ||
+    message.contentType === MessageType.GroupAnnouncementUpdated
+  ) {
+    return formatMessageByType(message);
+  }
+  return `${message.senderNickname}：${formatMessageByType(message)}`;
 };
+
+const regex =
+  /\b(https?:\/\/)?((?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9](?:\.[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]+)*\.[a-zA-Z]{2,})(\/[^\s]*)?\b/g;
+
+export const formatLink = (content: string) =>
+  content.replace(regex, (match) => {
+    let href = match;
+    if (!match.match(/^https?:\/\//)) {
+      href = "https://" + match;
+    }
+    return `<a href="${href}" target="_blank" class="link-el">${match}</a>`;
+  });

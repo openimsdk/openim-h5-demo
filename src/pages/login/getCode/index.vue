@@ -1,91 +1,168 @@
 <template>
-    <div class="page_container !bg-white px-10 text-[#171A1D] relative">
-        <img class="w-9 h-[34px] mt-[5vh]" :src="registe_back" alt="" @click="$router.back">
+  <div class="page_container px-10 relative">
+    <img class="w-6 h-6 mt-[5vh]" :src="login_back" alt="" @click="$router.back">
 
-        <div class="text-3xl font-semibold my-12">{{ isRegiste ? '新用户注册' : '忘记密码' }}</div>
-
-        <van-form @submit="onSubmit">
-            <div>
-                <div class="text-sm mb-1">手机号</div>
-                <div class="border-b border-[rgba(126,134,142,0.16)] flex items-center">
-                    <div class="flex items-center">
-                        <span class="mr-2">+86</span>
-                        <van-icon name="arrow-down" />
-                    </div>
-                    <van-field class="!py-1" clearable v-model="formData.phoneNumber" name="phoneNumber"
-                        :rules="[{ pattern: phonePattern, message: '请输入正确手机号' }]" type="tel" placeholder="请输入手机号码" />
-                </div>
-            </div>
-
-            <div class="mt-3" v-if="isRegiste">
-                <div class="text-sm mb-1">验证码</div>
-                <div class="border-b border-[rgba(126,134,142,0.16)]">
-                    <van-field class="!py-1 !pl-0" clearable v-model="formData.invitationCode" name="invitationCode"
-                        :rules="[{ required: needInvitationCode, message: '请输入邀请码' }]" type="text"
-                        :placeholder="`请输入邀请码${needInvitationCode ? '' : '（选填）'}`">
-                    </van-field>
-                </div>
-            </div>
-
-            <div class="mt-28">
-                <van-button block type="primary" native-type="submit">
-                    {{ isRegiste ? '立即注册' : '获取验证码' }}
-                </van-button>
-            </div>
-
-            <div class="flex items-center mt-2" v-if="isRegiste">
-                <van-field name="accept" class="!p-0 !w-auto">
-                    <template #input>
-                        <van-checkbox icon-size="16px" v-model="formData.accept" />
-                    </template>
-                </van-field>
-                <div class="text-xs text-[#b9babd] ml-1">
-                    我已阅读并同意：<span class="text-[#0089FF]">《服务协议》</span>，<span class="text-[#0089FF]">《隐私政策协议》</span>
-                </div>
-            </div>
-
-        </van-form>
+    <div class="text-2xl text-primary font-semibold my-12">{{ isRegiste ? $t('register') : $t('forgetPasswordTitle') }}
     </div>
+
+    <van-form @submit="onSubmit">
+      <div>
+        <div class="text-sm mb-1 text-sub-text">{{ $t('cellphone') }}</div>
+        <div class="border border-gap-text rounded-lg flex items-center">
+          <div class="flex items-center border-r border-gap-text px-3" @click="showAreaCode = true">
+            <span class="mr-1">{{ formData.areaCode }}</span>
+            <van-icon name="arrow-down" />
+          </div>
+          <van-field class="!py-1 !text-base" clearable v-model="formData.phoneNumber" name="phoneNumber" type="number"
+            :placeholder="$t('placeholder.inputPhoneNumber')" />
+        </div>
+      </div>
+
+      <div class="mt-5" v-if="isRegiste">
+        <div class="text-sm mb-1 text-sub-text">{{ $t('invitationCode') }}</div>
+        <div class="border border-gap-text rounded-lg">
+          <van-field class="!py-1" clearable v-model="formData.invitationCode" name="invitationCode" type="text"
+            :placeholder="`${$t('placeholder.inputInvitationCode')}${needInvitationCode ? '' : `(${$t('optional')})`}`">
+          </van-field>
+        </div>
+      </div>
+
+      <div class="mt-5" v-else>
+        <div class="text-sm mb-1 text-sub-text">{{ $t('reAcquireDesc') }}</div>
+        <div class="border border-gap-text rounded-lg">
+          <van-field class="!py-1" clearable v-model="formData.verificationCode" name="verificationCode" type="text"
+            :placeholder="$t('placeholder.inputVerificationCode')">
+            <template #button>
+              <span class="text-primary" @click="reSend" v-if="count <= 0">{{ $t('buttons.verificationCode') }}</span>
+              <span class="text-primary" v-else>{{ count }}S</span>
+            </template>
+          </van-field>
+        </div>
+      </div>
+
+      <div class="mt-28">
+        <van-button block type="primary" native-type="submit">
+          {{ $t('buttons.next') }}
+        </van-button>
+      </div>
+
+    </van-form>
+
+    <van-popup v-model:show="showAreaCode" round position="bottom">
+      <van-picker :columns="countryCode" @cancel="showAreaCode = false" @confirm="onConfirmAreaCode"
+        :columns-field-names="{ text: 'phone_code', value: 'phone_code', children: 'children' }" />
+    </van-popup>
+  </div>
 </template>
 
 <script setup lang='ts'>
+import type { PickerConfirmEventParams, } from 'vant';
 import { UsedFor } from '@/api/data';
-import { sendSms, verifyCode } from '@/api/login';
+import { sendSms } from '@/api/login';
 import useUserStore from '@/store/modules/user'
+import countryCode from '@/utils/areaCode'
 import { feedbackToast } from '@/utils/common';
-import registe_back from '@assets/images/registe_back.png'
+import login_back from '@assets/images/login_back.png'
 
-const phonePattern = /^1[3-9]\d{9}$/
+const phoneRegExp = /^1[3-9]\d{9}$/
 
+const { t } = useI18n()
 const userStore = useUserStore();
 const router = useRouter();
 
 const props = defineProps<{ isRegiste: boolean }>()
 const formData = reactive({
-    phoneNumber: '',
-    areaCode: '+86',
-    invitationCode: '',
-    accept: true
+  phoneNumber: '',
+  areaCode: '+86',
+  invitationCode: '',
+  accept: true,
+  verificationCode: ''
 })
+const showAreaCode = ref(false)
+const count = ref(0)
+let timer: NodeJS.Timer
 
 const needInvitationCode = computed(() => !!userStore.storeAppConfig.needInvitationCodeRegister)
 
 const onSubmit = () => {
-    sendSms({
-        phoneNumber: formData.phoneNumber,
-        areaCode: formData.areaCode,
-        usedFor: props.isRegiste ? UsedFor.Register : UsedFor.Modify
-    }).then(()=>router.push({
-        path: 'verifyCode',
-        query: {
+  if (!phoneRegExp.test(formData.phoneNumber)) {
+    feedbackToast({
+      message: t('messageTip.correctPhoneNumber'),
+      error: t('messageTip.correctPhoneNumber')
+    })
+    return
+  }
+  if (needInvitationCode && formData.invitationCode) {
+    feedbackToast({
+      message: t('messageTip.invitationCode'),
+      error: t('messageTip.invitationCode')
+    })
+    return
+  }
+  sendSms({
+    phoneNumber: formData.phoneNumber,
+    areaCode: formData.areaCode,
+    usedFor: props.isRegiste ? UsedFor.Register : UsedFor.Modify
+  })
+    .then(() => {
+      if (props.isRegiste) {
+        router.push({
+          path: 'verifyCode',
+          query: {
             baseData: JSON.stringify({
-                ...formData,
-                isRegiste: props.isRegiste
+              ...formData,
+              isRegiste: props.isRegiste
             })
-        }
-    })).catch(error=>feedbackToast({ message: '发送验证码失败！', error }))
+          }
+        })
+      } else {
+        router.push({
+          path: 'setPassword',
+          query: {
+            baseData: JSON.stringify({
+              ...formData,
+              isRegiste: props.isRegiste
+            })
+          }
+        })
+      }
+    })
+    .catch(error => feedbackToast({ message: t('messageTip.sendCodeFailed'), error }))
 }
 
+const onConfirmAreaCode = ({ selectedValues }: PickerConfirmEventParams) => {
+  formData.areaCode = String(selectedValues[0])
+  showAreaCode.value = false
+}
+
+const reSend = () => {
+  if (count.value > 0) return
+  sendSms({
+    phoneNumber: formData.phoneNumber,
+    areaCode: formData.areaCode,
+    usedFor: UsedFor.Login
+  })
+    .then(startTimer)
+    .catch(error => feedbackToast({ message: t('messageTip.sendCodeFailed'), error }))
+}
+
+const startTimer = () => {
+  if (timer) {
+    clearInterval(timer)
+  }
+  count.value = 60
+  timer = setInterval(() => {
+    if (count.value > 0) {
+      count.value -= 1
+    } else {
+      clearInterval(timer)
+    }
+  }, 1000)
+}
 </script>
 
-<style lang='scss' scoped></style>
+<style lang='scss' scoped>
+.page_container {
+  background: linear-gradient(180deg, rgba(0, 137, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+}
+</style>

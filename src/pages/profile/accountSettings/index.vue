@@ -1,30 +1,52 @@
 <template>
-    <div class="page_container">
-        <NavBar :title="'账号设置'" />
+  <div class="page_container">
+    <NavBar :title="$t('profileMenu.accountSetting')" />
 
-        <DetailInfoItem class="mt-3" :lable="'勿扰模式'">
-            <van-switch size="20" :loading="false" :model-value="checked" @update:model-value="onUpdateValue" />
-        </DetailInfoItem>
-        <DetailInfoItem arrow :lable="'通讯录黑名单'" @click="$router.push('blackList')" />
+    <div class="mt-2 mx-3 rounded-md overflow-hidden">
+      <DetailInfoItem arrow :lable="$t('profileMenu.blacklist')" @click="$router.push('blackList')" />
+      <DetailInfoItem arrow :lable="$t('profileMenu.language')" @click="$router.push('/language')" />
     </div>
+
+    <div class="mt-2 mx-3 rounded-md overflow-hidden">
+      <DetailInfoItem arrow :lable="$t('changePassword')" @click="$router.push('/changePassword')" />
+      <DetailInfoItem arrow danger :lable="$t('profileMenu.clearChatHistory')" @click="tryClearChatLogs" />
+    </div>
+  </div>
 </template>
   
 <script setup lang='ts'>
+import NavBar from '@/components/NavBar/index.vue';
 import DetailInfoItem from '@/components/DetailInfoItem/index.vue';
-import useUserStore from '@/store/modules/user';
+import useMessageStore from '@/store/modules/message';
+import { feedbackToast } from '@/utils/common';
 import { IMSDK } from '@/utils/imCommon';
-import { MessageReceiveOptType } from 'open-im-sdk-wasm/lib/types/enum';
-import { showToast } from 'vant';
+import { showConfirmDialog } from 'vant';
 
-const userStore = useUserStore();
-const checked = computed(()=>userStore.storeSelfInfo.globalRecvMsgOpt !== MessageReceiveOptType.Nomal)
-const onUpdateValue = (newValue: boolean) => {
-    IMSDK.setGlobalRecvMessageOpt(newValue ? MessageReceiveOptType.NotNotify : MessageReceiveOptType.Nomal).then(() => showToast('设置成功！'))
-        .catch(err => showToast(err.errMsg || '设置失败！'))
-}
+const { t } = useI18n()
+const messageStore = useMessageStore()
+
+const tryClearChatLogs = () => {
+  showConfirmDialog({
+    title: t("profileMenu.clearChatHistory"),
+    message: t("popover.clearChatHistory"),
+    beforeClose: (action: string) => {
+      return new Promise((resolve) => {
+        if (action !== "confirm") {
+          resolve(true);
+          return;
+        }
+        IMSDK.deleteAllMsgFromLocalAndSvr()
+          .then(() => {
+            messageStore.clearHistoryMessage()
+            feedbackToast();
+          })
+          .catch((error: unknown) => feedbackToast({ error }))
+          .finally(() => resolve(true))
+      });
+    },
+  })
+};
 
 </script>
   
-<style lang='scss' scoped>
-
-</style>
+<style lang='scss' scoped></style>

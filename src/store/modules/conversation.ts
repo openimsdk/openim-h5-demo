@@ -4,7 +4,7 @@ import {
   GroupItem,
   GroupMemberItem,
   MessageItem,
-} from "open-im-sdk-wasm/lib/types/entity";
+} from "@/utils/open-im-sdk-wasm/types/entity";
 
 import { defineStore } from "pinia";
 import store from "../index";
@@ -17,6 +17,7 @@ interface StateType {
   unReadCount: number;
   currentGroupInfo: GroupItem;
   currentMemberInGroup: GroupMemberItem;
+  quoteMessage?: MessageItem;
 }
 
 const useStore = defineStore("conversation", {
@@ -26,6 +27,7 @@ const useStore = defineStore("conversation", {
     unReadCount: 0,
     currentGroupInfo: {} as GroupItem,
     currentMemberInGroup: {} as GroupMemberItem,
+    quoteMessage: undefined,
   }),
   getters: {
     storeConversationList: (state) => state.conversationList,
@@ -33,11 +35,14 @@ const useStore = defineStore("conversation", {
     storeUnReadCount: (state) => state.unReadCount,
     storeCurrentGroupInfo: (state) => state.currentGroupInfo,
     storeCurrentMemberInGroup: (state) => state.currentMemberInGroup,
+    storeQuoteMessage: (state) => state.quoteMessage,
   },
   actions: {
     async getConversationListFromReq(isScrollLoad = false): Promise<boolean> {
       try {
-        const { data } = await IMSDK.getConversationListSplit({
+        const { data } = await IMSDK.getConversationListSplit<
+          ConversationItem[]
+        >({
           offset: isScrollLoad ? this.conversationList.length : 0,
           count: 20,
         });
@@ -48,11 +53,12 @@ const useStore = defineStore("conversation", {
         ];
         return cves.length === 20;
       } catch (error) {
+        console.error(error);
         return false;
       }
     },
     async getUnReadCountFromReq() {
-      const { data } = await IMSDK.getTotalUnreadMsgCount();
+      const { data } = await IMSDK.getTotalUnreadMsgCount<number>();
       this.unReadCount = data;
     },
     updateUnReadCount(data: number) {
@@ -69,7 +75,9 @@ const useStore = defineStore("conversation", {
         return;
       }
       try {
-        const { data } = await IMSDK.getSpecifiedGroupsInfo([sourceID]);
+        const { data } = await IMSDK.getSpecifiedGroupsInfo<GroupItem[]>([
+          sourceID,
+        ]);
         this.currentGroupInfo = data[0] ?? {};
       } catch (error) {
         console.error(error);
@@ -82,7 +90,9 @@ const useStore = defineStore("conversation", {
       const userStore = useUserStore();
 
       try {
-        const { data } = await IMSDK.getSpecifiedGroupMembersInfo({
+        const { data } = await IMSDK.getSpecifiedGroupMembersInfo<
+          GroupMemberItem[]
+        >({
           groupID: groupID ?? this.currentConversation.groupID,
           userIDList: [userStore.storeSelfInfo.userID],
         });
@@ -107,6 +117,17 @@ const useStore = defineStore("conversation", {
       if (idx !== -1) {
         this.conversationList.splice(idx, 1);
       }
+    },
+    updateQuoteMessage(message?: MessageItem) {
+      this.quoteMessage = message;
+    },
+    clearConversationStore() {
+      this.conversationList = [];
+      this.currentConversation = {} as ConversationItem;
+      this.unReadCount = 0;
+      this.currentGroupInfo = {} as GroupItem;
+      this.currentMemberInGroup = {} as GroupMemberItem;
+      this.quoteMessage = undefined;
     },
   },
 });

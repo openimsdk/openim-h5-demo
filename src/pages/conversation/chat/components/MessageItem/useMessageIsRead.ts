@@ -11,6 +11,7 @@ type UseMessageIsReadProps = {
   isSelfMsg: ComputedRef<boolean>;
   isRead: boolean;
   isPreView: boolean;
+  isGroupAnnounce: boolean;
 };
 
 const conversationStore = useConversationStore();
@@ -21,6 +22,7 @@ export function useMessageIsRead({
   isSelfMsg,
   isRead,
   isPreView,
+  isGroupAnnounce,
   clientMsgID,
 }: UseMessageIsReadProps) {
   const markC2CAsRead = () => {
@@ -36,7 +38,7 @@ export function useMessageIsRead({
   };
 
   const getMessageVisible = () => {
-    if (isSelfMsg.value || isRead || isPreView) {
+    if (isSelfMsg.value || isRead || isPreView || isGroupAnnounce) {
       return;
     }
 

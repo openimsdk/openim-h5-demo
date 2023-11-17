@@ -27,6 +27,15 @@ const contactRouters: Array<RouteRecordRaw> = [
     component: () => import("@pages/contact/applicationList/index.vue"),
   },
   {
+    path: "/applicationDetails",
+    name: "ApplicationDetails",
+    component: () => import("@pages/contact/applicationDetails/index.vue"),
+    props: ({ query }) => ({
+      application: JSON.parse((query.application as string) || "{}"),
+      type: Number(query.type),
+    }),
+  },
+  {
     path: "/userCard",
     name: "UserCard",
     component: () => import("@pages/contact/userCard/index.vue"),
@@ -37,14 +46,19 @@ const contactRouters: Array<RouteRecordRaw> = [
     component: () => import("@pages/contact/groupCard/index.vue"),
   },
   {
+    path: "/userCardSetting",
+    name: "UserCardSetting",
+    component: () => import("@pages/contact/userCardSetting/index.vue"),
+  },
+  {
+    path: "/userCardDetails",
+    name: "UserCardDetails",
+    component: () => import("@pages/contact/userCardDetails/index.vue"),
+  },
+  {
     path: "/contactAdd",
     name: "ContactAdd",
     component: () => import("@pages/contact/contactAdd/index.vue"),
-  },
-  {
-    path: "/switchJoinGroup",
-    name: "SwitchJoinGroup",
-    component: () => import("@pages/contact/switchJoinGroup/index.vue"),
   },
   {
     path: "/searchToJoin",
@@ -74,14 +88,6 @@ const contactRouters: Array<RouteRecordRaw> = [
     component: () => import("@pages/contact/groupMemberList/index.vue"),
   },
   {
-    path: "/prepareSearchContact",
-    name: "PrepareSearchContact",
-    component: () => import("@pages/contact/prepareSearchContact/index.vue"),
-    props: ({ query }) => ({
-      isGroup: query.isGroup === "true",
-    }),
-  },
-  {
     path: "/createGroup",
     name: "CreateGroup",
     component: () => import("@pages/contact/createGroup/index.vue"),
@@ -93,6 +99,16 @@ const contactRouters: Array<RouteRecordRaw> = [
     path: "/chooseUser",
     name: "ChooseUser",
     component: () => import("@pages/contact/chooseUser/index.vue"),
+  },
+  {
+    path: "/searchFriendOrGroup",
+    name: "SearchFriendOrGroup",
+    component: () => import("@pages/contact/searchFriendOrGroup/index.vue"),
+  },
+  {
+    path: "/scanPage",
+    name: "ScanPage",
+    component: () => import("@pages/contact/scanPage/index.vue"),
   },
 ];
 

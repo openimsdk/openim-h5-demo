@@ -17,14 +17,27 @@ const profileRouters: Array<RouteRecordRaw> = [
     component: () => import("@pages/profile/accountSettings/index.vue"),
   },
   {
-    path: "/notificationSettings",
-    name: "NotificationSettings",
-    component: () => import("@pages/profile/notificationSettings/index.vue"),
-  },
-  {
     path: "/blackList",
     name: "BlackList",
     component: () => import("@pages/profile/blackList/index.vue"),
+  },
+  {
+    path: "/language",
+    name: "Language",
+    component: () => import("@pages/profile/language/index.vue"),
+  },
+  {
+    path: "/changePassword",
+    name: "ChangePassword",
+    component: () => import("@pages/profile/changePassword/index.vue"),
+  },
+  {
+    path: "/selfOrGroupQr",
+    name: "SelfOrGroupQr",
+    props: ({ query }) => ({
+      isGroup: !!query.isGroup,
+    }),
+    component: () => import("@pages/profile/selfOrGroupQr/index.vue"),
   },
   {
     path: "/changeNameOrRemark",

@@ -1,47 +1,38 @@
 <template>
-  <div class="px-[22px] h-[66px] flex items-center" @click="$emit('clickItem',source)">
+  <div class="px-[22px] h-[64px] flex items-center bg-white" @click="$emit('clickItem', source)">
     <div v-if="showCheck" class="mr-3 relative">
       <van-icon v-show="!checked" name="circle" color="#979797" size="20" />
       <van-icon v-show="checked" name="checked" size="20" color="#1D6BED" />
-      <div
-        v-show="disabled"
-        class="w-5 h-5 rounded-full absolute top-0 left-0 bg-[#c8c9cc]"
-      ></div>
+      <div v-show="disabled" class="w-5 h-5 rounded-full absolute top-0 left-0 bg-[#c8c9cc]"></div>
     </div>
 
-    <Avatar :src="source.faceURL" :size="iconSize" :is-group="(!!source.conversationID || !!source.groupName) && !!source.groupID" :desc="source.remark||source.nickname||source.showName" />
+    <Avatar :src="source.faceURL" :size="iconSize"
+      :is-group="(!!source.conversationID || !!source.groupName) && !!source.groupID"
+      :desc="source.remark || source.nickname || source.showName" />
 
-    <div
-      class="flex justify-between items-center w-full h-full ml-4 border-b border-[#F1F1F1]"
-      :class="{ '!border-0': noBorder }"
-    >
-      <div class="w-full">
-        <div class="flex">
-          <div class="max-w-[60%] truncate">{{ getTitle }}</div>
-          <div
-            v-if="isAdmin || isOwner"
-            class="text-xs px-3 py-1 rounded-xl ml-3"
-            :class="{
-              'bg-[#f4da9a] text-[#ff8c00]': isOwner,
-              'bg-[#a2c9f8] text-[#2691ed]': isAdmin,
-            }"
-          >
-            {{ $t(isOwner ? "groupOwner" : "groupAdmin") }}
+    <div class="flex justify-between items-center w-full h-full ml-4 border-b border-[#F1F1F1] !border-0"
+      :class="{ '!border-0': noBorder }">
+      <div class="flex justify-between w-full items-center">
+        <div class="max-w-[60%] truncate">
+          <div>{{ getTitle }}</div>
+          <div v-if="subKey" class="text-[#999] text-[13px]">
+            {{ getSubTitle }}
           </div>
         </div>
-        <div v-if="subKey" class="text-[#999] text-[13px]">
-          {{ getSubTitle }}
+        <div v-if="showRole && (isAdmin || isOwner)" class="px-3 py-1 rounded-xl ml-3 text-sub-text">
+          {{ $t(isOwner ? "groupOwner" : "groupAdmin") }}
         </div>
       </div>
       <div>
-        <van-button v-if="showRemove" size="small" class="!border-none w-max" @click="remove" plain type="primary">移除</van-button>
+        <van-button v-if="showRemove" size="small" class="!border-none w-max" @click="remove" plain type="primary">{{
+          $t("buttons.remove") }}</van-button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { GroupMemberRole } from "open-im-sdk-wasm/lib/types/enum";
+import { GroupMemberRole } from "@/utils/open-im-sdk-wasm/types/enum";
 import { GenericListItemSource } from "./data";
 import Avatar from "../Avatar/index.vue";
 
@@ -55,12 +46,15 @@ type GenericListItemProps = {
   checked?: boolean;
   disabled?: boolean;
   showRemove?: boolean;
+  showRole?: boolean
 };
 
 type GenericListItemEmits = {
   (event: "remove", item: Partial<GenericListItemSource>): void;
   (event: "clickItem", item: Partial<GenericListItemSource>): void;
 };
+
+const { t } = useI18n()
 
 const props = withDefaults(defineProps<GenericListItemProps>(), {
   iconSize: 42,
@@ -81,7 +75,7 @@ const getSubTitle = computed(() => {
   if (!props.subKey) return;
 
   if (props.subKey === "memberCount") {
-    return `${props.source.memberCount}人`;
+    return `${props.source.memberCount}${t("people")}`;
   }
   return (props.source as any)[props.subKey];
 });

@@ -1,6 +1,6 @@
 <template>
   <div class="py-2 ml-[22px] text-[#999] text-xs">
-    常用联系人
+    {{ $t('contactMenu.frequentContacts') }}
   </div>
   <virtual-list class="my_scrollbar flex-1 overflow-y-auto bg-white" :data-key="'userID'" :data-sources="dataSource"
     :data-component="GenericListItem" :estimate-size="88" :extra-props="{
@@ -11,9 +11,14 @@
 <script setup lang='ts'>
 import VirtualList from '@components/VirtualList';
 import GenericListItem from '@/components/GenericListItem/index.vue';
-import { PublicUserItem } from 'open-im-sdk-wasm/lib/types/entity';
+import { PublicUserItem } from '@/utils/open-im-sdk-wasm/types/entity';
+import { getFrequentContacts } from '@/utils/imCommon';
 
 const dataSource = ref<PublicUserItem[]>([])
+
+onActivated(() => {
+  dataSource.value = getFrequentContacts()
+})
 
 </script>
 

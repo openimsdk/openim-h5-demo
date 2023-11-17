@@ -36,6 +36,7 @@ export var CbEvents;
     CbEvents["OnFriendDeleted"] = "OnFriendDeleted";
     CbEvents["OnJoinedGroupAdded"] = "OnJoinedGroupAdded";
     CbEvents["OnJoinedGroupDeleted"] = "OnJoinedGroupDeleted";
+    CbEvents["OnGroupDismissed"] = "OnGroupDismissed";
     CbEvents["OnGroupMemberAdded"] = "OnGroupMemberAdded";
     CbEvents["OnGroupMemberDeleted"] = "OnGroupMemberDeleted";
     CbEvents["OnGroupApplicationAdded"] = "OnGroupApplicationAdded";
@@ -45,4 +46,20 @@ export var CbEvents;
     CbEvents["OnGroupApplicationAccepted"] = "OnGroupApplicationAccepted";
     CbEvents["OnGroupApplicationRejected"] = "OnGroupApplicationRejected";
     CbEvents["UploadComplete"] = "UploadComplete";
+    CbEvents["OnRecvCustomBusinessMessage"] = "OnRecvCustomBusinessMessage";
+    CbEvents["OnUserStatusChanged"] = "OnUserStatusChanged";
+    // rtc
+    CbEvents["OnReceiveNewInvitation"] = "OnReceiveNewInvitation";
+    CbEvents["OnInviteeAccepted"] = "OnInviteeAccepted";
+    CbEvents["OnInviteeRejected"] = "OnInviteeRejected";
+    CbEvents["OnInvitationCancelled"] = "OnInvitationCancelled";
+    CbEvents["OnHangUp"] = "OnHangUp";
+    CbEvents["OnInvitationTimeout"] = "OnInvitationTimeout";
+    CbEvents["OnInviteeAcceptedByOtherDevice"] = "OnInviteeAcceptedByOtherDevice";
+    CbEvents["OnInviteeRejectedByOtherDevice"] = "OnInviteeRejectedByOtherDevice";
+    // meeting
+    CbEvents["OnStreamChange"] = "OnStreamChange";
+    CbEvents["OnRoomParticipantConnected"] = "OnRoomParticipantConnected";
+    CbEvents["OnRoomParticipantDisconnected"] = "OnRoomParticipantDisconnected";
+    CbEvents["OnReceiveCustomSignal"] = "OnReceiveCustomSignal";
 })(CbEvents || (CbEvents = {}));

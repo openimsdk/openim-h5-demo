@@ -37,8 +37,8 @@ export default defineConfig({
       resolvers: [VantResolver(), VueAmapResolver()],
     }),
     AutoImport({
-      imports: ["vue", "vue-router", "vue-i18n"], // 自动导入vue和vue-router相关函数
-      dts: "src/auto-import.d.ts", // 生成 `auto-import.d.ts` 全局声明
+      imports: ["vue", "vue-router", "vue-i18n"],
+      dts: "src/auto-import.d.ts",
       resolvers: [VueAmapResolver()],
     }),
   ],
@@ -53,6 +53,7 @@ export default defineConfig({
       "@store": resolve(__dirname, "src/store"),
       "@assets": resolve(__dirname, "src/assets"),
       "@i18n": resolve(__dirname, "src/i18n"),
+      "@type": resolve(__dirname, "src/type"),
     },
   },
 });

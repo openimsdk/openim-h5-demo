@@ -7,6 +7,8 @@ import { MessageItem } from "@/utils/open-im-sdk-wasm/types/entity";
 import { ExMessageItem } from "@/store/modules/message";
 
 export default function useCreateFileMessage() {
+  const { t } = useI18n();
+
   const getFileData = (data: Blob): Promise<ArrayBuffer> => {
     return new Promise((resolve, reject) => {
       let reader = new FileReader();
@@ -36,7 +38,8 @@ export default function useCreateFileMessage() {
       sourcePicture: baseInfo,
       bigPicture: baseInfo,
       snapshotPicture: baseInfo,
-      file
+      sourcePath: "",
+      file,
     };
     return (await IMSDK.createImageMessageByFile<ExMessageItem>(options)).data;
   };
@@ -48,7 +51,7 @@ export default function useCreateFileMessage() {
     const { width, height } = await getPicInfo(snapShotFile);
     const options = {
       videoFile: file,
-      snapFile: snapShotFile,
+      snapshotFile: snapShotFile,
       videoPath: "",
       duration: await getMediaDuration(URL.createObjectURL(file)),
       videoType: getFileType(file.name),
@@ -69,13 +72,14 @@ export default function useCreateFileMessage() {
   const createFileMessage = async (
     file: File,
     messageType: MessageType,
+    duration?: number
   ) => {
     let snapShotFile = undefined;
     if (messageType === MessageType.VideoMessage) {
       try {
         snapShotFile = await getVideoSnshot(URL.createObjectURL(file));
       } catch (error) {
-        showFailToast("生成封面图失败！");
+        showFailToast(t("messageTip.generateImageFailed"));
         console.error("get video snapShotFile failed: " + error);
         return {
           error: "get video snapShotFile failed",

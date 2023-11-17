@@ -1,17 +1,14 @@
 <template>
   <div class="px-[22px] py-1 flex justify-between items-center bg-white">
-    <span class="text-[22px] text-[#1B72EC]">通讯录</span>
-    <div>
-        <van-icon class="mr-3" size="24" name="search"/>
-        <van-icon size="24" name="add-o" @click="$router.push('contactAdd')" />
+    <span class="text-[22px] font-semibold">{{ $t('contact') }}</span>
+    <div class="flex flex-row">
+      <img class="h-7 w-7" :src="add" @click="$router.push('contactAdd')" alt="add">
     </div>
   </div>
 </template>
 
 <script setup lang='ts'>
-
+import add from '@/assets/images/contact/add.png'
 </script>
 
-<style lang='scss' scoped>
-
-</style>
+<style lang='scss' scoped></style>

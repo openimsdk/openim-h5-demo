@@ -1,13 +1,15 @@
 import { feedbackToast } from "@utils/common";
 import { IMSDK } from "@/utils/imCommon";
-import { MessageItem } from "open-im-sdk-wasm/lib/types/entity";
-import { GetAdvancedHistoryMsgParams } from "open-im-sdk-wasm/lib/types/params";
+import { MessageItem } from "@/utils/open-im-sdk-wasm/types/entity";
+import { MessageType } from "@/utils/open-im-sdk-wasm/types/enum";
+import { GetAdvancedHistoryMsgParams } from "@/utils/open-im-sdk-wasm/types/params";
 import { defineStore } from "pinia";
 import store from "../index";
 
 interface StateType {
   historyMessageList: ExMessageItem[];
   hasMore: boolean;
+  previewImgList: string[];
 }
 
 type ExType = {
@@ -21,16 +23,24 @@ type GetHistoryMessageListFromReqResp = {
   lastMinSeq: number;
 };
 
+interface IAdvancedMessageResponse {
+  lastMinSeq: number;
+  isEnd: boolean;
+  messageList: ExMessageItem[];
+}
+
 export type ExMessageItem = MessageItem & ExType;
 
 const useStore = defineStore("message", {
   state: (): StateType => ({
     historyMessageList: [],
     hasMore: true,
+    previewImgList: [],
   }),
   getters: {
     storeHistoryMessageList: (state) => state.historyMessageList,
     storeHistoryMessageHasMore: (state) => state.hasMore,
+    storePreviewImgList: (state) => state.previewImgList,
   },
   actions: {
     async getHistoryMessageListFromReq(
@@ -39,14 +49,21 @@ const useStore = defineStore("message", {
       const isFirstPage =
         params.startClientMsgID === "" || params.lastMinSeq === 0;
       try {
-        const { data: tmpData } = await IMSDK.getAdvancedHistoryMessageList(
-          params
-        );
+        const { data: tmpData } =
+          await IMSDK.getAdvancedHistoryMessageList<IAdvancedMessageResponse>(
+            params
+          );
         this.historyMessageList = [
           ...tmpData.messageList,
           ...(isFirstPage ? [] : this.historyMessageList),
         ];
+        const imageUrls = filterPreviewImage(tmpData.messageList);
+        this.previewImgList = [
+          ...imageUrls,
+          ...(isFirstPage ? [] : this.previewImgList),
+        ];
         this.hasMore = !tmpData.isEnd && tmpData.messageList.length === 20;
+        // console.log(this.historyMessageList);
         return {
           messageIDList: tmpData.messageList.map(
             (message: MessageItem) => message.clientMsgID
@@ -63,6 +80,10 @@ const useStore = defineStore("message", {
       }
     },
     pushNewMessage(message: MessageItem) {
+      const imageUrls = filterPreviewImage([message]);
+      if (imageUrls.length > 0) {
+        this.previewImgList = [...this.previewImgList, ...imageUrls];
+      }
       this.historyMessageList.push(message);
     },
     updateOneMessage(message: ExMessageItem, isSuccessCallBack = false) {
@@ -74,6 +95,12 @@ const useStore = defineStore("message", {
           ...this.historyMessageList[idx],
           ...message,
         };
+        if (isSuccessCallBack) {
+          const imageUrls = filterPreviewImage([message]);
+          if (imageUrls.length > 0) {
+            this.previewImgList = [...this.previewImgList, ...imageUrls];
+          }
+        }
       }
     },
     deleteOneMessage(message: ExMessageItem) {
@@ -86,16 +113,62 @@ const useStore = defineStore("message", {
     },
     clearHistoryMessage() {
       this.historyMessageList = [];
+      this.previewImgList = [];
     },
     resetCheckState() {
       this.historyMessageList.forEach((message) => (message.checked = false));
     },
+    updatePreviewImgList(imgs: string[]) {
+      this.previewImgList = [...this.previewImgList, ...imgs];
+    },
     resetHistoryMessageList() {
       this.historyMessageList = [];
       this.hasMore = true;
+      this.previewImgList = [];
+    },
+    updateMessageNicknameAndFaceUrl({
+      sendID,
+      senderFaceUrl,
+      senderNickname,
+    }: {
+      sendID: string;
+      senderFaceUrl: string;
+      senderNickname: string;
+    }) {
+      const tmpList = [...this.historyMessageList].map((message) => {
+        if (message.sendID === sendID) {
+          message.senderFaceUrl = senderFaceUrl;
+          message.senderNickname = senderNickname;
+        }
+        return message;
+      });
+      this.historyMessageList = tmpList;
     },
   },
 });
+
+function filterPreviewImage(messages: MessageItem[]) {
+  return messages
+    .filter((message) => {
+      if (message.contentType === MessageType.PictureMessage) {
+        return true;
+      }
+      if (message.contentType === MessageType.OANotification) {
+        let notificationData = {} as any;
+        try {
+          notificationData = JSON.parse(message.notificationElem.detail);
+        } catch (error) {}
+        if (notificationData.mixType === 1) {
+          message.pictureElem.snapshotPicture.url =
+            notificationData.pictureElem.sourcePicture.url;
+          return true;
+        }
+        return false;
+      }
+      return false;
+    })
+    .map((item) => item.pictureElem.sourcePicture.url);
+}
 
 export default function useMessageStore() {
   return useStore(store);

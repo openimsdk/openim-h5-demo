@@ -24,17 +24,14 @@ const resizeHandler = () => {
 
 onMounted(() => {
   window.addEventListener('resize', resizeHandler)
-  emitter.on("KEYBOARD_UPDATE",resizeHandler)
+  emitter.on("KEYBOARD_UPDATE", resizeHandler)
   userStore.getAppConfigFromReq()
 })
 
-onUnmounted(()=>{
+onUnmounted(() => {
   window.removeEventListener('resize', resizeHandler)
-  emitter.off("KEYBOARD_UPDATE",resizeHandler)
+  emitter.off("KEYBOARD_UPDATE", resizeHandler)
 })
-
-
-
 
 </script>
 

@@ -1,29 +1,29 @@
-import { ActionSheetAction, PopoverAction } from "vant";
-import more_scan from '@/assets/images/more_qr.png'
-import more_add_friend from '@/assets/images/more_add_friend.png'
-import more_add_group from '@/assets/images/more_add_group.png'
-import more_create_group from '@/assets/images/more_create_group.png'
+import { PopoverAction } from "vant";
+import add_friend from "@/assets/images/conversation/add_friend.png";
+import add_group from "@/assets/images/conversation/add_group.png";
+import scan from "@/assets/images/conversation/scan.png";
+import create_group from "@/assets/images/conversation/create_group.png";
 
 // i18n
 import { i18n } from "@/i18n";
 // @ts-ignore
-const { t } = i18n.global;
+const { t, locale } = i18n.global;
 
 export const ConversationTopMoreActions: PopoverAction[] = [
-    {
-        text: t('scanQr'),
-        icon: more_scan
-    },
-    {
-        text: t('addFriend'),
-        icon: more_add_friend
-    },
-    {
-        text: t('addGroup'),
-        icon: more_add_group
-    },
-    {
-        text: t('launchGroup'),
-        icon: more_create_group
-    },
-]
+  {
+    text: t("scanQr"),
+    icon: scan,
+  },
+  {
+    text: t("addFriend"),
+    icon: add_friend,
+  },
+  {
+    text: t("addGroup"),
+    icon: add_group,
+  },
+  {
+    text: t("launchGroup"),
+    icon: create_group,
+  },
+];

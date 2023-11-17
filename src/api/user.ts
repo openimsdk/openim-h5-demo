@@ -1,13 +1,13 @@
 import request from "@utils/request";
 import { BusinessUserInfo } from "./data";
-import { getChatToken, getIMToken } from "@/utils/storage";
-import { AppConfig } from "@/store/modules/user";
+import { getChatToken } from "@/utils/storage";
+import useUserStore, { AppConfig } from "@/store/modules/user";
 
 // new
 export const updateBusinessInfo = (params: Partial<BusinessUserInfo>) =>
   request.post(
     "/user/update",
-    JSON.stringify({ ...params, operationID: Date.now() + "" }),
+    JSON.stringify({ ...params, userID: useUserStore().storeSelfInfo.userID }),
     {
       headers: {
         token: getChatToken(),
@@ -17,7 +17,7 @@ export const updateBusinessInfo = (params: Partial<BusinessUserInfo>) =>
 
 // new
 export const getBusinessInfo = (userID: string) =>
-  request.post("/user/find/full", JSON.stringify({ userIDs: [userID] }), {
+  request.post<{ users: BusinessUserInfo[] }>("/user/find/full", JSON.stringify({ userIDs: [userID] }), {
     headers: {
       token: getChatToken(),
     },
@@ -27,10 +27,8 @@ export const getBusinessInfo = (userID: string) =>
 export const searchUserInfoByBusiness = (
   content: string
 ): Promise<{
-  data: {
-    total: number;
-    users: BusinessUserInfo[];
-  };
+  total: number;
+  users: BusinessUserInfo[];
 }> => {
   return request.post(
     "/user/search/full",
@@ -50,14 +48,14 @@ export const searchUserInfoByBusiness = (
 };
 
 // new
-export const getAppConfig = (): Promise<{ data: AppConfig }> => {
+export const getAppConfig = (): Promise<{ data: { config: AppConfig } }> => {
   return request.post(
     "/client_config/get",
     JSON.stringify({
       operationID: Date.now() + "",
     }),
     {
-      baseURL: process.env.CONFIG_URL,
+      baseURL: process.env.CHAT_URL,
     }
   );
 };

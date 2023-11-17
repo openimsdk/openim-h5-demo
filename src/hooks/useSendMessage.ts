@@ -1,6 +1,6 @@
 import { FileMessageTypes } from "@/constants/enum";
 import useConversationStore from "@/store/modules/conversation";
-import useMessageStore from "@/store/modules/message";
+import useMessageStore, { ExMessageItem } from "@/store/modules/message";
 import useUserStore from "@/store/modules/user";
 import emitter from "@/utils/events";
 import { IMSDK } from "@/utils/imCommon";
@@ -28,6 +28,8 @@ export default function useSendMessage() {
     recvID,
     groupID,
     message,
+    // fileArrayBuffer,
+    // snpFileArrayBuffer,
     needOpreateMessage,
   }: SendMessageParams) => {
     needOpreateMessage =
@@ -36,18 +38,25 @@ export default function useSendMessage() {
     if (needOpreateMessage) {
       messageStore.pushNewMessage(message);
       emitter.emit("CHAT_MAIN_SCROLL_TO_BOTTOM", false);
+      updateFrequentContacts();
     }
 
+    // let funcName = "sendMessage";
+    // if (FileMessageTypes.includes(message.contentType)) {
+    //   funcName = fileArrayBuffer ? "sendMessageByBuffer" : "sendMessageNotOss";
+    // }
     const options = {
       recvID: recvID ?? conversationStore.storeCurrentConversation.userID ?? "",
       groupID:
         groupID ?? conversationStore.storeCurrentConversation.groupID ?? "",
       message,
+      // fileArrayBuffer,
+      // snpFileArrayBuffer,
     };
     try {
       // @ts-ignore
       const { data: successMessage } = await IMSDK.sendMessage(options);
-      messageStore.updateOneMessage(successMessage, true);
+      messageStore.updateOneMessage(successMessage as ExMessageItem, true);
     } catch (error) {
       console.error(error);
 
@@ -56,6 +65,36 @@ export default function useSendMessage() {
         status: MessageStatus.Failed,
       });
     }
+  };
+
+  const updateFrequentContacts = () => {
+    if (!conversationStore.storeCurrentConversation.userID) {
+      return;
+    }
+    let myFrequentContacts = [];
+    let totalFrequentContacts = {} as any;
+    const item = {
+      userID: conversationStore.storeCurrentConversation.userID,
+      nickname: conversationStore.storeCurrentConversation.showName,
+      faceURL: conversationStore.storeCurrentConversation.faceURL,
+    };
+    try {
+      totalFrequentContacts = JSON.parse(
+        localStorage.getItem("IMFrequentContacts_H5") || "{}"
+      );
+      myFrequentContacts =
+        totalFrequentContacts[userStore.storeSelfInfo.userID] ?? [];
+    } catch (error) {}
+    const user = myFrequentContacts.find(
+      (contact: PublicUserItem) => contact.userID === item.userID
+    );
+    if (user) return;
+    myFrequentContacts.unshift({ ...item });
+    totalFrequentContacts[userStore.storeSelfInfo.userID] = myFrequentContacts;
+    localStorage.setItem(
+      "IMFrequentContacts_H5",
+      JSON.stringify(totalFrequentContacts)
+    );
   };
 
   const inCurrentConversation = (sourceID?: string) =>

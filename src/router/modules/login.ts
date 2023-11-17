@@ -66,11 +66,6 @@ const loginRouters: Array<RouteRecordRaw> = [
     },
     component: () => import("@pages/login/setBaseInfo/index.vue"),
   },
-  {
-    path: "/chooseAvatar",
-    name: "ChooseAvatar",
-    component: () => import("@pages/login/chooseAvatar/index.vue"),
-  },
 ];
 
 export default loginRouters;

@@ -1,19 +1,32 @@
 <template>
-  <div class="bg-white py-4 px-[22px] my-3" @click="toMemberList">
-    <div class="flex w-full justify-between">
-      <span>群成员</span>
-      <div class="text-[#999] text-[13px]">
-        <span class="mr-1">{{ `${memberCount}人` }}</span>
-        <van-icon name="arrow" />
+  <div class="bg-white pt-2 px-1 mt-[10px] mx-[10px] rounded-md overflow-hidden" @click="toMemberList">
+
+    <div class="flex flex-wrap mt-3">
+      <div class="flex flex-col justify-center items-center grow-0 shrink-0 basis-1/5 pb-[10px] px-[6px] w-[42px]"
+        v-for="member in fetchState.groupMemberList.slice(0, isNomal ? 9 : 8)">
+        <div class="relative w-12 h-12">
+          <Avatar :src="member.faceURL" :desc="member.nickname" :size="48" />
+          <div v-if="member.roleLevel === 100"
+            class="absolute w-12 flex justify-center items-center bg-[#E8EAEF] text-primary rounded-md bottom-0 text-xs">
+            {{ $t('groupOwner') }}</div>
+        </div>
+        <span class="w-[42px] text-center text-xs text-sub-text truncate mt-0.5">{{ member.nickname }}</span>
       </div>
+
+      <div class="flex flex-col justify-center items-center grow-0 shrink-0 basis-1/5 pb-[10px] px-[6px] w-[42px]">
+        <img class="w-12 h-12" :src="group_invite" alt="" @click.stop="inviteMember" />
+        <span class="w-[42px] text-center text-xs text-sub-text truncate mt-0.5">{{ $t('add') }}</span>
+      </div>
+
+      <div v-if="!isNomal"
+        class="flex flex-col justify-center items-center grow-0 shrink-0 basis-1/5 pb-[10px] px-[6px] w-[42px]">
+        <img class="w-12 h-12" :src="group_remove" alt="" @click.stop="kickMember" />
+        <span class="w-[42px] text-center text-xs text-sub-text truncate mt-0.5">{{ $t('buttons.remove') }}</span>
+      </div>
+
     </div>
 
-    <div class="flex mt-3">
-      <Avatar class="mr-[6px]" v-for="member in fetchState.groupMemberList.slice(0, isNomal ? 6 : 5)"
-        :src="member.faceURL" :desc="member.nickname" :size="42" />
-        <img class="w-9 h-9" :src="group_setting_invite" alt="" @click.stop="inviteMember" />
-      <img v-if="!isNomal" class="w-9 h-9 ml-[6px]" :src="group_setting_remove" alt="" @click.stop="kickMember" />
-    </div>
+    <SettingRowItem class="border-t" :title="`${$t('allGroupMember')}(${memberCount})`" />
   </div>
 </template>
 
@@ -23,19 +36,20 @@ import useGroupMemberList from "@/hooks/useGroupMemberList";
 import { ContactChooseEnum } from "@/pages/contact/chooseUser/data";
 import { MemberListActionEnum } from "@/pages/contact/groupMemberList/data";
 import useConversationStore from "@/store/modules/conversation";
-import group_setting_invite from "@assets/images/group_setting_invite.png";
-import group_setting_remove from "@assets/images/group_setting_remove.png";
+import group_invite from "@assets/images/setting/group_invite.png";
+import group_remove from "@assets/images/setting/group_remove.png";
+import SettingRowItem from "@/components/SettingRowItem/index.vue";
 
 type GroupMemberRowProps = {
   memberCount: number;
   isNomal: boolean;
 };
 
+defineProps<GroupMemberRowProps>();
+
 const router = useRouter();
 const conversationStore = useConversationStore();
-
-const props = defineProps<GroupMemberRowProps>();
-const { fetchState } = useGroupMemberList(undefined,true);
+const { fetchState } = useGroupMemberList(undefined, true);
 
 const inviteMember = () => {
   router.push({
@@ -66,9 +80,6 @@ const toMemberList = () => {
     }
   })
 }
-
 </script>
 
-<style lang="scss" scoped>
-
-</style>
+<style lang="scss" scoped></style>

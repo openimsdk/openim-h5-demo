@@ -1,20 +1,19 @@
 import request from "@utils/request";
 import {
+  ChangPasswordParams,
   DemoLoginParams,
   DemoRegisterParams,
   ModifyPasswordParams,
   SendSmsParams,
   VerifyCodeParams,
 } from "./data";
+import { getChatToken } from "@/utils/storage";
 
 let platform = 5;
 
 // new
 export const sendSms = (params: SendSmsParams) =>
-  request.post(
-    "/account/code/send",
-    JSON.stringify({ ...params})
-  );
+  request.post("/account/code/send", JSON.stringify({ ...params }));
 
 // new
 export const verifyCode = (params: VerifyCodeParams) =>
@@ -40,7 +39,7 @@ export const register = (params: DemoRegisterParams) => {
 // new
 export const modify = (params: ModifyPasswordParams) =>
   request.post(
-    "/account/password/change",
+    "/account/password/reset",
     JSON.stringify({
       ...params,
       platform,
@@ -58,5 +57,20 @@ export const login = (params: DemoLoginParams) => {
       platform: 5,
       account: "",
     })
+  );
+};
+
+export const businessModify = (params: ChangPasswordParams) => {
+  return request.post(
+    "/account/password/change",
+    JSON.stringify({
+      ...params,
+      platform,
+    }),
+    {
+      headers: {
+        token: getChatToken(),
+      },
+    }
   );
 };

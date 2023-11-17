@@ -1,4 +1,4 @@
-import { MessageItem } from "open-im-sdk-wasm/lib/types/entity";
+import { MessageItem } from "@/utils/open-im-sdk-wasm/types/entity";
 
 type ExMessageFields = {
   checked: boolean;
@@ -9,11 +9,3 @@ type ExMessageFields = {
 
 export type ExedMessageItem = MessageItem & ExMessageFields;
 
-export enum MessageMenuType {
-  Copy,
-  Delete,
-  ForWard,
-  Replay,
-  Revoke,
-  Multiple,
-}

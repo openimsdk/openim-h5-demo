@@ -1,5 +1,5 @@
 import { DatabaseErrorCode } from '../../constant';
-import { locaBlacks, localFriends, localGroups, localFriendRequests, localErrChatLogs, localGroupRequests, localAdminGroupRequests, localConversations, localUsers, localSuperGroups, localConversationUnreadMessages, localGroupMembers, tempCacheLocalChatLogs, localNotification, localUploads, } from '../../sqls';
+import { locaBlacks, localFriends, localGroups, localFriendRequests, localGroupRequests, localAdminGroupRequests, localConversations, localUsers, localSuperGroups, localConversationUnreadMessages, localGroupMembers, tempCacheLocalChatLogs, localNotification, localUploads, localStranger, } from '../../sqls';
 import { formatResponse } from '../../utils';
 import { getInstance, resetInstance } from './instance';
 export async function init(userId, dir) {
@@ -12,12 +12,12 @@ export async function init(userId, dir) {
         const db = await getInstance(`${dir}${userId}.sqlite`);
         const results = [];
         const execResultLocalUploads = localUploads(db);
+        const execResultLocalStrangers = localStranger(db);
         const execResultLocalConversations = localConversations(db);
         const execResultLocalUsers = localUsers(db);
         const execResultLocalBlack = locaBlacks(db);
         const execResultLocalFriend = localFriends(db);
         const execResuLocalGroup = localGroups(db);
-        const execResuLocalErrChatLos = localErrChatLogs(db);
         const execResuLocalGroupRequest = localGroupRequests(db);
         const execResuLocalGroupMembers = localGroupMembers(db);
         const execResuLocalAdminGroupRequest = localAdminGroupRequests(db);
@@ -28,6 +28,7 @@ export async function init(userId, dir) {
         const execResultLocalConversationUnreadMessages = localConversationUnreadMessages(db);
         results.push(...[
             execResultLocalUploads,
+            execResultLocalStrangers,
             execResultLocalConversations,
             execResultLocalUsers,
             execResultLocalSuperGroups,
@@ -37,7 +38,6 @@ export async function init(userId, dir) {
             execResuLocalGroup,
             execResuLocalGroupMembers,
             execResultlocaFendRequest,
-            execResuLocalErrChatLos,
             execResuLocalGroupRequest,
             execResuLocalAdminGroupRequest,
             execResultTempCacheLocalChatLogs,

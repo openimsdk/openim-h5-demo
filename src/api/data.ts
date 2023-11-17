@@ -1,6 +1,9 @@
+import { MessageReceiveOptType } from "@/utils/open-im-sdk-wasm/types/enum";
+
 export enum UsedFor {
   Register = 1,
   Modify = 2,
+  Login = 3,
 }
 
 export type SendSmsParams = {
@@ -38,8 +41,14 @@ export type VerifyCodeParams = {
 export type ModifyPasswordParams = {
   phoneNumber: string;
   areaCode: string;
-  verificationCode: string;
+  VerifyCode: string;
   password: string;
+};
+
+export type ChangPasswordParams = {
+  userID: string;
+  currentPassword: string;
+  newPassword: string;
 };
 
 export type DemoLoginParams = {
@@ -63,10 +72,10 @@ export interface BusinessUserInfo {
   allowAddFriend: BusinessAllowType;
   allowBeep: BusinessAllowType;
   allowVibration: BusinessAllowType;
+  globalRecvMsgOpt: MessageReceiveOptType;
 }
 
 export enum BusinessAllowType {
   Allow = 1,
   NotAllow = 2,
 }
-

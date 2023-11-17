@@ -1,25 +1,32 @@
 <template>
-  <div class="page_container !bg-white px-10 text-[#171A1D] relative">
-    <div class="text-3xl font-semibold mt-[15vh]">请设置账号密码</div>
-    <div class="text-[#0089FF] mt-2 mb-4">
-      登录密码用于登录IM账号
-    </div>
+  <div class="page_container px-10 relative">
+    <img class="w-6 h-6 mt-[5vh]" :src="login_back" alt="" @click="$router.back">
+
+    <div class="text-2xl text-primary font-semibold mt-12">{{ $t('forgetPasswordTitle') }}</div>
 
     <van-form @submit="onSubmit">
+      <div class="mt-5">
+        <div class="text-sm mb-1 text-sub-text">{{ $t('password') }}</div>
+        <div class="border border-gap-text rounded-lg">
+          <van-field class="!py-1" clearable v-model="password" name="password" type="password"
+            :placeholder="$t('placeholder.inputPassword')">
+          </van-field>
+        </div>
+        <div class="text-xs mt-0.5 text-sub-text">{{ $t('passwordRequired') }}</div>
+      </div>
 
-      <div class="mt-3">
-        <div class="text-sm mb-1">密码</div>
-        <div class="border-b border-[rgba(126,134,142,0.16)]">
-          <van-field class="!py-1 !pl-0" clearable v-model="password" name="password"
-            :rules="[{ required: true, message: '请输入密码' }]" type="password" placeholder="请输入密码" />
+      <div class="mt-5">
+        <div class="text-sm mb-1 text-sub-text">{{ $t('confirmPassword') }}</div>
+        <div class="border border-gap-text rounded-lg">
+          <van-field class="!py-1" clearable v-model="confirmPassword" name="confirmPassword" type="password"
+            :placeholder="$t('placeholder.reConfirmPassword')">
+          </van-field>
         </div>
       </div>
 
-      <div class="text-xs text-[#0089FF] mt-2">{{ `需6~20位字符` }}</div>
-
-      <div class="mt-[20vh]">
+      <div class="mt-28">
         <van-button :disabled="!password" block type="primary" native-type="submit">
-          {{ baseData.isRegiste ? '下一步' : '确认修改' }}
+          {{ $t('buttons.confirm') }}
         </van-button>
       </div>
 
@@ -29,40 +36,50 @@
 
 <script setup lang='ts'>
 import { modify } from '@/api/login';
+import login_back from '@assets/images/login_back.png'
 import { BaseData } from '../verifyCode/index.vue';
 import { feedbackToast } from '@/utils/common';
 import md5 from 'md5';
 
+const { t } = useI18n()
 const router = useRouter();
 const props = defineProps<{
   baseData: BaseData & { verificationCode: string }
 }>()
 
+const passwordRegExp = /^(?=.*[0-9])(?=.*[a-zA-Z]).{6,20}$/
 const password = ref()
+const confirmPassword = ref()
 
 const onSubmit = () => {
-  if (props.baseData.isRegiste) {
-    router.push({
-      path: 'setBaseInfo',
-      query: {
-        baseData: JSON.stringify({
-          ...props.baseData,
-          password: password.value
-        })
-      }
+  if (!passwordRegExp.test(password.value)) {
+    feedbackToast({
+      message: t('messageTip.correctPassword'),
+      error: t('messageTip.correctPassword')
     })
-    return;
+    return
   }
-
+  if (password.value !== confirmPassword.value) {
+    feedbackToast({
+      message: t('messageTip.rePassword'),
+      error: t('messageTip.rePassword')
+    })
+    return
+  }
   modify({
     password: md5(password.value),
-    verificationCode: props.baseData.verificationCode,
+    VerifyCode: props.baseData.verificationCode,
     areaCode: props.baseData.areaCode,
     phoneNumber: props.baseData.phoneNumber
-  }).then(() => feedbackToast({ message: '修改成功，请重新登陆！', onClose: () => router.push('login') }))
+  })
+    .then(() => feedbackToast({ message: t('messageTip.changePasswordSuccess'), onClose: () => router.push('login') }))
     .catch(error => feedbackToast({ error }))
 }
 
 </script>
 
-<style lang='scss' scoped></style>
+<style lang='scss' scoped>
+.page_container {
+  background: linear-gradient(180deg, rgba(0, 137, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+}
+</style>

@@ -2,7 +2,7 @@
   <div class="page_container">
     <ContactHeader />
     <ContactMenuList />
-    <ContactFrequentList />
+    <!-- <ContactFrequentList /> -->
   </div>
 </template>
 
@@ -11,11 +11,8 @@ import ContactHeader from './components/ContactHeader.vue';
 import ContactMenuList from './components/ContactMenuList.vue';
 import ContactFrequentList from './components/ContactFrequentList.vue';
 
-
 const emit = defineEmits([]);
 const props = defineProps({});
-
-
 
 </script>
 

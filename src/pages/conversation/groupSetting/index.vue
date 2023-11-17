@@ -1,56 +1,137 @@
 <template>
   <div class="page_container">
-    <NavBar title="聊天设置" />
+    <NavBar :title="$t('groupSetting')" />
 
     <div class="overflow-y-auto flex-1">
-      <div class="flex items-center bg-white px-[22px] py-[18px] mt-3">
-        <Avatar class="mr-5" :size="48" :src="conversationStore.currentConversation.faceURL" is-group />
-        <div class="max-w-[160px] truncate">
-          {{ conversationStore.currentConversation.showName }}
+      <div class="flex items-center bg-white p-4 mt-[10px] mx-[10px] rounded-md">
+        <div class="relative w-12 h-12">
+          <Avatar :size="48" :src="conversationStore.currentConversation.faceURL" is-group @click="chooseAvatar" />
+          <img v-if="isOwner || isAdmin" class="w-[14px] h-[14px] absolute right-[-4px] bottom-[-4px]" :src="edit_icon"
+            alt="" />
         </div>
-        <span>{{
-          `（${conversationStore.storeCurrentGroupInfo.memberCount}）`
-        }}</span>
+
+        <div class="flex flex-1 h-[48px] flex-col items-start ml-[10px]" @click="toChangeName(true)">
+          <div class="flex items-center justify-start">
+            <span class="text-base">{{ conversationStore.currentConversation.showName }}</span>
+            <span class="text-base">{{ "(" }}</span>
+            <span class="text-base">{{ conversationStore.storeCurrentGroupInfo.memberCount }}</span>
+            <span class="text-base">{{ ")" }}</span>
+            <img v-if="isOwner || isAdmin" class="w-[12px] h-[12px] ml-1.5" :src="edit" alt="">
+          </div>
+
+          <span class="text-sm text-sub-text mt-1">{{ conversationStore.storeCurrentGroupInfo.groupID }}</span>
+        </div>
+        <img class="w-[18px] h-[18px]" @click="toGroupQr" :src="qr" alt="">
       </div>
 
-      <GroupMemberRow :member-count="conversationStore.storeCurrentGroupInfo.memberCount" :is-nomal="isNomal"/>
+      <GroupMemberRow :member-count="conversationStore.storeCurrentGroupInfo.memberCount" :is-nomal="isNomal" />
 
-
-      <SettingRowItem title="群聊名称" :sub-title="conversationStore.storeCurrentGroupInfo.groupName" />
-
-      <SettingRowItem title="群ID号" border :sub-title="conversationStore.storeCurrentGroupInfo.groupID"
-        @click="copyGroupID" />
-
-      <div class="my-12">
-        <van-button class="w-full text-[#F85050] !border-0" plain type="default" :text="isOwner ? '解散群聊' : '退出群聊'" />
+      <div class="bg-white m-[10px] rounded-md overflow-hidden">
+        <SettingRowItem danger :title="isOwner ? $t('buttons.disbandGroup') : $t('buttons.quitGroup')"
+          @click-item="dismissOrQuit" />
       </div>
     </div>
+
+    <van-uploader v-show="false" ref="uploaderRef" accept="image/*" capture="camcorder" :preview-image="false"
+      :multiple="false" :after-read="afterReadFile" />
   </div>
 </template>
 
 <script name="groupSetting" setup lang="ts">
+import qr from '@/assets/images/setting/qr.png'
+import edit from '@/assets/images/setting/edit.png'
+import edit_icon from '@/assets/images/setting/edit_icon.png'
 import NavBar from "@/components/NavBar/index.vue";
 import Avatar from "@/components/Avatar/index.vue";
-import { showToast } from "vant";
+import { UploaderFileListItem, UploaderInstance, showConfirmDialog, showLoadingToast } from "vant";
 import SettingRowItem from "@/components/SettingRowItem/index.vue";
 import GroupMemberRow from "./components/GroupMemberRow.vue";
-import { useClipboard } from "@vueuse/core";
-import useConversationStore from "@/store/modules/conversation";
-import { GroupMemberRole } from "open-im-sdk-wasm/lib/types/enum";
+import useConversationSettings from "@/hooks/useConversationSettings";
+import useCurrentMemberRole from "@/hooks/useCurrentMemberRole";
+import { IMSDK } from "@/utils/imCommon";
+import { v4 as uuidV4 } from "uuid";
+import { feedbackToast } from '@/utils/common';
 
-const { copy, isSupported } = useClipboard()
+const {
+  conversationStore,
+} = useConversationSettings();
 
-const conversationStore = useConversationStore();
+const { isNomal, isOwner, isAdmin } = useCurrentMemberRole();
+const router = useRouter();
+const { t } = useI18n()
 
+const uploaderRef = ref<UploaderInstance>()
 
-const isOwner = conversationStore.currentMemberInGroup.roleLevel === GroupMemberRole.Owner
-const isNomal = conversationStore.currentMemberInGroup.roleLevel === GroupMemberRole.Nomal
+const afterReadFile = (data: UploaderFileListItem | UploaderFileListItem[]) => {
+  const fileData = Array.isArray(data) ? data[0] : data
+  const uploadToast = showLoadingToast({
+    message: t('uploading'),
+    forbidClick: true,
+    duration: 0
+  })
+  IMSDK.uploadFile({
+    name: fileData.file?.name ?? '',
+    contentType: fileData.file?.type!,
+    uuid: uuidV4(),
+    file: fileData.file as File,
+  }).then((res) => {
+    IMSDK.setGroupInfo({
+      groupID: conversationStore.storeCurrentConversation.groupID,
+      faceURL: res.data.url
+    }).finally(() => uploadToast.close())
+  }).catch(() => {
+    uploadToast.message = t('messageTip.uploadFailed'); setTimeout(() => {
+      uploadToast.close()
+    }, 200)
+  }).finally(() => uploadToast.close())
+}
 
-const copyGroupID = () => {
-  if (isSupported) {
-    copy(conversationStore.storeCurrentGroupInfo.groupID)
+const chooseAvatar = () => {
+  if (!isNomal.value) {
+    uploaderRef.value?.chooseFile()
   }
-  showToast(isSupported ? '复制成功！' : '当前环境暂不支持复制！')
+}
+
+const toChangeName = (isGroup?: boolean) => {
+  if (isGroup && isNomal.value) {
+    return;
+  }
+  router.push({
+    path: 'changeName',
+    query: {
+      originData: JSON.stringify(isGroup ? conversationStore.storeCurrentGroupInfo : conversationStore.storeCurrentMemberInGroup)
+    }
+  })
+}
+
+const toGroupQr = () => {
+  router.push({
+    path: 'selfOrGroupQr',
+    query: {
+      isGroup: 'true'
+    }
+  })
+}
+
+const dismissOrQuit = () => {
+  const funName = isOwner ? 'dismissGroup' : "quitGroup"
+  const message = isOwner ? t('messageTip.disbandGroup') :  t('messageTip.quitGroup')
+
+  showConfirmDialog({
+    message,
+    beforeClose: (action: string) => {
+      return new Promise((resolve) => {
+        if (action !== "confirm") {
+          resolve(true);
+          return;
+        }
+        IMSDK[funName](conversationStore.currentConversation.groupID)
+          .then(() => router.push('/conversation'))
+          .catch((error: unknown) => feedbackToast({ error }))
+          .finally(() => resolve(true));
+      });
+    },
+  });
 }
 
 </script>

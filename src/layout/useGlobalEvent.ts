@@ -10,6 +10,10 @@ import {
   GroupApplicationItem,
   WSEvent,
   MessageItem,
+  BlackUserItem,
+  GroupItem,
+  FriendUserItem,
+  RevokedInfo,
 } from "@/utils/open-im-sdk-wasm/types/entity";
 import {
   MessageType,
@@ -18,8 +22,12 @@ import {
 } from "@/utils/open-im-sdk-wasm/types/enum";
 import useMessageStore, { ExMessageItem } from "@/store/modules/message";
 import emitter from "@/utils/events";
-import { useDebounceFn, useThrottleFn } from "@vueuse/core";
-import { clearIMProfile } from "@/utils/storage";
+import { useThrottleFn } from "@vueuse/core";
+import { GroupSessionTypes } from "@/constants/enum";
+import {
+  getAccessedFriendApplication,
+  getAccessedGroupApplication,
+} from "@/utils/storage";
 import { showLoadingToast } from "vant";
 import { ToastWrapperInstance } from "vant/lib/toast/types";
 import { feedbackToast } from "@/utils/common";
@@ -33,6 +41,7 @@ export function useGlobalEvent() {
   const contactStore = useContactStore();
   const messageStore = useMessageStore();
 
+  const { t } = useI18n();
   const router = useRouter();
 
   let cacheConversationList = [] as ConversationItem[];
@@ -71,10 +80,12 @@ export function useGlobalEvent() {
     // group
     IMSDK.on(CbEvents.OnJoinedGroupAdded, joinedGroupAddedHandler);
     IMSDK.on(CbEvents.OnJoinedGroupDeleted, joinedGroupDeletedHandler);
+    IMSDK.on(CbEvents.OnGroupDismissed, joinedGroupDismissHandler);
     IMSDK.on(CbEvents.OnGroupInfoChanged, groupInfoChangedHandler);
     IMSDK.on(CbEvents.OnGroupMemberAdded, groupMemberAddedHandler);
     IMSDK.on(CbEvents.OnGroupMemberDeleted, groupMemberDeletedHandler);
     IMSDK.on(CbEvents.OnGroupMemberInfoChanged, groupMemberInfoChangedHandler);
+    // application
     IMSDK.on(CbEvents.OnFriendApplicationAdded, friendApplicationAddedHandler);
     IMSDK.on(
       CbEvents.OnFriendApplicationAccepted,
@@ -96,47 +107,58 @@ export function useGlobalEvent() {
   };
 
   const selfUpdateHandler = ({ data }: any) => {
+    const imUserInfo = data;
     userStore.updateSelfInfo({
+      ...imUserInfo,
       ...userStore.storeSelfInfo,
-      ...data,
+      globalRecvMsgOpt: imUserInfo.globalRecvMsgOpt,
     });
   };
   const connectingHandler = () => {};
-  const connectFailedHandler = () => {};
+  const connectFailedHandler = ({ errCode }: any) => {
+    if (errCode == 705) {
+      tryOut(t("messageTip.loginExpiration"));
+    }
+  };
   const connectSuccessHandler = () => {};
-  const kickHandler = () => tryOut("您的账号已在其他设备登录,请重新登录");
-  const expiredHandler = () => tryOut("当前登录已过期,请重新登录");
+  const kickHandler = () => tryOut(t("messageTip.loginKicked"));
+  const expiredHandler = () => tryOut(t("messageTip.loginExpiration"));
 
   const tryOut = (message: string) =>
     feedbackToast({
       message,
       error: message,
       onClose: () => {
-        clearIMProfile();
-        router.push("login");
+        userStore.userLogout(true);
+        router.push("/login");
       },
     });
 
   // sync
   const syncStartHandler = () => {
+    userStore.isSyncing = true;
     syncToast = showLoadingToast({
-      message: "同步中...",
+      message: t("syncing"),
       forbidClick: true,
     });
   };
   const syncFinishHandler = () => {
+    userStore.isSyncing = false;
     syncToast?.close();
     syncToast = null;
   };
   const syncFailedHandler = () => {
+    userStore.isSyncing = false;
     if (!syncToast) return;
-    syncToast.message = "同步失败";
+    syncToast.message = t("syncFailed");
     syncToast.close();
     syncToast = null;
   };
 
   // message
-  const newMessageHandler = ({ data }: any) => {
+  const newMessageHandler = ({
+    data,
+  }: WSEvent<ExMessageItem | ExMessageItem[]>) => {
     if (syncToast) return;
     const parsedData = data;
     if (Array.isArray(parsedData)) {
@@ -164,7 +186,6 @@ export function useGlobalEvent() {
           messageStore.pushNewMessage(newServerMsg);
           emitter.emit("CHAT_MAIN_SCROLL_TO_BOTTOM", true);
         }
-        markConversationAsRead();
       }
     } else {
       if (
@@ -200,12 +221,6 @@ export function useGlobalEvent() {
         return false;
     }
   };
-  const markConversationAsRead = useDebounceFn(() => {
-    IMSDK.markConversationMessageAsRead(
-      conversationStore.storeCurrentConversation.conversationID
-    );
-  }, 2000);
-
   const newMessageNotify = async (newServerMsg: MessageItem) => {
     if (userStore.storeIsSyncing) {
       return;
@@ -222,7 +237,7 @@ export function useGlobalEvent() {
       ...conversationStore.storeConversationList,
       ...cacheConversationList,
     ].find((conversation) => {
-      if (newServerMsg.sessionType === SessionType.WorkingGroup) {
+      if (GroupSessionTypes.includes(newServerMsg.sessionType)) {
         return newServerMsg.groupID === conversation.groupID;
       }
       return newServerMsg.sendID === conversation.userID;
@@ -230,7 +245,7 @@ export function useGlobalEvent() {
 
     if (!cveItem) {
       try {
-        const { data } = await IMSDK.getOneConversation({
+        const { data } = await IMSDK.getOneConversation<ConversationItem>({
           sessionType: newServerMsg.sessionType,
           sourceID: newServerMsg.groupID || newServerMsg.sendID,
         });
@@ -251,9 +266,18 @@ export function useGlobalEvent() {
     audioEl.src = messageRing;
     audioEl.play();
   };
+  const revokedMessageHandler = ({ data }: WSEvent<RevokedInfo>) => {
+    messageStore.updateOneMessage({
+      clientMsgID: data.clientMsgID,
+      contentType: MessageType.RevokeMessage,
+      notificationElem: {
+        detail: JSON.stringify(data),
+      },
+    } as ExMessageItem);
+  };
 
   // conversation
-  const conversationChnageHandler = ({ data }: WSEvent<ConversationItem[]>) => {
+  const conversationChnageHandler = ({ data }: any) => {
     let filterArr: ConversationItem[] = [];
     const changes: ConversationItem[] = data;
     const chids = changes.map((ch) => ch.conversationID);
@@ -269,59 +293,72 @@ export function useGlobalEvent() {
     const result = [...changes, ...filterArr];
     conversationStore.updateConversationList(conversationSort(result));
   };
-  const newConversationHandler = ({ data }: WSEvent<ConversationItem[]>) => {
+  const newConversationHandler = ({ data }: any) => {
     const news: ConversationItem[] = data;
     const result = [...news, ...conversationStore.storeConversationList];
     conversationStore.updateConversationList(conversationSort(result));
   };
-  const totalUnreadChangeHandler = ({ data }: WSEvent<number>) => {
+  const totalUnreadChangeHandler = ({ data }: any) => {
     conversationStore.updateUnReadCount(data);
   };
 
   // friend
-  const friednInfoChangeHandler = ({ data }: any) => {
+  const friednInfoChangeHandler = ({ data }: WSEvent<FriendUserItem>) => {
+    if (data.userID === conversationStore.currentConversation?.userID) {
+      messageStore.updateMessageNicknameAndFaceUrl({
+        sendID: data.userID,
+        senderNickname: data.remark || data.nickname,
+        senderFaceUrl: data.faceURL,
+      });
+    }
     contactStore.updateFriendList(data);
   };
-  const friednAddedHandler = ({ data }: any) => {
+  const friednAddedHandler = ({ data }: WSEvent<FriendUserItem>) => {
     contactStore.pushNewFriend(data);
   };
-  const friednDeletedHandler = ({ data }: any) => {
+  const friednDeletedHandler = ({ data }: WSEvent<FriendUserItem>) => {
     contactStore.updateFriendList(data, true);
   };
 
   // blacklist
-  const blackAddedHandler = ({ data }: any) => {
+  const blackAddedHandler = ({ data }: WSEvent<BlackUserItem>) => {
     contactStore.pushNewBlack(data);
   };
-  const blackDeletedHandler = ({ data }: any) => {
+  const blackDeletedHandler = ({ data }: WSEvent<BlackUserItem>) => {
     contactStore.updateBlackList(data, true);
   };
 
   // group
-  const joinedGroupAddedHandler = ({ data }: any) => {
+  const joinedGroupAddedHandler = ({ data }: WSEvent<GroupItem>) => {
+    if (data.groupID === conversationStore.currentConversation?.groupID) {
+      conversationStore.updateCurrentGroupInfo(data);
+    }
     contactStore.pushNewGroup(data);
   };
-  const joinedGroupDeletedHandler = ({ data }: any) => {
+  const joinedGroupDeletedHandler = ({ data }: WSEvent<GroupItem>) => {
     contactStore.updateGroupList(data, true);
   };
-  const groupInfoChangedHandler = ({ data }: any) => {
-    const group = data;
-    contactStore.updateGroupList(group);
-    if (group.groupID === conversationStore.storeCurrentGroupInfo.groupID) {
-      conversationStore.updateCurrentGroupInfo(group);
+  const joinedGroupDismissHandler = () => {};
+  const groupInfoChangedHandler = ({ data }: WSEvent<GroupItem>) => {
+    contactStore.updateGroupList(data);
+    if (data.groupID === conversationStore.storeCurrentGroupInfo?.groupID) {
+      conversationStore.updateCurrentGroupInfo(data);
     }
   };
   const groupMemberAddedHandler = () => {};
   const groupMemberDeletedHandler = () => {};
-  const groupMemberInfoChangedHandler = ({ data }: any) => {
-    const member = data as GroupMemberItem;
-    if (
-      member.groupID === conversationStore.storeCurrentMemberInGroup?.groupID &&
-      member.userID === conversationStore.storeCurrentMemberInGroup?.userID
-    ) {
-      conversationStore.updateCurrentMemberInGroup({ ...member });
+  const groupMemberInfoChangedHandler = ({
+    data,
+  }: WSEvent<GroupMemberItem>) => {
+    if (data.groupID === conversationStore.storeCurrentMemberInGroup?.groupID) {
+      conversationStore.updateCurrentMemberInGroup({ ...data });
+      messageStore.updateMessageNicknameAndFaceUrl({
+        sendID: data.userID,
+        senderNickname: data.nickname,
+        senderFaceUrl: data.faceURL,
+      });
     }
-    contactStore.updateUserCardMemberInfo(member);
+    contactStore.updateUserCardMemberInfo(data);
   };
 
   // rtc
@@ -397,6 +434,7 @@ export function useGlobalEvent() {
     // group
     IMSDK.off(CbEvents.OnJoinedGroupAdded, joinedGroupAddedHandler);
     IMSDK.off(CbEvents.OnJoinedGroupDeleted, joinedGroupDeletedHandler);
+    IMSDK.off(CbEvents.OnGroupDismissed, joinedGroupDismissHandler);
     IMSDK.off(CbEvents.OnGroupInfoChanged, groupInfoChangedHandler);
     IMSDK.off(CbEvents.OnGroupMemberAdded, groupMemberAddedHandler);
     IMSDK.off(CbEvents.OnGroupMemberDeleted, groupMemberDeletedHandler);
@@ -426,6 +464,41 @@ export function useGlobalEvent() {
     () => userStore.storeSelfInfo.userID,
     () => {
       cacheConversationList = [];
+    }
+  );
+
+  watch(
+    [
+      () => contactStore.storeRecvFriendApplicationList,
+      () => contactStore.storeRecvGroupApplicationList,
+      () => userStore.storeSelfInfo.userID,
+    ],
+    (newValue) => {
+      const userID = newValue[2];
+      if (!userID) return;
+      const accessedFriendApplications = getAccessedFriendApplication();
+      let unHandleFriendApplicationNum = newValue[0].filter(
+        (application) =>
+          application.handleResult === 0 &&
+          !accessedFriendApplications.includes(
+            `${application.fromUserID}_${application.createTime}`
+          )
+      ).length;
+
+      const accessedGroupApplications = getAccessedGroupApplication();
+      let unHandleGroupApplicationNum = newValue[1].filter(
+        (application) =>
+          application.handleResult === 0 &&
+          !accessedGroupApplications.includes(
+            `${application.userID}_${application.createTime}`
+          )
+      ).length;
+      contactStore.updateUnHandleFriendApplicationNum(
+        unHandleFriendApplicationNum
+      );
+      contactStore.updateUnHandleGroupApplicationNum(
+        unHandleGroupApplicationNum
+      );
     }
   );
 

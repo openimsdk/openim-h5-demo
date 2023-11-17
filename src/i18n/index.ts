@@ -6,7 +6,7 @@ import { Locale } from "vant";
 const localLanguage = localStorage.getItem("IMI18n") ?? "zh-CN";
 
 export function loadLanguages() {
-  const context = import.meta.glob('./languages/*.ts', { eager: true });
+  const context = import.meta.glob("./languages/*.ts", { eager: true });
 
   const languages: any = {};
 
@@ -39,4 +39,5 @@ export function setLanguage(locale: string) {
   i18n.global.locale = locale;
   dayjs.locale(locale);
   Locale.use(locale, i18n.global.messages[i18n.global.locale].vant);
+  localStorage.setItem("IMI18n", locale);
 }
