@@ -2,7 +2,7 @@ import useContactStore from "@store/modules/contact";
 import useConversationStore from "@store/modules/conversation";
 import useUserStore from "@store/modules/user";
 import { conversationSort, IMSDK } from "@/utils/imCommon";
-import { CbEvents } from "@/utils/open-im-sdk-wasm/constant";
+import { CbEvents } from "open-im-sdk-wasm";
 import {
   ConversationItem,
   GroupMemberItem,
@@ -14,12 +14,12 @@ import {
   GroupItem,
   FriendUserItem,
   RevokedInfo,
-} from "@/utils/open-im-sdk-wasm/types/entity";
+} from "open-im-sdk-wasm/lib/types/entity";
 import {
   MessageType,
   MessageReceiveOptType,
   SessionType,
-} from "@/utils/open-im-sdk-wasm/types/enum";
+} from "open-im-sdk-wasm";
 import useMessageStore, { ExMessageItem } from "@/store/modules/message";
 import emitter from "@/utils/events";
 import { useThrottleFn } from "@vueuse/core";
@@ -245,7 +245,7 @@ export function useGlobalEvent() {
 
     if (!cveItem) {
       try {
-        const { data } = await IMSDK.getOneConversation<ConversationItem>({
+        const { data } = await IMSDK.getOneConversation({
           sessionType: newServerMsg.sessionType,
           sourceID: newServerMsg.groupID || newServerMsg.sendID,
         });
@@ -351,7 +351,9 @@ export function useGlobalEvent() {
     data,
   }: WSEvent<GroupMemberItem>) => {
     if (data.groupID === conversationStore.storeCurrentMemberInGroup?.groupID) {
-      conversationStore.updateCurrentMemberInGroup({ ...data });
+      if (data.userID === conversationStore.storeCurrentMemberInGroup?.userID) {
+        conversationStore.updateCurrentMemberInGroup({ ...data });
+      }
       messageStore.updateMessageNicknameAndFaceUrl({
         sendID: data.userID,
         senderNickname: data.nickname,

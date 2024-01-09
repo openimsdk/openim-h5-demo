@@ -1,8 +1,7 @@
 import useConversationStore from "@/store/modules/conversation";
 import { feedbackToast } from "@/utils/common";
 import { IMSDK, getCleanText } from "@/utils/imCommon";
-import { MessageItem } from "@/utils/open-im-sdk-wasm/types/entity";
-import { FaceMessageParams } from "open-im-sdk-wasm/lib/types/params";
+import type { MessageItem } from "open-im-sdk-wasm/lib/types/entity";
 import { Ref } from "vue";
 
 type CreateNomalMessageProps = {

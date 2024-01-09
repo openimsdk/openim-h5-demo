@@ -1,8 +1,8 @@
 import useConversationStore from "@/store/modules/conversation";
 import { feedbackToast } from "@/utils/common";
 import { IMSDK } from "@/utils/imCommon";
-import { CbEvents } from "@/utils/open-im-sdk-wasm/constant";
-import { GroupMemberItem, WSEvent } from "@/utils/open-im-sdk-wasm/types/entity";
+import { CbEvents } from "open-im-sdk-wasm";
+import { GroupMemberItem, WSEvent } from "open-im-sdk-wasm/lib/types/entity";
 
 const conversationStore = useConversationStore();
 
@@ -34,7 +34,7 @@ export default function useGroupMemberList(
 
   const searchMember = (keyword: string) => {
     fetchState.loading = true;
-    IMSDK.searchGroupMembers<GroupMemberItem[]>({
+    IMSDK.searchGroupMembers({
       groupID: groupID ?? conversationStore.storeCurrentGroupInfo.groupID,
       offset: fetchState.searchOffset,
       count: 20,
@@ -59,7 +59,7 @@ export default function useGroupMemberList(
 
   const getMemberData = () => {
     fetchState.loading = true;
-    IMSDK.getGroupMemberList<GroupMemberItem[]>({
+    IMSDK.getGroupMemberList({
       groupID: groupID ?? conversationStore.storeCurrentGroupInfo.groupID,
       offset: fetchState.offset,
       count: 20,

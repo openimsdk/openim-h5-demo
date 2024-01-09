@@ -1,16 +1,9 @@
 import { showToast } from "vant";
 import PinYin from "./pinyin";
 
-import excel from '@/assets/images/messageItem/excel.png'
-import ppt from "@/assets/images/messageItem/ppt.png";
-import word from "@/assets/images/messageItem/word.png";
-import zip from "@/assets/images/messageItem/zip.png";
-import pdf from "@/assets/images/messageItem/pdf.png";
-import unknown from "@/assets/images/messageItem/unknown.png";
-
 // i18n
 import { i18n } from "@/i18n";
-import { FriendUserItem } from "@/utils/open-im-sdk-wasm/types/entity";
+import type { FriendUserItem } from "open-im-sdk-wasm/lib/types/entity";
 // @ts-ignore
 const { t } = i18n.global;
 

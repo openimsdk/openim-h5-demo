@@ -1,10 +1,8 @@
 import { GroupSessionTypes } from "@/constants/enum";
 import useConversationStore from "@/store/modules/conversation";
-import useMessageStore from "@/store/modules/message";
-import emitter from "@/utils/events";
 import { IMSDK } from "@/utils/imCommon";
-import { ConversationItem } from "@/utils/open-im-sdk-wasm/types/entity";
-import { GroupAtType } from "@/utils/open-im-sdk-wasm/types/enum";
+import type { ConversationItem } from "open-im-sdk-wasm/lib/types/entity";
+import { GroupAtType } from "open-im-sdk-wasm";
 import { onBeforeRouteLeave } from "vue-router";
 
 export default function useConversationState() {

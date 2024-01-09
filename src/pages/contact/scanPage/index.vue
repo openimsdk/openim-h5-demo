@@ -17,7 +17,6 @@ import { AddFriendQrCodePrefix, AddGroupQrCodePrefix, IMSDK } from '@/utils/imCo
 import useContactStore from '@/store/modules/contact';
 import useConversationStore from '@/store/modules/conversation';
 import { feedbackToast } from '@/utils/common';
-import { GroupItem } from '@/utils/open-im-sdk-wasm/types/entity';
 
 const { t } = useI18n()
 const router = useRouter();
@@ -34,7 +33,7 @@ const onDecode = async (data: string) => {
     try {
       let info = contactStore.storeGroupList.find(item => item.groupID === groupID)
       if (!info) {
-        const { data } = await IMSDK.getSpecifiedGroupsInfo<GroupItem[]>([groupID])
+        const { data } = await IMSDK.getSpecifiedGroupsInfo([groupID])
         info = data[0]
       }
       if (info) {

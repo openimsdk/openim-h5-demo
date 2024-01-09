@@ -54,7 +54,7 @@ import useConversationStore from '@/store/modules/conversation';
 import useContactStore from '@/store/modules/contact';
 import useGroupMemberList from '@/hooks/useGroupMemberList';
 import dayjs from 'dayjs';
-import { SessionType } from '@/utils/open-im-sdk-wasm/types/enum';
+import { SessionType } from 'open-im-sdk-wasm';
 import { MemberListActionEnum } from '../groupMemberList/data';
 import useConversationToggle from '@/hooks/useConversationToggle';
 

@@ -20,7 +20,7 @@ import add_create_group from '@assets/images/contact/add_create_group.png'
 import add_join_group from '@assets/images/contact/add_join_group.png'
 import add_search_user from '@assets/images/contact/add_search_user.png'
 import add_scan from '@assets/images/contact/add_scan.png'
-import { GroupType } from '@/utils/open-im-sdk-wasm/types/enum';
+import { GroupType } from 'open-im-sdk-wasm';
 
 const router = useRouter()
 

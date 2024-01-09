@@ -68,7 +68,7 @@ import { IMSDK } from '@/utils/imCommon';
 import { feedbackToast, copy2Text } from '@/utils/common';
 import useContactStore from '@/store/modules/contact';
 import useCurrentMemberRole from '@/hooks/useCurrentMemberRole';
-import { AllowType, GroupJoinSource, GroupMemberRole, SessionType } from '@/utils/open-im-sdk-wasm/types/enum';
+import { AllowType, GroupJoinSource, GroupMemberRole, SessionType } from 'open-im-sdk-wasm';
 import dayjs from 'dayjs';
 import useUserStore from '@/store/modules/user';
 import useConversationStore from '@/store/modules/conversation';

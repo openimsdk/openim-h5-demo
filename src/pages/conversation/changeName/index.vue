@@ -15,7 +15,7 @@
 
 <script setup lang='ts'>
 import NavBar from '@/components/NavBar/index.vue';
-import { GroupItem, GroupMemberItem } from '@/utils/open-im-sdk-wasm/types/entity';
+import type { GroupItem, GroupMemberItem } from 'open-im-sdk-wasm/lib/types/entity';
 import { IMSDK } from '@/utils/imCommon';
 import { feedbackToast } from '@/utils/common';
 

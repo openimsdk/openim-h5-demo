@@ -19,9 +19,8 @@ import send from '@/assets/images/chatFooter/send.png'
 
 import CustomEdit from '@/components/CustomEdit/index.vue';
 import ChatFooterAction from './ChatFooterAction.vue';
-import ChatFooterRecording from './ChatFooterRecording.vue';
 import { useThrottleFn } from '@vueuse/core';
-import { MessageType, SessionType } from '@/utils/open-im-sdk-wasm/types/enum'
+import { MessageType, SessionType } from 'open-im-sdk-wasm'
 import { UploaderFileListItem } from 'vant';
 import useSendMessage from '@/hooks/useSendMessage';
 import useConversationStore from '@/store/modules/conversation';

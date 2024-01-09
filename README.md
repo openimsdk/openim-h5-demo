@@ -50,19 +50,13 @@ Follow these steps to set up a local development environment:
 
 ## Build 🚀
 
-1. You need update `utils/open_im_sdk_wasm/api/database/instance.js` wasm import path first.
-
-  ```js
-  - SQL = await initSqlJs({ locateFile: () => '/sql-wasm.wasm' });
-  + SQL = await initSqlJs({ locateFile: () => '../sql-wasm.wasm' });
-  ```
-2. Run the following command to build the web application:
+1. Run the following command to build the web application:
 
   ```bash
   npm run build
   ```
 
-3. The build result will be located in the `dist` folder.
+2. The build result will be located in the `dist` folder.
 
 ## Community :busts_in_silhouette:
 

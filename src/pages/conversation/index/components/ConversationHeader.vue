@@ -46,8 +46,7 @@ import sync_error from '@assets/images/conversation/sync_error.png'
 import { PopoverAction } from 'vant';
 import useUserStore from '@/store/modules/user';
 import { IMSDK } from '@/utils/imCommon';
-import { CbEvents } from '@/utils/open-im-sdk-wasm/constant';
-import { GroupType } from '@/utils/open-im-sdk-wasm/types/enum';
+import { GroupType, CbEvents } from 'open-im-sdk-wasm';
 
 enum ActionEnum {
   Scan,

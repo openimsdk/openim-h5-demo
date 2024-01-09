@@ -16,7 +16,7 @@
 <script setup lang='ts' name="tabbar">
 import Tabbar from './Tabbar.vue'
 import useConversationStore from "@/store/modules/conversation";
-import { AllowType, LoginStatus } from "@/utils/open-im-sdk-wasm/types/enum";
+import { AllowType, LoginStatus } from "open-im-sdk-wasm";
 import useContactStore from "@/store/modules/contact";
 import { useGlobalEvent } from './useGlobalEvent';
 import { getIMToken, getIMUserID } from "@/utils/storage";
@@ -31,7 +31,7 @@ onMounted(() => {
 
 router.beforeEach(async (to, from, next) => {
   if (from.path === '/login') {
-    const { data } = await IMSDK.getLoginStatus<LoginStatus>()
+    const { data } = await IMSDK.getLoginStatus()
     if (data === LoginStatus.Logout) {
       loginCheck();
     }

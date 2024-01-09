@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import NavBar from '@/components/NavBar/index.vue';
-import { setLanguage } from '@/i18n';
+import { localLanguage, setLanguage } from '@/i18n';
 import select from '@assets/images/setting/select.png'
 
 const { t, locale } = useI18n()
@@ -37,12 +37,11 @@ watch(locale, () => {
 const currentLanguage = ref('zh-CN')
 
 onMounted(() => {
-  currentLanguage.value = localStorage.getItem("IMI18n") ?? "zh-CN";
+  currentLanguage.value = localLanguage();
 })
 
 const clickItem = (item: string) => {
   currentLanguage.value = item
   setLanguage(item)
-  location.reload()
 }
 </script>

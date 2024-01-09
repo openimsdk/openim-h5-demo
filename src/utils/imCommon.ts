@@ -1,7 +1,6 @@
-import { CustomMessageType, GroupSystemMessageTypes } from "@/constants/enum";
+import { GroupSystemMessageTypes } from "@/constants/enum";
 import dayjs from "dayjs";
 
-import { sec2Time, secondsToTime } from "./common";
 import { isThisYear } from "date-fns";
 
 import useContactStore from "@store/modules/contact";
@@ -14,14 +13,13 @@ import updateLocale from "dayjs/plugin/updateLocale";
 
 // i18n
 import { i18n } from "@/i18n";
-import {
+import type {
   MessageItem,
   ConversationItem,
   PublicUserItem,
-  AtTextElem,
-} from "@/utils/open-im-sdk-wasm/types/entity";
-import { getSDK } from "@/utils/open-im-sdk-wasm";
-import { MessageType } from "./open-im-sdk-wasm/types/enum";
+} from "open-im-sdk-wasm/lib/types/entity";
+import { getSDK } from "open-im-sdk-wasm";
+import { MessageType } from "open-im-sdk-wasm";
 // @ts-ignore
 const { t } = i18n.global;
 
@@ -50,7 +48,10 @@ dayjs.updateLocale("zh-cn", {
   },
 });
 
-export const IMSDK = getSDK("./openIM.wasm");
+export const IMSDK = getSDK({
+  coreWasmPath: "./openIM.wasm",
+  sqlWasmPath: "/sql-wasm.wasm",
+});
 
 export const AddFriendQrCodePrefix = "io.openim.app/addFriend/";
 export const AddGroupQrCodePrefix = "io.openim.app/joinGroup/";

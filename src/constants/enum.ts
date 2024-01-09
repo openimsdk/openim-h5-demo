@@ -1,4 +1,4 @@
-import { MessageType, SessionType } from "@/utils/open-im-sdk-wasm/types/enum";
+import { MessageType, SessionType } from "open-im-sdk-wasm";
 
 export const CustomMessageType = {
   Call: 100,
@@ -21,9 +21,6 @@ export const GroupSystemMessageTypes = [
   MessageType.GroupMuted,
   MessageType.GroupCancelMuted,
   MessageType.GroupMemberCancelMuted,
-  MessageType.GroupMemberInfoUpdated,
-  MessageType.GroupMemberToAdmin,
-  MessageType.GroupAdminToNomal,
   MessageType.GroupNameUpdated
 ];
 

@@ -1,10 +1,10 @@
 import { IMSDK } from "@/utils/imCommon";
-import {
+import type {
   ConversationItem,
   GroupItem,
   GroupMemberItem,
   MessageItem,
-} from "@/utils/open-im-sdk-wasm/types/entity";
+} from "open-im-sdk-wasm/lib/types/entity";
 
 import { defineStore } from "pinia";
 import store from "../index";
@@ -40,9 +40,7 @@ const useStore = defineStore("conversation", {
   actions: {
     async getConversationListFromReq(isScrollLoad = false): Promise<boolean> {
       try {
-        const { data } = await IMSDK.getConversationListSplit<
-          ConversationItem[]
-        >({
+        const { data } = await IMSDK.getConversationListSplit({
           offset: isScrollLoad ? this.conversationList.length : 0,
           count: 20,
         });
@@ -58,7 +56,7 @@ const useStore = defineStore("conversation", {
       }
     },
     async getUnReadCountFromReq() {
-      const { data } = await IMSDK.getTotalUnreadMsgCount<number>();
+      const { data } = await IMSDK.getTotalUnreadMsgCount();
       this.unReadCount = data;
     },
     updateUnReadCount(data: number) {
@@ -75,7 +73,7 @@ const useStore = defineStore("conversation", {
         return;
       }
       try {
-        const { data } = await IMSDK.getSpecifiedGroupsInfo<GroupItem[]>([
+        const { data } = await IMSDK.getSpecifiedGroupsInfo([
           sourceID,
         ]);
         this.currentGroupInfo = data[0] ?? {};
@@ -90,9 +88,7 @@ const useStore = defineStore("conversation", {
       const userStore = useUserStore();
 
       try {
-        const { data } = await IMSDK.getSpecifiedGroupMembersInfo<
-          GroupMemberItem[]
-        >({
+        const { data } = await IMSDK.getSpecifiedGroupMembersInfo({
           groupID: groupID ?? this.currentConversation.groupID,
           userIDList: [userStore.storeSelfInfo.userID],
         });

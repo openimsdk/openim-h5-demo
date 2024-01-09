@@ -11,7 +11,7 @@
 <script setup lang='ts'>
 import VirtualList from '@components/VirtualList';
 import GenericListItem from '@/components/GenericListItem/index.vue';
-import { PublicUserItem } from '@/utils/open-im-sdk-wasm/types/entity';
+import type { PublicUserItem } from 'open-im-sdk-wasm/lib/types/entity';
 import { getFrequentContacts } from '@/utils/imCommon';
 
 const dataSource = ref<PublicUserItem[]>([])

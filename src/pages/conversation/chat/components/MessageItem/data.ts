@@ -1,4 +1,4 @@
-import { MessageItem } from "@/utils/open-im-sdk-wasm/types/entity";
+import type { MessageItem } from "open-im-sdk-wasm/lib/types/entity";
 
 type ExMessageFields = {
   checked: boolean;

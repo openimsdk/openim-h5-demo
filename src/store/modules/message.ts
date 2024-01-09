@@ -1,10 +1,10 @@
 import { feedbackToast } from "@utils/common";
 import { IMSDK } from "@/utils/imCommon";
-import { MessageItem } from "@/utils/open-im-sdk-wasm/types/entity";
-import { MessageType } from "@/utils/open-im-sdk-wasm/types/enum";
-import { GetAdvancedHistoryMsgParams } from "@/utils/open-im-sdk-wasm/types/params";
+import type { MessageItem } from "open-im-sdk-wasm/lib/types/entity";
+import { MessageType } from "open-im-sdk-wasm";
 import { defineStore } from "pinia";
 import store from "../index";
+import { GetAdvancedHistoryMsgParams } from "open-im-sdk-wasm/lib/types/params";
 
 interface StateType {
   historyMessageList: ExMessageItem[];
@@ -50,7 +50,7 @@ const useStore = defineStore("message", {
         params.startClientMsgID === "" || params.lastMinSeq === 0;
       try {
         const { data: tmpData } =
-          await IMSDK.getAdvancedHistoryMessageList<IAdvancedMessageResponse>(
+          await IMSDK.getAdvancedHistoryMessageList(
             params
           );
         this.historyMessageList = [

@@ -40,8 +40,8 @@
 import Avatar from '@/components/Avatar/index.vue';
 import { feedbackToast } from '@/utils/common';
 import { IMSDK } from '@/utils/imCommon';
-import { PublicUserItem } from '@/utils/open-im-sdk-wasm/types/entity';
-import { GroupType, SessionType } from '@/utils/open-im-sdk-wasm/types/enum';
+import type { PublicUserItem } from 'open-im-sdk-wasm/lib/types/entity';
+import { GroupType, SessionType } from 'open-im-sdk-wasm';
 import { ContactChooseEnum } from '../chooseUser/data';
 import create_group from '@/assets/images/contact/create_group.png'
 import NavBar from '@/components/NavBar/index.vue';

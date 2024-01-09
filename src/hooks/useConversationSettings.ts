@@ -2,7 +2,7 @@ import { feedbackToast } from "@utils/common";
 import useConversationStore from "@/store/modules/conversation";
 import useMessageStore from "@/store/modules/message";
 import { IMSDK } from "@/utils/imCommon";
-import { MessageReceiveOptType } from "@/utils/open-im-sdk-wasm/types/enum";
+import { MessageReceiveOptType } from "open-im-sdk-wasm";
 import { showConfirmDialog } from "vant";
 
 export default function useConversationSettings() {

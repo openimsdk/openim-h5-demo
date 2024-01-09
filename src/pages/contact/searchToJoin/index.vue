@@ -23,7 +23,6 @@ import { searchUserInfoByBusiness } from "@/api/user";
 import useContactStore from "@/store/modules/contact";
 import useConversationStore from "@/store/modules/conversation";
 import { IMSDK } from "@/utils/imCommon";
-import { FullUserItemWithCache, GroupItem } from "@/utils/open-im-sdk-wasm/types/entity";
 
 type SearchToJoinProps = {
   isGroup: boolean;
@@ -60,7 +59,7 @@ const searchGroups = async () => {
       (item) => item.groupID === keyword.value
     );
     if (!info) {
-      const { data } = await IMSDK.getSpecifiedGroupsInfo<GroupItem[]>([keyword.value]);
+      const { data } = await IMSDK.getSpecifiedGroupsInfo([keyword.value]);
       info = data[0];
     }
     if (info) {
@@ -76,10 +75,10 @@ const searchGroups = async () => {
 
 const searchUsers = async () => {
   try {
-    const { total, users } = await searchUserInfoByBusiness(keyword.value);
+    const { data: { users, total } } = await searchUserInfoByBusiness(keyword.value);
     if (total > 0) {
       const businessData = users[0];
-      const { data } = await IMSDK.getUsersInfo<FullUserItemWithCache[]>([businessData.userID]);
+      const { data } = await IMSDK.getUsersInfo([businessData.userID]);
       const imData = data[0]?.friendInfo ?? data[0]?.publicInfo ?? {};
       const info = {
         ...imData,

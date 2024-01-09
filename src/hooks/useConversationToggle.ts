@@ -1,8 +1,8 @@
 import useConversationStore from "@/store/modules/conversation";
 import { feedbackToast } from "@/utils/common";
 import { IMSDK } from "@/utils/imCommon";
-import { ConversationItem } from "@/utils/open-im-sdk-wasm/types/entity";
-import { SessionType } from "@/utils/open-im-sdk-wasm/types/enum";
+import { ConversationItem } from "open-im-sdk-wasm/lib/types/entity";
+import { SessionType } from "open-im-sdk-wasm";
 
 export default function useConversationToggle() {
   const router = useRouter();
@@ -21,7 +21,7 @@ export default function useConversationToggle() {
     if (!conversation) {
       try {
         conversation = (
-          await IMSDK.getOneConversation<ConversationItem>({
+          await IMSDK.getOneConversation({
             sourceID,
             sessionType,
           })

@@ -1,5 +1,5 @@
 import useConversationStore from "@/store/modules/conversation";
-import { GroupMemberRole } from "@/utils/open-im-sdk-wasm/types/enum";
+import { GroupMemberRole } from "open-im-sdk-wasm";
 
 export default function useCurrentMemberRole(groupID?: string) {
   const conversationStore = useConversationStore();

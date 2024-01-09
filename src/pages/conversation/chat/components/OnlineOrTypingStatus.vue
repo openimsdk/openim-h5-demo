@@ -8,11 +8,10 @@
 
 <script setup lang='ts'>
 import useConversationStore from '@/store/modules/conversation';
-import emitter from '@/utils/events';
 import { IMSDK } from '@/utils/imCommon';
-import { CbEvents } from '@/utils/open-im-sdk-wasm/constant';
-import { UserOnlineState, WSEvent } from '@/utils/open-im-sdk-wasm/types/entity';
-import { OnlineState, Platform } from '@/utils/open-im-sdk-wasm/types/enum';
+import { CbEvents } from 'open-im-sdk-wasm';
+import type { UserOnlineState, WSEvent } from 'open-im-sdk-wasm/lib/types/entity';
+import { OnlineState, Platform } from 'open-im-sdk-wasm';
 
 const platformMap: Record<Platform, string> = {
   1: "iOS",

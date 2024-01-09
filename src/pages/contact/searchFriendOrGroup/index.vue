@@ -19,7 +19,7 @@
 <script setup lang='ts'>
 import GenericListItem from '@/components/GenericListItem/index.vue';
 import useContactStore from '@/store/modules/contact';
-import { GroupItem, SearchedFriendsInfo } from '@/utils/open-im-sdk-wasm/types/entity';
+import type { GroupItem, SearchedFriendsInfo } from 'open-im-sdk-wasm/lib/types/entity';
 import CommonEmpty from '@/components/CommonEmpty/index.vue';
 import { IMSDK } from '@/utils/imCommon';
 import { feedbackToast } from '@/utils/common';
@@ -51,13 +51,13 @@ const onSearch = () => {
   searchState.loading = true;
   let func
   if (history.state.isGroup) {
-    func = IMSDK.searchGroups<GroupInfo[]>({
+    func = IMSDK.searchGroups({
       keywordList: [searchState.keyword],
       isSearchGroupID: false,
       isSearchGroupName: true
     })
   } else {
-    func = IMSDK.searchFriends<FriendInfo[]>({
+    func = IMSDK.searchFriends({
       keywordList: [searchState.keyword],
       isSearchUserID: false,
       isSearchNickname: true,

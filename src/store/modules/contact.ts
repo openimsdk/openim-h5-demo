@@ -1,13 +1,12 @@
 import { IMSDK } from "@/utils/imCommon";
-import {
+import type {
   FriendUserItem,
   GroupItem,
   BlackUserItem,
   FriendApplicationItem,
   GroupApplicationItem,
   GroupMemberItem,
-  FullUserItem,
-} from "@/utils/open-im-sdk-wasm/types/entity";
+} from "open-im-sdk-wasm/lib/types/entity";
 import { defineStore } from "pinia";
 import store from "../index";
 import { feedbackToast } from "@/utils/common";
@@ -97,7 +96,7 @@ const useStore = defineStore("contact", {
     },
     async getGroupListFromReq() {
       try {
-        const { data } = await IMSDK.getJoinedGroupList<GroupItem[]>();
+        const { data } = await IMSDK.getJoinedGroupList();
         this.groupList = data;
       } catch (error) {
         console.error(error);
@@ -120,7 +119,7 @@ const useStore = defineStore("contact", {
     },
     async getBlackListFromReq() {
       try {
-        const { data } = await IMSDK.getBlackList<BlackUserItem[]>();
+        const { data } = await IMSDK.getBlackList();
         this.blackList = data;
       } catch (error) {
         console.error(error);
@@ -143,9 +142,7 @@ const useStore = defineStore("contact", {
     },
     async getRecvFriendApplicationListFromReq() {
       try {
-        const { data } = await IMSDK.getFriendApplicationListAsRecipient<
-          FriendApplicationItem[]
-        >();
+        const { data } = await IMSDK.getFriendApplicationListAsRecipient();
         this.recvFriendApplicationList = data;
       } catch (error) {
         console.error(error);
@@ -172,9 +169,7 @@ const useStore = defineStore("contact", {
     },
     async getSendFriendApplicationListFromReq() {
       try {
-        const { data } = await IMSDK.getFriendApplicationListAsApplicant<
-          FriendApplicationItem[]
-        >();
+        const { data } = await IMSDK.getFriendApplicationListAsApplicant();
         this.sendFriendApplicationList = data;
       } catch (error) {
         console.error(error);
@@ -201,9 +196,7 @@ const useStore = defineStore("contact", {
     },
     async getRecvGroupApplicationListFromReq() {
       try {
-        const { data } = await IMSDK.getGroupApplicationListAsRecipient<
-          GroupApplicationItem[]
-        >();
+        const { data } = await IMSDK.getGroupApplicationListAsRecipient();
         this.recvGroupApplicationList = data;
       } catch (error) {
         console.error(error);
@@ -230,9 +223,7 @@ const useStore = defineStore("contact", {
     },
     async getSendGroupApplicationListFromReq() {
       try {
-        const { data } = await IMSDK.getGroupApplicationListAsApplicant<
-          GroupApplicationItem[]
-        >();
+        const { data } = await IMSDK.getGroupApplicationListAsApplicant();
         this.sendGroupApplicationList = data;
       } catch (error) {
         console.error(error);
@@ -280,13 +271,11 @@ const useStore = defineStore("contact", {
       let groupMemberInfo: GroupMemberItem | undefined;
       baseInfo = this.friendList.find((item) => item.userID === sourceID);
       if (!baseInfo) {
-        const { data } = await IMSDK.getUsersInfo<FullUserItem[]>([sourceID]);
+        const { data } = await IMSDK.getUsersInfo([sourceID]);
         baseInfo = data[0]?.friendInfo ?? data[0]?.publicInfo ?? undefined;
       }
       if (groupID) {
-        const { data } = await IMSDK.getSpecifiedGroupMembersInfo<
-          GroupMemberItem[]
-        >({
+        const { data } = await IMSDK.getSpecifiedGroupMembersInfo({
           groupID,
           userIDList: [sourceID],
         });

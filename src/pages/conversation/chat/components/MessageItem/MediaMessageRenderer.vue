@@ -16,7 +16,7 @@
 import play_icon from '@/assets/images/chating_message_video_play.png'
 import useMessageStore from '@/store/modules/message';
 import { secFormat } from '@/utils/common';
-import { MessageType } from '@/utils/open-im-sdk-wasm/types/enum';
+import { MessageType } from 'open-im-sdk-wasm';
 import { showImagePreview } from 'vant';
 import { ExedMessageItem } from './data';
 

@@ -1,6 +1,6 @@
 import { IMSDK } from "@/utils/imCommon";
-import { FullUserItem } from "@/utils/open-im-sdk-wasm/types/entity";
-import { MessageReceiveOptType } from "@/utils/open-im-sdk-wasm/types/enum";
+import type { FullUserItem } from "open-im-sdk-wasm/lib/types/entity";
+import { MessageReceiveOptType } from "open-im-sdk-wasm";
 import { defineStore } from "pinia";
 import store from "../index";
 import { BusinessUserInfo } from "@/api/data";
@@ -44,7 +44,7 @@ const useStore = defineStore("user", {
   actions: {
     async getSelfInfoFromReq() {
       try {
-        const { data } = await IMSDK.getSelfUserInfo<BusinessUserInfo>();
+        const { data } = await IMSDK.getSelfUserInfo();
         const res = await getBusinessInfo(data.userID);
         const businessData = res.data.users[0] ?? {};
         filterEmptyValue(businessData as any);

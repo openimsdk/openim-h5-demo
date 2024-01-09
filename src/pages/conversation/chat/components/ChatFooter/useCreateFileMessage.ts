@@ -1,10 +1,9 @@
 import { getPicInfo, getMediaDuration, getVideoSnshot } from "@/utils/common";
 import { v4 as uuidV4 } from "uuid";
-import { MessageType } from "@/utils/open-im-sdk-wasm/types/enum";
+import { MessageType } from "open-im-sdk-wasm";
 import { IMSDK } from "@/utils/imCommon";
 import { showFailToast } from "vant";
-import { MessageItem } from "@/utils/open-im-sdk-wasm/types/entity";
-import { ExMessageItem } from "@/store/modules/message";
+import type { MessageItem } from "open-im-sdk-wasm/lib/types/entity";
 
 export default function useCreateFileMessage() {
   const { t } = useI18n();
@@ -41,7 +40,7 @@ export default function useCreateFileMessage() {
       sourcePath: "",
       file,
     };
-    return (await IMSDK.createImageMessageByFile<ExMessageItem>(options)).data;
+    return (await IMSDK.createImageMessageByFile(options)).data;
   };
 
   const getVideoMessage = async (
@@ -66,7 +65,7 @@ export default function useCreateFileMessage() {
       snapshotHeight: height,
       snapShotType: getFileType(file.name),
     };
-    return (await IMSDK.createVideoMessageByFile<ExMessageItem>(options)).data;
+    return (await IMSDK.createVideoMessageByFile(options)).data;
   };
 
   const createFileMessage = async (

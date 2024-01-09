@@ -13,7 +13,7 @@
 
 <script setup lang='ts'>
 import Avatar from '@/components/Avatar/index.vue';
-import { MessageItem } from '@/utils/open-im-sdk-wasm/types/entity';
+import type { MessageItem } from 'open-im-sdk-wasm/lib/types/entity';
 
 const emit = defineEmits([]);
 const props = defineProps<{ source: MessageItem }>();

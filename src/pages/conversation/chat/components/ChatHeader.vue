@@ -25,7 +25,7 @@ import arrows_left from '@/assets/images/chatHeader/arrows_left.png'
 import not_accept from '@assets/images/conversation/not_accept.png'
 import more from '@/assets/images/chatHeader/more.png'
 import useConversationStore from '@/store/modules/conversation';
-import { MessageReceiveOptType, SessionType } from '@/utils/open-im-sdk-wasm/types/enum';
+import { MessageReceiveOptType, SessionType } from 'open-im-sdk-wasm';
 import OnlineOrTypingStatus from './OnlineOrTypingStatus.vue'
 
 const router = useRouter();

@@ -1,8 +1,8 @@
 import {
     FriendApplicationItem,
     GroupApplicationItem,
-  } from "@/utils/open-im-sdk-wasm/types/entity";
-import { GroupJoinSource } from "@/utils/open-im-sdk-wasm/types/enum";
+  } from "open-im-sdk-wasm/lib/types/entity";
+import { GroupJoinSource } from "open-im-sdk-wasm";
 
 export enum ApplicationTypeEnum {
     RecivedFriendApplication,

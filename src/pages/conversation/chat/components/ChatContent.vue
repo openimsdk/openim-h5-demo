@@ -29,11 +29,11 @@
 import { TipTypes } from '@/constants/enum';
 import useMessageStore from '@/store/modules/message';
 import VirtualList from '@components/VirtualList';
-import { MessageItem } from '@/utils/open-im-sdk-wasm/types/entity';
+import type { MessageItem } from 'open-im-sdk-wasm/lib/types/entity';
 import useHistoryMessageList from '../useHistoryMessageList';
 import MessageItemVue from './MessageItem/MessageItem.vue';
 import SystemNotificationItem from './SystemNotificationItem.vue';
-import { MessageType } from '@/utils/open-im-sdk-wasm/types/enum';
+import { MessageType } from 'open-im-sdk-wasm';
 import arrow_icon from '@assets/images/conversation/arrow.png'
 
 

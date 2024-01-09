@@ -28,11 +28,11 @@
 </template>
 
 <script setup lang='ts'>
-import { ConversationItem, MessageItem } from '@/utils/open-im-sdk-wasm/types/entity';
+import type { ConversationItem, MessageItem } from 'open-im-sdk-wasm/lib/types/entity';
 import Avatar from '@/components/Avatar/index.vue';
 import not_accept from '@assets/images/conversation/not_accept.png'
 import { formatConversionTime, IMSDK, getConversationContent } from '@/utils/imCommon';
-import { GroupAtType, MessageReceiveOptType, SessionType } from '@/utils/open-im-sdk-wasm/types/enum';
+import { GroupAtType, MessageReceiveOptType, SessionType } from 'open-im-sdk-wasm';
 import { feedbackToast } from '@/utils/common';
 import useConversationStore from '@/store/modules/conversation';
 import { GroupSessionTypes } from '@/constants/enum';
