@@ -92,7 +92,7 @@ const onSubmit = () => {
     })
     return
   }
-  if (needInvitationCode && formData.invitationCode) {
+  if (needInvitationCode && !formData.invitationCode) {
     feedbackToast({
       message: t('messageTip.invitationCode'),
       error: t('messageTip.invitationCode')
