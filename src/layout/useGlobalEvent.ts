@@ -183,6 +183,7 @@ export function useGlobalEvent() {
         if (newServerMsg.contentType === MessageType.RevokeMessage) {
         } else {
           newServerMsg.isAppend = true;
+          messageStore.pushNewMessage(newServerMsg);
           emitter.emit("CHAT_MAIN_SCROLL_TO_BOTTOM", true);
         }
       }
