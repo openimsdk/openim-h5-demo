@@ -8,12 +8,14 @@
       </transition>
     </router-view>
   </div>
+  <CommonModal />
 </template>
 
 <script setup lang='ts'>
 import useUserStore from '@/store/modules/user'
 import { checkIsSafari } from '@/utils/common';
 import emitter from '@/utils/events';
+import CommonModal from './CommonModal.vue'
 
 const innerHeight = ref(`${window.visualViewport?.height ?? window.innerHeight}px`)
 const userStore = useUserStore();

@@ -10,6 +10,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@livekit/components-core": "^0.8.2",
     "@vuemap/vue-amap": "^2.0.5",
     "@vueuse/core": "^9.10.0",
     "absurd-sql-optimized": "^0.0.1",
@@ -18,11 +19,13 @@
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.5",
     "js-audio-recorder": "^1.0.7",
+    "livekit-client": "^1.15.5",
     "md5": "^2.3.0",
     "mitt": "^3.0.0",
-    "open-im-sdk-wasm": "^3.5.1-alpha.2.2",
+    "open-im-sdk-wasm": "^3.5.1-beta.1",
     "patch-package": "^8.0.0",
     "pinia": "^2.0.23",
+    "rxjs": "^7.8.1",
     "uqrcodejs": "^4.0.6",
     "uuid": "^9.0.0",
     "vant": "^4.0.7",

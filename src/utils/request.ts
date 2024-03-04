@@ -1,5 +1,12 @@
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
+import { feedbackToast } from './common'
+import { ErrCodeMap } from '@/constants/errcode'
+
+type ErrorData = {
+  errCode: number
+  errMsg?: string
+}
 
 const serves = axios.create({
   baseURL: process.env.CHAT_URL,
@@ -18,7 +25,14 @@ serves.interceptors.request.use(
 serves.interceptors.response.use(
   (res) => {
     if (res.data.errCode !== 0) {
-      return Promise.reject(res.data);
+      const errData = res.data as ErrorData
+      if (errData.errMsg) {
+        feedbackToast({
+          message: ErrCodeMap[errData.errCode],
+          error: errData.errMsg,
+        })
+      }
+      return Promise.reject(res.data)
     }
     return res.data;
   },

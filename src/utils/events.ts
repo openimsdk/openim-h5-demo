@@ -1,3 +1,4 @@
+import { InviteData } from "@/pages/rtc/data";
 import mitt, { Emitter } from "mitt";
 
 type Events = {
@@ -8,6 +9,8 @@ type Events = {
   UPDATE_MULTIPLE_CHECK_STATE: boolean;
   KEYBOARD_UPDATE: void;
   AT_SOMEONE: any;
+  OPEN_RTC_MODAL: InviteData
+  CLOSE_RTC_MODAL: void
 };
 
 const emitter: Emitter<Events> = mitt<Events>();

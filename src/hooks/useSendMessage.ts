@@ -17,18 +17,16 @@ const messageStore = useMessageStore();
 const conversationStore = useConversationStore();
 const userStore = useUserStore();
 
-type SendMessageParams = Partial<Omit<SendMsgParams, "message">> & {
-  message: MessageItem;
-  needOpreateMessage?: boolean;
-};
+type SendMessageParams = Partial<Omit<SendMsgParams, 'message'>> & {
+  message: MessageItem
+  needOpreateMessage?: boolean
+}
 
 export default function useSendMessage() {
   const sendMessage = async ({
     recvID,
     groupID,
     message,
-    // fileArrayBuffer,
-    // snpFileArrayBuffer,
     needOpreateMessage,
   }: SendMessageParams) => {
     needOpreateMessage =
@@ -40,17 +38,11 @@ export default function useSendMessage() {
       updateFrequentContacts();
     }
 
-    // let funcName = "sendMessage";
-    // if (FileMessageTypes.includes(message.contentType)) {
-    //   funcName = fileArrayBuffer ? "sendMessageByBuffer" : "sendMessageNotOss";
-    // }
     const options = {
       recvID: recvID ?? conversationStore.storeCurrentConversation.userID ?? "",
       groupID:
         groupID ?? conversationStore.storeCurrentConversation.groupID ?? "",
       message,
-      // fileArrayBuffer,
-      // snpFileArrayBuffer,
     };
     try {
       // @ts-ignore

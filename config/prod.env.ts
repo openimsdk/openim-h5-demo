@@ -6,5 +6,5 @@ export default {
   OBJECT_STORAGE: "minio",
   AMAP_KEY: "key",
   AMAP_SNAP_KEY: "key",
-  VERSION: "IM-HCD 3.5.0 SDK v3.4.0-e-v1.0.0",
+  VERSION: "IM-H5Demo",
 };

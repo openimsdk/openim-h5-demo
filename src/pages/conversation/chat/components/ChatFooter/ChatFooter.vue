@@ -73,6 +73,12 @@ const switchTextMessage = async () => {
   if (message) {
     sendMessage({ message })
   }
+  resetState()
+}
+
+const resetState = () => {
+  messageContent.value = ''
+  inputRef.value.clear()
 }
 
 // action bar
@@ -98,7 +104,7 @@ const getFile = async (uploadData: UploaderFileListItem) => {
     feedbackToast({ error, message: error })
     return;
   }
-  sendMessage({ message, fileArrayBuffer: buffer as ArrayBuffer, snpFileArrayBuffer: snapBuffer as ArrayBuffer })
+  sendMessage({ message })
 }
 
 </script>

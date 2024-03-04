@@ -26,10 +26,11 @@ export function useMessageIsRead({
   clientMsgID,
 }: UseMessageIsReadProps) {
   const markC2CAsRead = () => {
-    IMSDK.markMessagesAsReadByMsgID({
-      conversationID: conversationStore.storeCurrentConversation.conversationID,
-      clientMsgIDList: [clientMsgID],
-    });
+    if (conversationStore.storeCurrentConversation.unreadCount > 0) {
+      IMSDK.markConversationMessageAsRead(
+        conversationStore.storeCurrentConversation.conversationID,
+      )
+    }
     messageStore.updateOneMessage({
       clientMsgID,
       isRead: true,
