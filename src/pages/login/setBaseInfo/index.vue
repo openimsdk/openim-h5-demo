@@ -27,7 +27,7 @@
       <div class="text-sm mb-1 text-sub-text">{{ $t('confirmPassword') }}</div>
       <div class="border border-gap-text rounded-lg">
         <van-field class="!py-1" clearable v-model="baseInfo.confirmPassword" name="confirmPassword" type="password"
-          :placeholder="$t('placeholder.reConfirmPassword')">
+          :placeholder="$t('reConfirmPassword')">
         </van-field>
       </div>
     </div>

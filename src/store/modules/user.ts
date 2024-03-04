@@ -26,8 +26,8 @@ export interface AppConfig {
   ordinaryUserAddFriend: number;
   bossUserID: string;
   adminURL: string;
-  allowSendMsgNotFriend: string;
-  needInvitationCodeRegister: string;
+  allowSendMsgNotFriend?: string;
+  needInvitationCodeRegister?: string;
 }
 
 const useStore = defineStore("user", {
@@ -63,7 +63,7 @@ const useStore = defineStore("user", {
     async getAppConfigFromReq() {
       try {
         const { data } = await getAppConfig();
-        this.appConfig = data.config;
+        this.appConfig = data.config ?? {};
       } catch (error) {}
     },
     async userLogout(force?: boolean) {
