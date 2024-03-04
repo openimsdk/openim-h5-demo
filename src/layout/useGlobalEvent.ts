@@ -23,7 +23,7 @@ import {
 import useMessageStore, { ExMessageItem } from "@/store/modules/message";
 import emitter from "@/utils/events";
 import { useThrottleFn } from "@vueuse/core";
-import { GroupSessionTypes } from "@/constants/enum";
+import { CustomType, GroupSessionTypes } from "@/constants/enum";
 import {
   getAccessedFriendApplication,
   getAccessedGroupApplication,
@@ -182,6 +182,15 @@ export function useGlobalEvent() {
       } else {
         if (newServerMsg.contentType === MessageType.RevokeMessage) {
         } else {
+          if (newServerMsg.contentType === MessageType.CustomMessage) {
+            const customData = JSON.parse(newServerMsg.customElem.data);
+            if (
+              CustomType.CallingInvite <= customData.customType &&
+              customData.customType <= CustomType.CallingHungup
+            ) {
+              return;
+            }
+          }
           newServerMsg.isAppend = true;
           messageStore.pushNewMessage(newServerMsg);
           emitter.emit("CHAT_MAIN_SCROLL_TO_BOTTOM", true);
