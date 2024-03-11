@@ -66,7 +66,7 @@ const acceptInvitation = async () => {
   try {
     await props.sendCustomSignal(recvID, CustomType.CallingAccept);
     const { data } = await getRtcConnectData(
-      uuidV4(),
+      props.invitation.roomID,
       userStore.selfInfo.userID
     );
     emit("connectRtc", {

@@ -121,7 +121,7 @@ const sendCustomSignal = async (recvID: string, customType: CustomType) => {
     recvID,
     message,
     groupID: "",
-    isOnlineonly: true,
+    isOnlineOnly: true,
   });
 };
 

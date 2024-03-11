@@ -42,12 +42,12 @@
 </template>
 
 <script setup lang='ts'>
-import md5 from 'md5';
 import login_back from '@assets/images/login_back.png'
-import { register } from '@/api/login';
-import { setIMProfile } from '@/utils/storage';
 import { feedbackToast } from '@/utils/common';
 import { BaseData } from '../verifyCode/index.vue';
+import md5 from 'md5';
+import { register } from '@/api/login';
+import { setTMUserID } from '@/utils/storage';
 
 const props = defineProps<{
   baseData: BaseData & { verificationCode: string }
@@ -84,7 +84,7 @@ const login = async () => {
   localStorage.setItem("IMAccount", props.baseData.phoneNumber)
   loading.value = true
   try {
-    const { data: { chatToken, imToken, userID } } = await register({
+    const { data: { userID } } = await register({
       verifyCode: props.baseData.verificationCode,
       deviceID: '',
       user: {
@@ -94,10 +94,9 @@ const login = async () => {
         password: md5(baseInfo.password),
       },
     })
-    setIMProfile({ chatToken, imToken, userID })
-    router.push('conversation')
+    setTMUserID(userID)
+    router.push('login')
   } catch (error) {
-    loading.value = false
     feedbackToast({ error, message: t('messageTip.registerFailed') })
   }
 }
