@@ -19,12 +19,14 @@
       </div>
 
       <div class="mt-5" v-if="isRegiste">
-        <div class="text-sm mb-1 text-sub-text">{{ $t('invitationCode') }}</div>
-        <div class="border border-gap-text rounded-lg">
-          <van-field class="!py-1" clearable v-model="formData.invitationCode" name="invitationCode" type="text"
-            :placeholder="`${$t('placeholder.inputInvitationCode')}${needInvitationCode ? '' : `(${$t('optional')})`}`">
-          </van-field>
-        </div>
+        <template v-if="needInvitationCode">
+          <div class="text-sm mb-1 text-sub-text">{{ $t('invitationCode') }}</div>
+          <div class="border border-gap-text rounded-lg">
+            <van-field class="!py-1" clearable v-model="formData.invitationCode" name="invitationCode" type="text"
+              :placeholder="`${$t('placeholder.inputInvitationCode')}${needInvitationCode ? '' : `(${$t('optional')})`}`">
+            </van-field>
+          </div>
+        </template>
       </div>
 
       <div class="mt-5" v-else>
@@ -57,7 +59,7 @@
 
 <script setup lang='ts'>
 import type { PickerConfirmEventParams, } from 'vant';
-import { UsedFor } from '@/api/data';
+import { BusinessAllowType, UsedFor } from '@/api/data';
 import { sendSms } from '@/api/login';
 import useUserStore from '@/store/modules/user'
 import countryCode from '@/utils/areaCode'
@@ -82,7 +84,11 @@ const showAreaCode = ref(false)
 const count = ref(0)
 let timer: NodeJS.Timer
 
-const needInvitationCode = computed(() => !!userStore.storeAppConfig.needInvitationCodeRegister)
+const needInvitationCode = computed(
+  () =>
+    Number(userStore.storeAppConfig.needInvitationCodeRegister) ===
+    BusinessAllowType.Allow,
+)
 
 const onSubmit = () => {
   if (!phoneRegExp.test(formData.phoneNumber)) {
@@ -102,7 +108,8 @@ const onSubmit = () => {
   sendSms({
     phoneNumber: formData.phoneNumber,
     areaCode: formData.areaCode,
-    usedFor: props.isRegiste ? UsedFor.Register : UsedFor.Modify
+    usedFor: props.isRegiste ? UsedFor.Register : UsedFor.Modify,
+    invitationCode: formData.invitationCode,
   })
     .then(() => {
       if (props.isRegiste) {
