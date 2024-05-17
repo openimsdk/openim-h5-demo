@@ -41,7 +41,7 @@ export type VerifyCodeParams = {
 export type ModifyPasswordParams = {
   phoneNumber: string;
   areaCode: string;
-  VerifyCode: string;
+  verifyCode: string;
   password: string;
 };
 

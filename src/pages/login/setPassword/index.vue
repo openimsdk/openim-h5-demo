@@ -68,7 +68,7 @@ const onSubmit = () => {
   }
   modify({
     password: md5(password.value),
-    VerifyCode: props.baseData.verificationCode,
+    verifyCode: props.baseData.verificationCode,
     areaCode: props.baseData.areaCode,
     phoneNumber: props.baseData.phoneNumber
   })

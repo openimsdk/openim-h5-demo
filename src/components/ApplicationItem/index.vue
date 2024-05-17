@@ -72,7 +72,13 @@ const getIcon = computed(() => {
   }
 });
 
-const showActionBtn = computed(() => props.source.handleResult === 0)
+const showActionBtn = computed(() => {
+  return (
+    props.source.handleResult === 0 &&
+    (props.type === ApplicationTypeEnum.RecivedFriendApplication ||
+      props.type === ApplicationTypeEnum.RecivedGroupApplication)
+  )
+})
 
 const stateStr = computed(() => {
   if (props.source.handleResult === 1) {
