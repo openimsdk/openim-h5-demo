@@ -6,5 +6,5 @@ export default {
   OBJECT_STORAGE: "minio",
   AMAP_KEY: "key",
   AMAP_SNAP_KEY: "key",
-  VERSION: "IM-H5Demo",
+  VERSION: "OpenIM-H5-Demo",
 };

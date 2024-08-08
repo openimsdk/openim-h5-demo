@@ -2,7 +2,7 @@ import { RtcType } from '@/constants/action'
 import useUserStore from '@/store/modules/user'
 import useConversationStore from '@/store/modules/conversation'
 import { v4 as uuidV4 } from 'uuid'
-import { SessionType } from 'open-im-sdk-wasm'
+import { SessionType } from '@openim/wasm-client-sdk'
 import emitter from '@/utils/events'
 
 export const useInviteRtc = () => {

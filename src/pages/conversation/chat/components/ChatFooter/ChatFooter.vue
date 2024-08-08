@@ -20,7 +20,7 @@ import send from '@/assets/images/chatFooter/send.png'
 import CustomEdit from '@/components/CustomEdit/index.vue';
 import ChatFooterAction from './ChatFooterAction.vue';
 import { useThrottleFn } from '@vueuse/core';
-import { MessageType, SessionType } from 'open-im-sdk-wasm'
+import { MessageType, SessionType } from '@openim/wasm-client-sdk'
 import { UploaderFileListItem } from 'vant';
 import useSendMessage from '@/hooks/useSendMessage';
 import useConversationStore from '@/store/modules/conversation';

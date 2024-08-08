@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { PublicUserItem } from 'open-im-sdk-wasm/lib/types/entity'
+import type { PublicUserItem } from '@openim/wasm-client-sdk/lib/types/entity'
 
 type SingleContentProps = {
   userInfo?: PublicUserItem

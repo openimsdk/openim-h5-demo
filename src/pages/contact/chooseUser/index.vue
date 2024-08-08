@@ -65,7 +65,7 @@ import GenericListItem from '@/components/GenericListItem/index.vue';
 import CheckedFooter from '@/components/CheckedFooter/index.vue';
 import VirtualList from '@components/VirtualList';
 
-import type { ConversationItem, FullUserItem, GroupItem, GroupMemberItem, MessageItem, PublicUserItem } from 'open-im-sdk-wasm/lib/types/entity';
+import type { ConversationItem, FullUserItem, GroupItem, GroupMemberItem, MessageItem, PublicUserItem } from '@openim/wasm-client-sdk/lib/types/entity';
 import { GenericListItemSource } from '@/components/GenericListItem/data';
 import { ContactChooseEnum } from './data';
 import useContactStore from '@/store/modules/contact';
@@ -75,7 +75,7 @@ import { IMSDK } from '@/utils/imCommon';
 import emitter from '@/utils/events';
 import useSendMessage from '@/hooks/useSendMessage';
 import useConversationStore from '@/store/modules/conversation';
-import { SessionType } from 'open-im-sdk-wasm';
+import { SessionType } from '@openim/wasm-client-sdk';
 
 const { t } = useI18n()
 

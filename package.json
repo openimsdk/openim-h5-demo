@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@livekit/components-core": "^0.8.2",
+    "@openim/wasm-client-sdk": "^3.8.1",
     "@vuemap/vue-amap": "^2.0.5",
     "@vueuse/core": "^9.10.0",
     "absurd-sql-optimized": "^0.0.1",
@@ -22,7 +23,6 @@
     "livekit-client": "^1.15.5",
     "md5": "^2.3.0",
     "mitt": "^3.0.0",
-    "open-im-sdk-wasm": "^3.5.2",
     "patch-package": "^8.0.0",
     "pinia": "^2.0.23",
     "rxjs": "^7.8.1",

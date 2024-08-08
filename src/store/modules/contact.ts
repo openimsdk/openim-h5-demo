@@ -6,7 +6,7 @@ import type {
   FriendApplicationItem,
   GroupApplicationItem,
   GroupMemberItem,
-} from "open-im-sdk-wasm/lib/types/entity";
+} from "@openim/wasm-client-sdk/lib/types/entity";
 import { defineStore } from "pinia";
 import store from "../index";
 import { feedbackToast } from "@/utils/common";

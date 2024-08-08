@@ -25,14 +25,14 @@ import arrows_left from '@/assets/images/chatHeader/arrows_left.png'
 import not_accept from '@assets/images/conversation/not_accept.png'
 import more from '@/assets/images/chatHeader/more.png'
 import useConversationStore from '@/store/modules/conversation';
-import { MessageReceiveOptType, SessionType } from 'open-im-sdk-wasm';
+import { MessageReceiveOptType, SessionType } from '@openim/wasm-client-sdk';
 import OnlineOrTypingStatus from './OnlineOrTypingStatus.vue'
 
 const router = useRouter();
 const conversationStore = useConversationStore();
 
 const isSingle = computed(() => conversationStore.storeCurrentConversation.conversationType === SessionType.Single)
-const notAccept = computed(() => conversationStore.storeCurrentConversation.recvMsgOpt !== MessageReceiveOptType.Nomal)
+const notAccept = computed(() => conversationStore.storeCurrentConversation.recvMsgOpt !== MessageReceiveOptType.Normal)
 const isNotification = computed(() => conversationStore.storeCurrentConversation.conversationType === SessionType.Notification)
 const titleSuffix = computed(() => {
   let suffix = ''

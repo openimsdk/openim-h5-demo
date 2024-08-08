@@ -4,7 +4,7 @@ import type {
   GroupItem,
   GroupMemberItem,
   MessageItem,
-} from "open-im-sdk-wasm/lib/types/entity";
+} from "@openim/wasm-client-sdk/lib/types/entity";
 
 import { defineStore } from "pinia";
 import store from "../index";

@@ -1,4 +1,4 @@
-import { MessageReceiveOptType } from "open-im-sdk-wasm";
+import { MessageReceiveOptType } from "@openim/wasm-client-sdk";
 
 export enum UsedFor {
   Register = 1,

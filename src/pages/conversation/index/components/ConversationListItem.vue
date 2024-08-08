@@ -28,11 +28,11 @@
 </template>
 
 <script setup lang='ts'>
-import type { ConversationItem, MessageItem } from 'open-im-sdk-wasm/lib/types/entity';
+import type { ConversationItem, MessageItem } from '@openim/wasm-client-sdk/lib/types/entity';
 import Avatar from '@/components/Avatar/index.vue';
 import not_accept from '@assets/images/conversation/not_accept.png'
 import { formatConversionTime, IMSDK, getConversationContent } from '@/utils/imCommon';
-import { GroupAtType, MessageReceiveOptType, SessionType } from 'open-im-sdk-wasm';
+import { GroupAtType, MessageReceiveOptType, SessionType } from '@openim/wasm-client-sdk';
 import { feedbackToast } from '@/utils/common';
 import useConversationStore from '@/store/modules/conversation';
 import { GroupSessionTypes } from '@/constants/enum';
@@ -53,7 +53,7 @@ const props = defineProps<ConversationItemProps>();
 const isGroup = GroupSessionTypes.includes(props.source.conversationType)
 const isNotification = props.source.conversationType === SessionType.Notification
 
-const notAccept = props.source.recvMsgOpt !== MessageReceiveOptType.Nomal
+const notAccept = props.source.recvMsgOpt !== MessageReceiveOptType.Normal
 
 const formattedMessage = computed(() => {
   let parsedMessage: MessageItem | undefined = undefined
@@ -73,7 +73,7 @@ const messagePrefix = computed(() => {
   }
   let prefix = ''
 
-  if (props.source?.recvMsgOpt !== MessageReceiveOptType.Nomal && props.source.unreadCount > 0) {
+  if (props.source?.recvMsgOpt !== MessageReceiveOptType.Normal && props.source.unreadCount > 0) {
     prefix = t('pieces', { number: props.source.unreadCount });
   }
 

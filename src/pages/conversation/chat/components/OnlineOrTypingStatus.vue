@@ -9,9 +9,9 @@
 <script setup lang='ts'>
 import useConversationStore from '@/store/modules/conversation';
 import { IMSDK } from '@/utils/imCommon';
-import { CbEvents } from 'open-im-sdk-wasm';
-import type { UserOnlineState, WSEvent } from 'open-im-sdk-wasm/lib/types/entity';
-import { OnlineState, Platform } from 'open-im-sdk-wasm';
+import { CbEvents } from '@openim/wasm-client-sdk';
+import type { UserOnlineState, WSEvent } from '@openim/wasm-client-sdk/lib/types/entity';
+import { OnlineState, Platform } from '@openim/wasm-client-sdk';
 
 const platformMap: Record<Platform, string> = {
   1: "iOS",

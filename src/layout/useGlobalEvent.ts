@@ -2,7 +2,7 @@ import useContactStore from "@store/modules/contact";
 import useConversationStore from "@store/modules/conversation";
 import useUserStore from "@store/modules/user";
 import { conversationSort, IMSDK } from "@/utils/imCommon";
-import { CbEvents } from "open-im-sdk-wasm";
+import { CbEvents } from "@openim/wasm-client-sdk";
 import {
   ConversationItem,
   GroupMemberItem,
@@ -14,12 +14,12 @@ import {
   GroupItem,
   FriendUserItem,
   RevokedInfo,
-} from "open-im-sdk-wasm/lib/types/entity";
+} from "@openim/wasm-client-sdk/lib/types/entity";
 import {
   MessageType,
   MessageReceiveOptType,
   SessionType,
-} from "open-im-sdk-wasm";
+} from "@openim/wasm-client-sdk";
 import useMessageStore, { ExMessageItem } from "@/store/modules/message";
 import emitter from "@/utils/events";
 import { useThrottleFn } from "@vueuse/core";
@@ -237,7 +237,7 @@ export function useGlobalEvent() {
 
     if (
       userStore.storeSelfInfo.allowBeep === BusinessAllowType.NotAllow ||
-      userStore.storeSelfInfo.globalRecvMsgOpt !== MessageReceiveOptType.Nomal
+      userStore.storeSelfInfo.globalRecvMsgOpt !== MessageReceiveOptType.Normal
     ) {
       return;
     }
@@ -265,7 +265,7 @@ export function useGlobalEvent() {
       }
     }
 
-    if (cveItem!.recvMsgOpt !== MessageReceiveOptType.Nomal) {
+    if (cveItem!.recvMsgOpt !== MessageReceiveOptType.Normal) {
       return;
     }
 

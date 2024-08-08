@@ -28,7 +28,7 @@ import Avatar from "@/components/Avatar/index.vue";
 import TextMessageRenderer from "./TextMessageRenderer.vue";
 import MediaMessageRenderer from "./MediaMessageRenderer.vue";
 import CatchMsgRenderer from "./CatchMsgRenderer.vue";
-import { AllowType, MessageType, SessionType } from "open-im-sdk-wasm";
+import { AllowType, MessageType, SessionType } from "@openim/wasm-client-sdk";
 import useUserStore from "@/store/modules/user";
 import { ExedMessageItem } from "./data";
 import { useMessageIsRead } from "./useMessageIsRead";

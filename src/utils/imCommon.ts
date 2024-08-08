@@ -17,9 +17,9 @@ import type {
   MessageItem,
   ConversationItem,
   PublicUserItem,
-} from "open-im-sdk-wasm/lib/types/entity";
-import { getSDK } from "open-im-sdk-wasm";
-import { MessageType } from "open-im-sdk-wasm";
+} from "@openim/wasm-client-sdk/lib/types/entity";
+import { getSDK } from "@openim/wasm-client-sdk";
+import { MessageType } from "@openim/wasm-client-sdk";
 // @ts-ignore
 const { t } = i18n.global;
 

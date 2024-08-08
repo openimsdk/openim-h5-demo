@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import { formatLink, parseBr } from "@/utils/imCommon";
-import { MessageType } from "open-im-sdk-wasm";
+import { MessageType } from "@openim/wasm-client-sdk";
 import { ExedMessageItem } from "./data";
 
 type TextMsgRendererProps = {

@@ -1,10 +1,10 @@
 import { IMSDK } from "@/utils/imCommon";
-import type { FullUserItem } from "open-im-sdk-wasm/lib/types/entity";
-import { MessageReceiveOptType } from "open-im-sdk-wasm";
+import type { FullUserItem } from "@openim/wasm-client-sdk/lib/types/entity";
+import { MessageReceiveOptType } from "@openim/wasm-client-sdk";
 import { defineStore } from "pinia";
 import store from "../index";
 import { BusinessUserInfo } from "@/api/data";
-import { getAppConfig, getBusinessInfo } from "@/api/user";
+import { getBusinessInfo } from "@/api/user";
 import { feedbackToast, filterEmptyValue } from "@/utils/common";
 import { clearIMProfile } from "@/utils/storage";
 import useContactStore from "./contact";
@@ -18,28 +18,16 @@ export type FullSelfInfo = FullUserItem & {
 interface StateType {
   selfInfo: BusinessUserInfo;
   isSyncing: boolean;
-  appConfig: AppConfig;
-}
-
-export interface AppConfig {
-  discoverPageURL: string;
-  ordinaryUserAddFriend: number;
-  bossUserID: string;
-  adminURL: string;
-  allowSendMsgNotFriend?: string;
-  needInvitationCodeRegister?: string;
 }
 
 const useStore = defineStore("user", {
   state: (): StateType => ({
     selfInfo: {} as BusinessUserInfo,
     isSyncing: false,
-    appConfig: {} as AppConfig,
   }),
   getters: {
     storeSelfInfo: (state) => state.selfInfo,
     storeIsSyncing: (state) => state.isSyncing,
-    storeAppConfig: (state) => state.appConfig,
   },
   actions: {
     async getSelfInfoFromReq() {
@@ -59,12 +47,6 @@ const useStore = defineStore("user", {
     },
     updateSelfInfo(info: Partial<BusinessUserInfo>) {
       this.selfInfo = { ...this.selfInfo, ...info };
-    },
-    async getAppConfigFromReq() {
-      try {
-        const { data } = await getAppConfig();
-        this.appConfig = data.config ?? {};
-      } catch (error) {}
     },
     async userLogout(force?: boolean) {
       const useConversatione = useConversationStore();

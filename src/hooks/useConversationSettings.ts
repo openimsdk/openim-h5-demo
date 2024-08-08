@@ -2,7 +2,7 @@ import { feedbackToast } from "@utils/common";
 import useConversationStore from "@/store/modules/conversation";
 import useMessageStore from "@/store/modules/message";
 import { IMSDK } from "@/utils/imCommon";
-import { MessageReceiveOptType } from "open-im-sdk-wasm";
+import { MessageReceiveOptType } from "@openim/wasm-client-sdk";
 import { showConfirmDialog } from "vant";
 
 export default function useConversationSettings() {
@@ -37,7 +37,7 @@ export default function useConversationSettings() {
       await IMSDK.setConversationRecvMessageOpt({
         conversationID:
           conversationStore.storeCurrentConversation.conversationID,
-        opt: flag ? opt : MessageReceiveOptType.Nomal,
+        opt: flag ? opt : MessageReceiveOptType.Normal,
       });
     } catch (error) {}
     switchLoading.recvMsgLoading = false;

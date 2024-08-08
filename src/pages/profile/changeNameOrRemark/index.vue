@@ -18,7 +18,7 @@ import { updateBusinessInfo } from '@/api/user';
 import useUserStore from '@/store/modules/user';
 import { feedbackToast } from '@/utils/common';
 import { IMSDK } from '@/utils/imCommon';
-import type { FriendUserItem } from 'open-im-sdk-wasm/lib/types/entity';
+import type { FriendUserItem } from '@openim/wasm-client-sdk/lib/types/entity';
 
 const props = defineProps<{ friendInfo?: FriendUserItem }>();
 

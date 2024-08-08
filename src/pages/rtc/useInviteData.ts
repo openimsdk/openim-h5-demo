@@ -1,6 +1,6 @@
-import { SessionType } from 'open-im-sdk-wasm'
+import { SessionType } from '@openim/wasm-client-sdk'
 import { InviteData } from './data'
-import type { GroupMemberItem } from 'open-im-sdk-wasm/lib/types/entity'
+import type { GroupMemberItem } from '@openim/wasm-client-sdk/lib/types/entity'
 import useUserStore from '@/store/modules/user'
 
 export default function useInviteData(inviteData: InviteData) {

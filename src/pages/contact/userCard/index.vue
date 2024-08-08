@@ -47,7 +47,7 @@
     </div>
 
     <div class="flex justify-between w-full px-[22px] mb-6 mt-8">
-      <van-button v-if="cannSendMessage && !isSelf" :icon="message" type="primary" class="w-full !ml-1 text-base"
+      <van-button v-if="!isSelf" :icon="message" type="primary" class="w-full !ml-1 text-base"
         @click="toConversation">
         {{ $t('sendMessage') }}
       </van-button>
@@ -68,7 +68,7 @@ import { IMSDK } from '@/utils/imCommon';
 import { feedbackToast, copy2Text } from '@/utils/common';
 import useContactStore from '@/store/modules/contact';
 import useCurrentMemberRole from '@/hooks/useCurrentMemberRole';
-import { AllowType, GroupJoinSource, GroupMemberRole, SessionType } from 'open-im-sdk-wasm';
+import { AllowType, GroupJoinSource, GroupMemberRole, SessionType } from '@openim/wasm-client-sdk';
 import dayjs from 'dayjs';
 import useUserStore from '@/store/modules/user';
 import useConversationStore from '@/store/modules/conversation';
@@ -106,7 +106,6 @@ const comptJoinSource = computed(() => {
       return '-'
   }
 })
-const cannSendMessage = computed(() => Number(userStore.storeAppConfig.allowSendMsgNotFriend) === BusinessAllowType.Allow ? true : !!friendInfo.value)
 const cannAddFriend = computed(() => {
   if (!!friendInfo.value) {
     return false
@@ -123,14 +122,14 @@ const checkMemberInGroup = async () => {
   if (!contactStore.storeUserCardData.groupMemberInfo) {
     return;
   }
-  showSetMuteMember.value = isOwner.value || (isAdmin.value && contactStore.storeUserCardData.groupMemberInfo.roleLevel === GroupMemberRole.Nomal)
+  showSetMuteMember.value = isOwner.value || (isAdmin.value && contactStore.storeUserCardData.groupMemberInfo.roleLevel === GroupMemberRole.Normal)
 }
 const onUpdateValue = (newValue: boolean) => {
   setAdminLoading.value = true;
   IMSDK.setGroupMemberRoleLevel({
     groupID: contactStore.storeUserCardData.groupMemberInfo!.groupID,
     userID: contactStore.storeUserCardData.groupMemberInfo!.userID,
-    roleLevel: newValue ? GroupMemberRole.Admin : GroupMemberRole.Nomal
+    roleLevel: newValue ? GroupMemberRole.Admin : GroupMemberRole.Normal
   })
     .catch((error) => feedbackToast({ error }))
     .finally(() => setAdminLoading.value = false)

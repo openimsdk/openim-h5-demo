@@ -35,7 +35,7 @@ import VirtualList from '@components/VirtualList';
 import GenericListItem from '@/components/GenericListItem/index.vue';
 import useContactStore from '@/store/modules/contact';
 import useUserStore from '@/store/modules/user';
-import type { GroupItem } from 'open-im-sdk-wasm/lib/types/entity';
+import type { GroupItem } from '@openim/wasm-client-sdk/lib/types/entity';
 import useConversationStore from '@/store/modules/conversation';
 import CommonEmpty from '@/components/CommonEmpty/index.vue';
 

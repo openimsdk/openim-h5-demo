@@ -20,7 +20,7 @@
 import GenericListItem from '@/components/GenericListItem/index.vue';
 import useContactStore from '@/store/modules/contact';
 import { formatContacts } from '@/utils/common';
-import type { FriendUserItem } from 'open-im-sdk-wasm/lib/types/entity';
+import type { FriendUserItem } from '@openim/wasm-client-sdk/lib/types/entity';
 import CommonEmpty from '@/components/CommonEmpty/index.vue';
 
 const contactStore = useContactStore()

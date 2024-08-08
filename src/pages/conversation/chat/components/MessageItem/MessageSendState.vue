@@ -7,7 +7,7 @@
 
 <script setup lang='ts'>
 import failed from '@/assets/images/messageItem/failed.png'
-import { MessageStatus } from 'open-im-sdk-wasm';
+import { MessageStatus } from '@openim/wasm-client-sdk';
 import { ExedMessageItem } from './data';
 import useSendMessage from '@/hooks/useSendMessage';
 import useMessageStore from '@/store/modules/message';

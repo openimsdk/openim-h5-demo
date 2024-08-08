@@ -9,12 +9,12 @@ import { InviteData, ParticipantInfo } from "@/pages/rtc/data";
 import rtcModal from "@/pages/rtc/index.vue";
 import emitter from "@/utils/events";
 import { IMSDK } from "@/utils/imCommon";
-import { CbEvents, MessageType } from "open-im-sdk-wasm";
+import { CbEvents, MessageType } from "@openim/wasm-client-sdk";
 import type {
   MessageItem,
   RtcInvite,
   WSEvent,
-} from "open-im-sdk-wasm/lib/types/entity";
+} from "@openim/wasm-client-sdk/lib/types/entity";
 
 const showRtcModal = ref(false);
 const inviteData = reactive<InviteData>({});

@@ -7,11 +7,11 @@ import { IMSDK } from "@/utils/imCommon";
 import {
   MessageItem,
   PublicUserItem,
-} from "open-im-sdk-wasm/lib/types/entity";
+} from "@openim/wasm-client-sdk/lib/types/entity";
 import {
   MessageStatus,
-} from "open-im-sdk-wasm";
-import { SendMsgParams } from "open-im-sdk-wasm/lib/types/params";
+} from "@openim/wasm-client-sdk";
+import { SendMsgParams } from "@openim/wasm-client-sdk/lib/types/params";
 
 const messageStore = useMessageStore();
 const conversationStore = useConversationStore();

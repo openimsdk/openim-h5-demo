@@ -1,4 +1,4 @@
-import { MessageType, SessionType } from "open-im-sdk-wasm";
+import { MessageType, SessionType } from "@openim/wasm-client-sdk";
 
 export enum CustomType {
   CallingInvite = 200,

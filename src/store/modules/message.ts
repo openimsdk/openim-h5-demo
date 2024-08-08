@@ -1,10 +1,10 @@
 import { feedbackToast } from "@utils/common";
 import { IMSDK } from "@/utils/imCommon";
-import type { MessageItem } from "open-im-sdk-wasm/lib/types/entity";
-import { MessageType } from "open-im-sdk-wasm";
+import type { MessageItem } from "@openim/wasm-client-sdk/lib/types/entity";
+import { MessageType } from "@openim/wasm-client-sdk";
 import { defineStore } from "pinia";
 import store from "../index";
-import { GetAdvancedHistoryMsgParams } from "open-im-sdk-wasm/lib/types/params";
+import { GetAdvancedHistoryMsgParams } from "@openim/wasm-client-sdk/lib/types/params";
 
 interface StateType {
   historyMessageList: ExMessageItem[];

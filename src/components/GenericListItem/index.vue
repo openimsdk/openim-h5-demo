@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { GroupMemberRole } from "open-im-sdk-wasm";
+import { GroupMemberRole } from "@openim/wasm-client-sdk";
 import { GenericListItemSource } from "./data";
 import Avatar from "../Avatar/index.vue";
 

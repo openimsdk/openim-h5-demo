@@ -1,8 +1,8 @@
 import useConversationStore from "@/store/modules/conversation";
 import { feedbackToast } from "@/utils/common";
 import { IMSDK } from "@/utils/imCommon";
-import { CbEvents } from "open-im-sdk-wasm";
-import { GroupMemberItem, WSEvent } from "open-im-sdk-wasm/lib/types/entity";
+import { CbEvents } from "@openim/wasm-client-sdk";
+import { GroupMemberItem, WSEvent } from "@openim/wasm-client-sdk/lib/types/entity";
 
 const conversationStore = useConversationStore();
 

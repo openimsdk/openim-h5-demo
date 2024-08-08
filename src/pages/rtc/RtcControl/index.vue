@@ -16,11 +16,11 @@
 <script lang="ts" setup>
 import hungup from "@/assets/images/rtc/hungup.png";
 import accept from "@/assets/images/rtc/accept.png";
-import type { RtcInvite, WSEvent } from "open-im-sdk-wasm/lib/types/entity";
+import type { RtcInvite, WSEvent } from "@openim/wasm-client-sdk/lib/types/entity";
 import { AuthData, InviteData } from "../data";
 import { IMSDK } from "@/utils/imCommon";
 import useUserStore from "@/store/modules/user";
-import { SessionType, CbEvents, MessageType } from "open-im-sdk-wasm";
+import { SessionType, CbEvents, MessageType } from "@openim/wasm-client-sdk";
 import { CustomType } from "@/constants/enum";
 import { ExMessageItem } from "@/store/modules/message";
 import emitter from "@/utils/events";

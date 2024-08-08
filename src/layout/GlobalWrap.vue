@@ -27,7 +27,6 @@ const resizeHandler = () => {
 onMounted(() => {
   window.addEventListener('resize', resizeHandler)
   emitter.on("KEYBOARD_UPDATE", resizeHandler)
-  userStore.getAppConfigFromReq()
 })
 
 onUnmounted(() => {

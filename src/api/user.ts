@@ -1,7 +1,7 @@
 import request from "@utils/request";
 import { BusinessUserInfo } from "./data";
 import { getChatToken } from "@/utils/storage";
-import useUserStore, { AppConfig } from "@/store/modules/user";
+import useUserStore from "@/store/modules/user";
 
 // new
 export const updateBusinessInfo = (params: Partial<BusinessUserInfo>) =>
@@ -42,19 +42,6 @@ export const searchUserInfoByBusiness = (content: string) => {
       headers: {
         token: getChatToken(),
       },
-    }
-  );
-};
-
-// new
-export const getAppConfig = (): Promise<{ data: { config: AppConfig } }> => {
-  return request.post(
-    "/client_config/get",
-    JSON.stringify({
-      operationID: Date.now() + "",
-    }),
-    {
-      baseURL: process.env.CHAT_URL,
     }
   );
 };

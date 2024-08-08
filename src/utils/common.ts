@@ -3,7 +3,7 @@ import PinYin from "./pinyin";
 
 // i18n
 import { i18n } from "@/i18n";
-import type { FriendUserItem } from "open-im-sdk-wasm/lib/types/entity";
+import type { FriendUserItem } from "@openim/wasm-client-sdk/lib/types/entity";
 // @ts-ignore
 const { t } = i18n.global;
 

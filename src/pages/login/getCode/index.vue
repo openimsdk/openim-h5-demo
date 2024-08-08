@@ -33,26 +33,7 @@
         </div>
       </div>
 
-      <div class="mt-5" v-if="isRegiste">
-        <template v-if="needInvitationCode">
-          <div class="text-sm mb-1 text-sub-text">
-            {{ $t("invitationCode") }}
-          </div>
-          <div class="border border-gap-text rounded-lg">
-            <van-field
-              class="!py-1"
-              clearable
-              v-model="formData.invitationCode"
-              name="invitationCode"
-              type="text"
-              :placeholder="`${$t('placeholder.inputInvitationCode')}${
-                needInvitationCode ? '' : `(${$t('optional')})`
-              }`"
-            >
-            </van-field>
-          </div>
-        </template>
-      </div>
+      <div class="mt-5" v-if="isRegiste"></div>
 
       <div class="mt-5" v-else>
         <div class="text-sm mb-1 text-sub-text">{{ $t("reAcquireDesc") }}</div>
@@ -99,9 +80,8 @@
 
 <script setup lang="ts">
 import type { PickerConfirmEventParams } from "vant";
-import { BusinessAllowType, UsedFor } from "@/api/data";
+import { UsedFor } from "@/api/data";
 import { sendSms, verifyCode } from "@/api/login";
-import useUserStore from "@/store/modules/user";
 import countryCode from "@/utils/areaCode";
 import { feedbackToast } from "@/utils/common";
 import login_back from "@assets/images/login_back.png";
@@ -109,7 +89,6 @@ import login_back from "@assets/images/login_back.png";
 const phoneRegExp = /^1[3-9]\d{9}$/;
 
 const { t } = useI18n();
-const userStore = useUserStore();
 const router = useRouter();
 
 const props = defineProps<{ isRegiste: boolean }>();
@@ -124,24 +103,11 @@ const showAreaCode = ref(false);
 const count = ref(0);
 let timer: NodeJS.Timer;
 
-const needInvitationCode = computed(
-  () =>
-    Number(userStore.storeAppConfig.needInvitationCodeRegister) ===
-    BusinessAllowType.Allow
-);
-
 const onSubmit = () => {
   if (!phoneRegExp.test(formData.phoneNumber)) {
     feedbackToast({
       message: t("messageTip.correctPhoneNumber"),
       error: t("messageTip.correctPhoneNumber"),
-    });
-    return;
-  }
-  if (needInvitationCode.value && !formData.invitationCode) {
-    feedbackToast({
-      message: t("messageTip.invitationCode"),
-      error: t("messageTip.invitationCode"),
     });
     return;
   }
@@ -168,7 +134,6 @@ const onSubmit = () => {
     phoneNumber: formData.phoneNumber,
     areaCode: formData.areaCode,
     usedFor: UsedFor.Register,
-    invitationCode: formData.invitationCode,
   }).then(() => {
     router.push({
       path: "verifyCode",

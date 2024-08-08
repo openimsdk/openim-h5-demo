@@ -1,9 +1,9 @@
 import { getPicInfo, getMediaDuration, getVideoSnshot } from "@/utils/common";
 import { v4 as uuidV4 } from "uuid";
-import { MessageType } from "open-im-sdk-wasm";
+import { MessageType } from "@openim/wasm-client-sdk";
 import { IMSDK } from "@/utils/imCommon";
 import { showFailToast } from "vant";
-import type { MessageItem } from "open-im-sdk-wasm/lib/types/entity";
+import type { MessageItem } from "@openim/wasm-client-sdk/lib/types/entity";
 
 export default function useCreateFileMessage() {
   const { t } = useI18n();

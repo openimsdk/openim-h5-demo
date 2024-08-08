@@ -6,7 +6,7 @@
 import useMessageStore from '@/store/modules/message';
 import { tipMessaggeFormat } from '@/utils/imCommon';
 import { useIntersectionObserver } from '@vueuse/core';
-import type { MessageItem } from 'open-im-sdk-wasm/lib/types/entity';
+import type { MessageItem } from '@openim/wasm-client-sdk/lib/types/entity';
 import { ExedMessageItem } from './MessageItem/data';
 
 type MessageItemProps = {

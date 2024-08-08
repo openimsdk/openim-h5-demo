@@ -19,7 +19,7 @@
 <script setup lang='ts'>
 import GenericListItem from '@/components/GenericListItem/index.vue';
 import useContactStore from '@/store/modules/contact';
-import type { GroupItem, SearchedFriendsInfo } from 'open-im-sdk-wasm/lib/types/entity';
+import type { GroupItem, SearchedFriendsInfo } from '@openim/wasm-client-sdk/lib/types/entity';
 import CommonEmpty from '@/components/CommonEmpty/index.vue';
 import { IMSDK } from '@/utils/imCommon';
 import { feedbackToast } from '@/utils/common';
