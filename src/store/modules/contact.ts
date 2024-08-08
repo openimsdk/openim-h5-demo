@@ -6,6 +6,7 @@ import type {
   FriendApplicationItem,
   GroupApplicationItem,
   GroupMemberItem,
+  FullUserItem,
 } from "@openim/wasm-client-sdk/lib/types/entity";
 import { defineStore } from "pinia";
 import store from "../index";
@@ -62,15 +63,19 @@ const useStore = defineStore("contact", {
   actions: {
     async getFriendListFromReq() {
       try {
-        const { data } = await IMSDK.getFriendList();
-
-        // let tmpList: FriendItem[] = [];
-        // data.map(
-        //   (item: TotalUserStruct) =>
-        //     !item.blackInfo && tmpList.push(item.friendInfo!)
-        // );
-        // this.friendList = data.map((user: FullUserItem) => user.friendInfo);
-        this.friendList = (data as any).map((user: any) => user.friendInfo);
+        let offset = 0;
+        let tmpList = [] as FullUserItem[];
+        let initialFetch = true;
+        // eslint-disable-next-line
+        while (true) {
+          const count = initialFetch ? 10000 : 1000;
+          const { data } = await IMSDK.getFriendListPage({ offset, count });
+          tmpList = [...tmpList, ...data];
+          offset += count;
+          if (data.length < count) break;
+          initialFetch = false;
+        }
+        this.friendList = tmpList.map((item) => item.friendInfo!);
       } catch (error) {
         console.error(error);
       }
@@ -96,8 +101,17 @@ const useStore = defineStore("contact", {
     },
     async getGroupListFromReq() {
       try {
-        const { data } = await IMSDK.getJoinedGroupList();
-        this.groupList = data;
+        let offset = 0;
+        let tmpList = [] as GroupItem[];
+        // eslint-disable-next-line
+        while (true) {
+          const { data } = await IMSDK.getJoinedGroupListPage({ offset, count: 1000 });
+          tmpList = [...tmpList, ...data];
+          offset += 1000;
+          if (data.length < 1000) break;
+        }
+  
+        this.groupList = tmpList;
       } catch (error) {
         console.error(error);
       }

@@ -1,14 +1,10 @@
 import useConversationStore from "@/store/modules/conversation";
+import { IMSDK } from "@/utils/imCommon";
 import { GroupMemberRole } from "@openim/wasm-client-sdk";
 
 export default function useCurrentMemberRole(groupID?: string) {
+  const inSameGroup = ref(true);
   const conversationStore = useConversationStore();
-
-  const inSameGroup = computed(
-    () =>
-      conversationStore.storeCurrentMemberInGroup.groupID ===
-      (groupID ?? conversationStore.storeCurrentGroupInfo.groupID)
-  );
 
   const currentRole = computed(
     () => conversationStore.storeCurrentMemberInGroup.roleLevel
@@ -24,6 +20,29 @@ export default function useCurrentMemberRole(groupID?: string) {
 
   const isNomal = computed(
     () => inSameGroup.value && currentRole.value === GroupMemberRole.Normal
+  );
+
+  watch(
+    () => conversationStore.storeCurrentGroupInfo.groupID,
+    (newVal) => {
+      if (newVal) {
+        async function checkGroupMembership() {
+          try {
+            const { data } = await IMSDK.isJoinGroup<boolean>(
+              groupID as string
+            );
+            inSameGroup.value = data;
+          } catch (error) {
+            inSameGroup.value = false;
+          }
+        }
+
+        checkGroupMembership();
+      }
+    },
+    {
+      immediate: true,
+    }
   );
 
   return {

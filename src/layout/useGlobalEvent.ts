@@ -56,10 +56,12 @@ export function useGlobalEvent() {
     IMSDK.on(CbEvents.OnConnectSuccess, connectSuccessHandler);
     IMSDK.on(CbEvents.OnKickedOffline, kickHandler);
     IMSDK.on(CbEvents.OnUserTokenExpired, expiredHandler);
+    IMSDK.on(CbEvents.OnUserTokenInvalid, expiredHandler);
     // sync
     IMSDK.on(CbEvents.OnSyncServerStart, syncStartHandler);
     IMSDK.on(CbEvents.OnSyncServerFinish, syncFinishHandler);
     IMSDK.on(CbEvents.OnSyncServerFailed, syncFailedHandler);
+    IMSDK.on(CbEvents.OnSyncServerProgress, syncProgressHandler);
     // message
     IMSDK.on(CbEvents.OnRecvNewMessage, newMessageHandler);
     IMSDK.on(CbEvents.OnRecvNewMessages, newMessageHandler);
@@ -135,17 +137,22 @@ export function useGlobalEvent() {
     });
 
   // sync
-  const syncStartHandler = () => {
+  const syncStartHandler = ({ data }: WSEvent<boolean>) => {
     userStore.isSyncing = true;
-    syncToast = showLoadingToast({
-      message: t("syncing"),
-      forbidClick: true,
-    });
+    if (data) {
+      syncToast = showLoadingToast({
+        message: t("syncing"),
+        forbidClick: true,
+      });
+    }
   };
   const syncFinishHandler = () => {
     userStore.isSyncing = false;
     syncToast?.close();
     syncToast = null;
+    contactStore.getFriendListFromReq();
+    contactStore.getGroupListFromReq();
+    conversationStore.getConversationListFromReq();
   };
   const syncFailedHandler = () => {
     userStore.isSyncing = false;
@@ -153,6 +160,10 @@ export function useGlobalEvent() {
     syncToast.message = t("syncFailed");
     syncToast.close();
     syncToast = null;
+  };
+
+  const syncProgressHandler = ({ data }: WSEvent<number>) => {
+    console.log("sync progress : ", data, "%");
   };
 
   // message
@@ -421,10 +432,12 @@ export function useGlobalEvent() {
     IMSDK.off(CbEvents.OnConnectSuccess, connectSuccessHandler);
     IMSDK.off(CbEvents.OnKickedOffline, kickHandler);
     IMSDK.off(CbEvents.OnUserTokenExpired, expiredHandler);
+    IMSDK.off(CbEvents.OnUserTokenInvalid, expiredHandler);
     // sync
     IMSDK.off(CbEvents.OnSyncServerStart, syncStartHandler);
     IMSDK.off(CbEvents.OnSyncServerFinish, syncFinishHandler);
     IMSDK.off(CbEvents.OnSyncServerFailed, syncFailedHandler);
+    IMSDK.off(CbEvents.OnSyncServerProgress, syncProgressHandler);
     // message
     IMSDK.off(CbEvents.OnRecvNewMessage, newMessageHandler);
     IMSDK.off(CbEvents.OnRecvNewMessages, newMessageHandler);

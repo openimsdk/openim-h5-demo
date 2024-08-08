@@ -374,11 +374,8 @@ export const initStore = () => {
   const contactStore = useContactStore();
 
   userStore.getSelfInfoFromReq();
-  conversationStore.getConversationListFromReq();
   conversationStore.getUnReadCountFromReq();
-  contactStore.getFriendListFromReq();
   contactStore.getBlackListFromReq();
-  contactStore.getGroupListFromReq();
   contactStore.getRecvFriendApplicationListFromReq();
   contactStore.getSendFriendApplicationListFromReq();
   contactStore.getRecvGroupApplicationListFromReq();

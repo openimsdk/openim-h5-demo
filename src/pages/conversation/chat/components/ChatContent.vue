@@ -29,6 +29,7 @@
 import { TipTypes } from '@/constants/enum';
 import useMessageStore from '@/store/modules/message';
 import VirtualList from '@components/VirtualList';
+import { useMessageReceipt } from '../useMessageReceipt'
 import type { MessageItem } from '@openim/wasm-client-sdk/lib/types/entity';
 import useHistoryMessageList from '../useHistoryMessageList';
 import MessageItemVue from './MessageItem/MessageItem.vue';
@@ -40,6 +41,7 @@ import arrow_icon from '@assets/images/conversation/arrow.png'
 const emit = defineEmits([]);
 defineProps();
 
+useMessageReceipt()
 const messageStore = useMessageStore();
 
 const cancelMultiple = () => { }

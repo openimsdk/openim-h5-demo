@@ -1,11 +1,30 @@
 <template>
-  <div ref="messageContainerRef" class="message_item"
-    :class="{ 'message_item_self': isSelfMsg, 'message_item_checked': showCheck, 'message_item_active': isActive || source.jump }"
-    @click="clickMessage">
-    <van-checkbox class="check_wrap" v-if="showCheck" v-model="source.checked" :disabled="source.disabled" @click.stop>
+  <div
+    ref="messageContainerRef"
+    class="message_item"
+    :class="{
+      message_item_self: isSelfMsg,
+      message_item_checked: showCheck,
+      message_item_active: isActive || source.jump,
+    }"
+    @click="clickMessage"
+  >
+    <van-checkbox
+      class="check_wrap"
+      v-if="showCheck"
+      v-model="source.checked"
+      :disabled="source.disabled"
+      @click.stop
+    >
     </van-checkbox>
     <div class="message_container_wrap">
-      <Avatar ref="avatarRef" :size="42" :src="source.senderFaceUrl" :desc="source.senderNickname" @click="toDetails" />
+      <Avatar
+        ref="avatarRef"
+        :size="42"
+        :src="source.senderFaceUrl"
+        :desc="source.senderNickname"
+        @click="toDetails"
+      />
       <div class="message_container">
         <div class="max-w-[240px] text-xs text-[#666] mb-1 truncate">
           <span className="text-[var(--sub-text)]">
@@ -15,9 +34,19 @@
           <span v-if="!isSing">{{ source.senderNickname }}</span>
         </div>
         <MessageSendState v-if="isSelfMsg" :message="source" />
-        <component :message="source" :is-self-msg="isSelfMsg" :announce-content="groupAnnounceData.notification"
-          :disabled="showCheck || isActive" :is="getRenderComp"></component>
+        <component
+          :message="source"
+          :is-self-msg="isSelfMsg"
+          :announce-content="groupAnnounceData.notification"
+          :disabled="showCheck || isActive"
+          :is="getRenderComp"
+        ></component>
         <MessageSendState v-if="!isSelfMsg" :message="source" />
+        <MessageReadState
+          v-if="showMessageReadState"
+          :message="source"
+          :disabled="showCheck"
+        />
       </div>
     </div>
   </div>
@@ -28,14 +57,20 @@ import Avatar from "@/components/Avatar/index.vue";
 import TextMessageRenderer from "./TextMessageRenderer.vue";
 import MediaMessageRenderer from "./MediaMessageRenderer.vue";
 import CatchMsgRenderer from "./CatchMsgRenderer.vue";
-import { AllowType, MessageType, SessionType } from "@openim/wasm-client-sdk";
+import {
+  AllowType,
+  MessageStatus,
+  MessageType,
+  SessionType,
+} from "@openim/wasm-client-sdk";
 import useUserStore from "@/store/modules/user";
 import { ExedMessageItem } from "./data";
 import { useMessageIsRead } from "./useMessageIsRead";
+import MessageReadState from './MessageReadState.vue'
 import useContactStore from "@/store/modules/contact";
 import useConversationStore from "@/store/modules/conversation";
-import { formatMessageTime } from '@/utils/imCommon'
-import MessageSendState from './MessageSendState.vue'
+import { formatMessageTime } from "@/utils/imCommon";
+import MessageSendState from "./MessageSendState.vue";
 
 interface MessageItemProps {
   source: ExedMessageItem;
@@ -53,21 +88,26 @@ const { source, showCheck } = toRefs(props);
 const messageContainerRef = ref();
 const avatarRef = ref();
 
-const isSing = computed(() => conversationStore.currentConversation.conversationType === SessionType.Single);
-const isSelfMsg = computed(() => userStore.selfInfo.userID === source.value.sendID);
+const isSing = computed(
+  () =>
+    conversationStore.currentConversation.conversationType ===
+    SessionType.Single
+);
+const isSelfMsg = computed(
+  () => userStore.selfInfo.userID === source.value.sendID
+);
 const groupAnnounceData = computed(() => {
-  let detail
+  let detail;
   if (props.source.contentType === MessageType.GroupAnnouncementUpdated) {
     try {
-      detail = JSON.parse(props.source.notificationElem?.detail)
-    } catch (e) {
-    }
+      detail = JSON.parse(props.source.notificationElem?.detail);
+    } catch (e) {}
   }
   return {
     notification: detail?.group?.notification,
-    opUser: detail?.opUser
-  }
-})
+    opUser: detail?.opUser,
+  };
+});
 const getRenderComp = computed(() => {
   switch (props.source.contentType) {
     case MessageType.TextMessage:
@@ -78,7 +118,19 @@ const getRenderComp = computed(() => {
     default:
       return CatchMsgRenderer;
   }
-})
+});
+const isShowAsRead = computed(
+  () => source.value.sessionType === SessionType.Single
+);
+const showMessageReadState = computed(() => {
+  return (
+    isSelfMsg.value &&
+    !groupAnnounceData.value.notification &&
+    source.value.status === MessageStatus.Succeed &&
+    source.value.contentType !== MessageType.CustomMessage &&
+    isShowAsRead.value
+  );
+});
 
 useMessageIsRead({
   messageContainerRef,
@@ -93,19 +145,25 @@ const toDetails = async () => {
   if (props.showCheck) {
     return;
   }
-  if (props.source.groupID && conversationStore.storeCurrentGroupInfo.lookMemberInfo === AllowType.NotAllowed) {
+  if (
+    props.source.groupID &&
+    conversationStore.storeCurrentGroupInfo.lookMemberInfo ===
+      AllowType.NotAllowed
+  ) {
     return;
   }
-  contactStore.getUserCardData(groupAnnounceData.value.opUser?.userID ?? props.source.sendID, props.source.groupID)
-}
+  contactStore.getUserCardData(
+    groupAnnounceData.value.opUser?.userID ?? props.source.sendID,
+    props.source.groupID
+  );
+};
 
 const clickMessage = () => {
   if (!props.showCheck) {
     return;
   }
-  props.source.checked = !props.source.checked
-}
-
+  props.source.checked = !props.source.checked;
+};
 </script>
 
 <style lang="scss" scoped>
@@ -127,7 +185,7 @@ const clickMessage = () => {
   .need_bg {
     padding: 10px 12px;
     border-radius: 6px;
-    background-color: #F4F5F7;
+    background-color: #f4f5f7;
   }
 
   .message_container_wrap {
@@ -152,9 +210,8 @@ const clickMessage = () => {
       position: absolute;
       bottom: 0;
       left: 50%;
-      transform: translate(-50%, 100%)
+      transform: translate(-50%, 100%);
     }
-
   }
 
   &_self {
@@ -167,7 +224,7 @@ const clickMessage = () => {
 
     .need_bg {
       border-radius: 6px;
-      background-color: #CCE7FE;
+      background-color: #cce7fe;
     }
 
     .message_container_wrap {

@@ -133,12 +133,12 @@ const checkDisabled = () => {
   if (history.state.chooseType !== ContactChooseEnum.InviteGroup) {
     return;
   }
-  IMSDK.getSpecifiedGroupMembersInfo({
+  IMSDK.getUsersInGroup({
     groupID: history.state.extraData,
     userIDList: contactStore.storeFriendList.map(user => user.userID)
   })
     .then(({ data }) => {
-      disabledUserIDList.value = data.map((member: GroupMemberItem) => member.userID)
+      disabledUserIDList.value = data
     })
 }
 
@@ -235,7 +235,7 @@ const confirm = async () => {
       allCheckedList.value.map(async item => {
         let message: MessageItem
         if (chooseType === ContactChooseEnum.ForwardMessage) {
-          message = (await IMSDK.createForwardMessage(history.state.extraData)).data as MessageItem
+          message = (await IMSDK.createForwardMessage(JSON.parse(history.state.extraData))).data as MessageItem
         } else if (chooseType === ContactChooseEnum.MergeMessage) {
           message = (await IMSDK.createMergerMessage(JSON.parse(history.state.extraData))).data as MessageItem
         } else {
