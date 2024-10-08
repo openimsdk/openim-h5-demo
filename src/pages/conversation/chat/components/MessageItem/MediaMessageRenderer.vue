@@ -33,8 +33,8 @@ const router = useRouter()
 const isError = ref(false)
 
 const isVideo = props.message.contentType === MessageType.VideoMessage
-const imageUrl = isVideo ? props.message.videoElem.snapshotUrl : props.message.pictureElem.snapshotPicture.url;
-const duration = isVideo ? secFormat(props.message.videoElem.duration) : 0
+const imageUrl = isVideo ? props.message.videoElem!.snapshotUrl : props.message.pictureElem!.snapshotPicture.url;
+const duration = isVideo ? secFormat(props.message.videoElem!.duration) : 0
 
 const clickMediaItem = () => {
   if (props.disabled) {
@@ -44,12 +44,12 @@ const clickMediaItem = () => {
     router.push({
       path: '/previewVideo',
       query: {
-        url: props.message.videoElem.videoUrl,
-        poster: props.message.videoElem.snapshotUrl
+        url: props.message.videoElem!.videoUrl,
+        poster: props.message.videoElem!.snapshotUrl
       }
     })
   } else {
-    const idx = messageStore.storePreviewImgList.findIndex(item => item === props.message.pictureElem.sourcePicture.url)
+    const idx = messageStore.storePreviewImgList.findIndex(item => item === props.message.pictureElem!.sourcePicture.url)
     showImagePreview({
       images: messageStore.storePreviewImgList,
       startPosition: idx > -1 ? idx : 0,

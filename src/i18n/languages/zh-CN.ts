@@ -12,7 +12,7 @@ export const lang = {
   contact: "通讯录",
   workbench: "工作台",
   profile: "我的",
-  welcome: "欢迎使用OpenIM",
+  welcome: "欢迎使用OpenCorp",
   emptySearchDesc: "搜索结果为空",
   offlinePushTitle: "你有一条新消息",
   offline: "离线",

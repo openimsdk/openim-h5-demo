@@ -65,7 +65,7 @@ import GenericListItem from '@/components/GenericListItem/index.vue';
 import CheckedFooter from '@/components/CheckedFooter/index.vue';
 import VirtualList from '@components/VirtualList';
 
-import type { ConversationItem, FullUserItem, GroupItem, GroupMemberItem, MessageItem, PublicUserItem } from '@openim/wasm-client-sdk/lib/types/entity';
+import type { ConversationItem, FriendUserItem, GroupItem, GroupMemberItem, MessageItem, PublicUserItem } from '@openim/wasm-client-sdk/lib/types/entity';
 import { GenericListItemSource } from '@/components/GenericListItem/data';
 import { ContactChooseEnum } from './data';
 import useContactStore from '@/store/modules/contact';
@@ -96,7 +96,7 @@ const canChooseGroupTypes = [
   ContactChooseEnum.ShareCard
 ]
 
-type CheckedItem = FullUserItem & GroupItem & ConversationItem
+type CheckedItem = FriendUserItem & GroupItem & ConversationItem
 
 const router = useRouter()
 const contactStore = useContactStore()

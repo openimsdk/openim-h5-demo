@@ -194,7 +194,7 @@ export function useGlobalEvent() {
         if (newServerMsg.contentType === MessageType.RevokeMessage) {
         } else {
           if (newServerMsg.contentType === MessageType.CustomMessage) {
-            const customData = JSON.parse(newServerMsg.customElem.data);
+            const customData = JSON.parse(newServerMsg.customElem!.data);
             if (
               CustomType.CallingInvite <= customData.customType &&
               customData.customType <= CustomType.CallingHungup

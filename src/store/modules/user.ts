@@ -1,5 +1,5 @@
 import { IMSDK } from "@/utils/imCommon";
-import type { FullUserItem } from "@openim/wasm-client-sdk/lib/types/entity";
+import type { FriendUserItem } from "@openim/wasm-client-sdk/lib/types/entity";
 import { MessageReceiveOptType } from "@openim/wasm-client-sdk";
 import { defineStore } from "pinia";
 import store from "../index";
@@ -11,7 +11,7 @@ import useContactStore from "./contact";
 import useConversationStore from "./conversation";
 import { i18nt } from "@/i18n";
 
-export type FullSelfInfo = FullUserItem & {
+export type FullSelfInfo = FriendUserItem & {
   globalRecvMsgOpt?: MessageReceiveOptType;
 } & BusinessUserInfo;
 

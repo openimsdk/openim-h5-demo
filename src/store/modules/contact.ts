@@ -6,7 +6,6 @@ import type {
   FriendApplicationItem,
   GroupApplicationItem,
   GroupMemberItem,
-  FullUserItem,
 } from "@openim/wasm-client-sdk/lib/types/entity";
 import { defineStore } from "pinia";
 import store from "../index";
@@ -64,7 +63,7 @@ const useStore = defineStore("contact", {
     async getFriendListFromReq() {
       try {
         let offset = 0;
-        let tmpList = [] as FullUserItem[];
+        let tmpList = [] as FriendUserItem[];
         let initialFetch = true;
         // eslint-disable-next-line
         while (true) {
@@ -75,7 +74,7 @@ const useStore = defineStore("contact", {
           if (data.length < count) break;
           initialFetch = false;
         }
-        this.friendList = tmpList.map((item) => item.friendInfo!);
+        this.friendList = tmpList;
       } catch (error) {
         console.error(error);
       }
@@ -286,7 +285,7 @@ const useStore = defineStore("contact", {
       baseInfo = this.friendList.find((item) => item.userID === sourceID);
       if (!baseInfo) {
         const { data } = await IMSDK.getUsersInfo([sourceID]);
-        baseInfo = data[0]?.friendInfo ?? data[0]?.publicInfo ?? undefined;
+        baseInfo = data[0];
       }
       if (groupID) {
         const { data } = await IMSDK.getSpecifiedGroupMembersInfo({

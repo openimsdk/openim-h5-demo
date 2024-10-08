@@ -79,7 +79,7 @@ const searchUsers = async () => {
     if (total > 0) {
       const businessData = users[0];
       const { data } = await IMSDK.getUsersInfo([businessData.userID]);
-      const imData = data[0]?.friendInfo ?? data[0]?.publicInfo ?? {};
+      const imData = data[0];
       const info = {
         ...imData,
         ...businessData,

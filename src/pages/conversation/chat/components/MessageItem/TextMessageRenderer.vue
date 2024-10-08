@@ -16,7 +16,7 @@ const props = defineProps<TextMsgRendererProps>();
 const content = computed(() => {
   let msgStr = '';
   if (props.message.contentType === MessageType.TextMessage) {
-    msgStr = props.message.textElem.content;
+    msgStr = props.message.textElem!.content;
   }
   return parseBr(formatLink(msgStr))
 });

@@ -20,8 +20,8 @@ const props = defineProps<{ source: MessageItem }>();
 
 const notifyContent = computed(() => {
     try {
-        console.log(props.source.notificationElem.detail);
-        return JSON.parse(props.source.notificationElem.detail)
+        console.log(props.source.notificationElem!.detail);
+        return JSON.parse(props.source.notificationElem!.detail)
     } catch (error) {
         return {}
     }

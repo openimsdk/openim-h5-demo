@@ -51,7 +51,7 @@ import contact_choose_group from '@assets/images/contact_choose_group.png'
 import contact_choose_group_active from '@assets/images/contact_choose_group_active.png'
 import contact_choose_company from '@assets/images/contact_choose_company.png'
 import contact_choose_company_active from '@assets/images/contact_choose_company_active.png'
-import { ConversationItem, FullUserItem, GroupItem, MessageItem, PublicUserItem } from '@openim/wasm-client-sdk/lib/types/entity';
+import { ConversationItem, FriendUserItem, GroupItem, MessageItem, PublicUserItem } from '@openim/wasm-client-sdk/lib/types/entity';
 import { GenericListItemSource } from '@/components/GenericListItem/data';
 import { ContactChooseEnum } from './data';
 import useContactStore from '@/store/modules/contact';
@@ -61,7 +61,7 @@ import { IMSDK } from '@/utils/imCommon';
 import emitter from '@/utils/events';
 import useSendMessage from '@/hooks/useSendMessage';
 
-type CheckedItem = FullUserItem & GroupItem & ConversationItem
+type CheckedItem = FriendUserItem & GroupItem & ConversationItem
 
 const { t } = useI18n()
 

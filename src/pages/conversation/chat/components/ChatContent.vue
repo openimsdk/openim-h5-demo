@@ -67,7 +67,7 @@ const checkIsNotification = computed(() => (message: MessageItem) => {
   if (message.contentType === MessageType.GroupInfoUpdated) {
     let detail
     try {
-      detail = JSON.parse(message.notificationElem?.detail)
+      detail = JSON.parse(message.notificationElem?.detail!)
     } catch (e) {
     }
     return detail?.group?.notification === undefined

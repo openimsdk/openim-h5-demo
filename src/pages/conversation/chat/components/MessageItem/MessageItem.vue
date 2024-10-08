@@ -100,7 +100,7 @@ const groupAnnounceData = computed(() => {
   let detail;
   if (props.source.contentType === MessageType.GroupAnnouncementUpdated) {
     try {
-      detail = JSON.parse(props.source.notificationElem?.detail);
+      detail = JSON.parse(props.source.notificationElem?.detail!);
     } catch (e) {}
   }
   return {

@@ -130,7 +130,7 @@ const participantDisconnectedHandler = (
 const newMessageHandler = ({ data }: WSEvent<ExMessageItem[]>) => {
   data.map((message) => {
     if (message.contentType === MessageType.CustomMessage) {
-      const customData = JSON.parse(message.customElem.data) as {
+      const customData = JSON.parse(message.customElem!.data) as {
         data: RtcInvite;
         customType: CustomType;
       };

@@ -68,7 +68,7 @@ export const tipMessaggeFormat = (msg: MessageItem) => {
     case MessageType.FriendAdded:
       return t("notificationTipMessage.alreadyFriendMessage");
     case MessageType.GroupCreated:
-      const groupCreatedDetail = JSON.parse(msg.notificationElem.detail);
+      const groupCreatedDetail = JSON.parse(msg.notificationElem!.detail);
       const groupCreatedUser = groupCreatedDetail.opUser;
       return t("notificationTipMessage.createGroupMessage", {
         creator: linkWrap({
@@ -78,7 +78,7 @@ export const tipMessaggeFormat = (msg: MessageItem) => {
         }),
       });
     case MessageType.GroupInfoUpdated:
-      const groupUpdateDetail = JSON.parse(msg.notificationElem.detail);
+      const groupUpdateDetail = JSON.parse(msg.notificationElem!.detail);
       const groupUpdateUser = groupUpdateDetail.opUser;
       return t("notificationTipMessage.updateGroupAnnouncementMessage", {
         operator: linkWrap({
@@ -88,7 +88,7 @@ export const tipMessaggeFormat = (msg: MessageItem) => {
         }),
       });
     case MessageType.GroupOwnerTransferred:
-      const transferDetails = JSON.parse(msg.notificationElem.detail);
+      const transferDetails = JSON.parse(msg.notificationElem!.detail);
       const transferOpUser = transferDetails.opUser;
       const newOwner = transferDetails.newGroupOwner;
       return t("notificationTipMessage.transferGroupMessage", {
@@ -104,7 +104,7 @@ export const tipMessaggeFormat = (msg: MessageItem) => {
         }),
       });
     case MessageType.MemberQuit:
-      const quitDetails = JSON.parse(msg.notificationElem.detail);
+      const quitDetails = JSON.parse(msg.notificationElem!.detail);
       const quitUser = quitDetails.quitUser;
       return t("notificationTipMessage.quitGroupMessage", {
         name: linkWrap({
@@ -114,7 +114,7 @@ export const tipMessaggeFormat = (msg: MessageItem) => {
         }),
       });
     case MessageType.MemberInvited:
-      const inviteDetails = JSON.parse(msg.notificationElem.detail);
+      const inviteDetails = JSON.parse(msg.notificationElem!.detail);
       const inviteOpUser = inviteDetails.opUser;
       const invitedUserList = inviteDetails.invitedUserList ?? [];
       let inviteStr = "";
@@ -142,7 +142,7 @@ export const tipMessaggeFormat = (msg: MessageItem) => {
         }`,
       });
     case MessageType.MemberKicked:
-      const kickDetails = JSON.parse(msg.notificationElem.detail);
+      const kickDetails = JSON.parse(msg.notificationElem!.detail);
       const kickOpUser = kickDetails.opUser;
       const kickdUserList = kickDetails.kickedUserList ?? [];
       let kickStr = "";
@@ -170,7 +170,7 @@ export const tipMessaggeFormat = (msg: MessageItem) => {
         }`,
       });
     case MessageType.MemberEnter:
-      const enterDetails = JSON.parse(msg.notificationElem.detail);
+      const enterDetails = JSON.parse(msg.notificationElem!.detail);
       const enterUser = enterDetails.entrantUser;
       return t("notificationTipMessage.joinGroupMessage", {
         name: linkWrap({
@@ -180,7 +180,7 @@ export const tipMessaggeFormat = (msg: MessageItem) => {
         }),
       });
     case MessageType.GroupDismissed:
-      const dismissDetails = JSON.parse(msg.notificationElem.detail);
+      const dismissDetails = JSON.parse(msg.notificationElem!.detail);
       const dismissUser = dismissDetails.opUser;
       return t("notificationTipMessage.disbanedGroupMessage", {
         operator: linkWrap({
@@ -190,7 +190,7 @@ export const tipMessaggeFormat = (msg: MessageItem) => {
         }),
       });
     case MessageType.GroupNameUpdated:
-      const groupNameDetails = JSON.parse(msg.notificationElem.detail);
+      const groupNameDetails = JSON.parse(msg.notificationElem!.detail);
       return t("messageDescription.updateGroupNameMessage", {
         operator: linkWrap({
           userID: groupNameDetails.opUser.userID,
@@ -274,7 +274,7 @@ export const formatMessageByType = (message: MessageItem): string => {
 
   switch (message.contentType) {
     case MessageType.TextMessage:
-      return message.textElem?.content;
+      return message.textElem?.content!;
     case MessageType.PictureMessage:
       return t("messageDescription.imageMessage");
     case MessageType.VideoMessage:
@@ -282,19 +282,19 @@ export const formatMessageByType = (message: MessageItem): string => {
     case MessageType.FriendAdded:
       return t("messageDescription.alreadyFriendMessage");
     case MessageType.MemberEnter:
-      const enterDetails = JSON.parse(message.notificationElem.detail);
+      const enterDetails = JSON.parse(message.notificationElem!.detail);
       const enterUser = enterDetails.entrantUser;
       return t("messageDescription.joinGroupMessage", {
         name: getName(enterUser),
       });
     case MessageType.GroupCreated:
-      const groupCreatedDetail = JSON.parse(message.notificationElem.detail);
+      const groupCreatedDetail = JSON.parse(message.notificationElem!.detail);
       const groupCreatedUser = groupCreatedDetail.opUser;
       return t("messageDescription.createGroupMessage", {
         creator: getName(groupCreatedUser),
       });
     case MessageType.MemberInvited:
-      const inviteDetails = JSON.parse(message.notificationElem.detail);
+      const inviteDetails = JSON.parse(message.notificationElem!.detail);
       const inviteOpUser = inviteDetails.opUser;
       const invitedUserList = inviteDetails.invitedUserList ?? [];
       let inviteStr = "";
@@ -313,7 +313,7 @@ export const formatMessageByType = (message: MessageItem): string => {
         }`,
       });
     case MessageType.MemberKicked:
-      const kickDetails = JSON.parse(message.notificationElem.detail);
+      const kickDetails = JSON.parse(message.notificationElem!.detail);
       const kickOpUser = kickDetails.opUser;
       const kickdUserList = kickDetails.kickedUserList ?? [];
       let kickStr = "";
@@ -332,19 +332,19 @@ export const formatMessageByType = (message: MessageItem): string => {
         }`,
       });
     case MessageType.MemberQuit:
-      const quitDetails = JSON.parse(message.notificationElem.detail);
+      const quitDetails = JSON.parse(message.notificationElem!.detail);
       const quitUser = quitDetails.quitUser;
       return t("messageDescription.quitGroupMessage", {
         name: getName(quitUser),
       });
     case MessageType.GroupInfoUpdated:
-      const groupUpdateDetail = JSON.parse(message.notificationElem.detail);
+      const groupUpdateDetail = JSON.parse(message.notificationElem!.detail);
       const groupUpdateUser = groupUpdateDetail.opUser;
       return t("messageDescription.updateGroupInfoMessage", {
         operator: getName(groupUpdateUser),
       });
     case MessageType.GroupOwnerTransferred:
-      const transferDetails = JSON.parse(message.notificationElem.detail);
+      const transferDetails = JSON.parse(message.notificationElem!.detail);
       const transferOpUser = transferDetails.opUser;
       const newOwner = transferDetails.newGroupOwner;
       return t("messageDescription.transferGroupMessage", {
@@ -352,13 +352,13 @@ export const formatMessageByType = (message: MessageItem): string => {
         newOwner: getName(newOwner),
       });
     case MessageType.GroupDismissed:
-      const dismissDetails = JSON.parse(message.notificationElem.detail);
+      const dismissDetails = JSON.parse(message.notificationElem!.detail);
       const dismissUser = dismissDetails.opUser;
       return t("messageDescription.disbanedGroupMessage", {
         operator: getName(dismissUser),
       });
     case MessageType.GroupNameUpdated:
-      const groupNameDetails = JSON.parse(message.notificationElem.detail);
+      const groupNameDetails = JSON.parse(message.notificationElem!.detail);
       return t("messageDescription.updateGroupNameMessage", {
         operator: getName(groupNameDetails.opUser),
         name: groupNameDetails.group.groupName,

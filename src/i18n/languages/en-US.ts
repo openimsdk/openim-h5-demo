@@ -12,7 +12,7 @@ export const lang = {
   contact: "Contacts",
   workbench: "Workbench",
   profile: "Mine",
-  welcome: "Welcome to OpenIM",
+  welcome: "Welcome to OpenCorp",
   emptySearchDesc: "No search results",
   offlinePushTitle: "You have a new message",
   offline: "Offline",

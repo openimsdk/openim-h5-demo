@@ -5,5 +5,5 @@ export default {
   WS_URL: "ws://your-server-ip:10001",
   AMAP_KEY: "key",
   AMAP_SNAP_KEY: "key",
-  VERSION: "OpenIM-H5-Demo",
+  VERSION: "OpenCorp-H5-Demo",
 };

@@ -156,18 +156,18 @@ function filterPreviewImage(messages: MessageItem[]) {
       if (message.contentType === MessageType.OANotification) {
         let notificationData = {} as any;
         try {
-          notificationData = JSON.parse(message.notificationElem.detail);
+          notificationData = JSON.parse(message.notificationElem!.detail);
         } catch (error) {}
         if (notificationData.mixType === 1) {
-          message.pictureElem.snapshotPicture.url =
-            notificationData.pictureElem.sourcePicture.url;
+          message.pictureElem!.snapshotPicture.url =
+            notificationData.pictureElem!.sourcePicture.url;
           return true;
         }
         return false;
       }
       return false;
     })
-    .map((item) => item.pictureElem.sourcePicture.url);
+    .map((item) => item.pictureElem!.sourcePicture.url);
 }
 
 export default function useMessageStore() {
