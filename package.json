@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@livekit/components-core": "^0.8.2",
-    "@openim/wasm-client-sdk": "^3.8.2",
+    "@openim/wasm-client-sdk": "^3.8.2-2",
     "@vuemap/vue-amap": "^2.0.5",
     "@vueuse/core": "^9.10.0",
     "absurd-sql-optimized": "^0.0.1",
