@@ -25,10 +25,6 @@ OpenIM H5 Demo is an open-source instant messaging application built on OpenIM S
 - This is a web project bootstrapped with [`Vite`](https://vitejs.dev/).
 - App is built with [openim-sdk-wasm](https://github.com/openimsdk/open-im-sdk-web-wasm) library.
 
-## Live Demo 🌐
-
-Give it a try at [https://h5-enterprise.rentsoft.cn](https://h5-enterprise.rentsoft.cn).
-
 ## Dev Setup 🛠️
 
 > It is recommended to use version 16.x-18.x.
