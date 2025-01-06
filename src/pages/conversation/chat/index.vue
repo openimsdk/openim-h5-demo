@@ -1,20 +1,18 @@
 <template>
-  <div class="h-full flex flex-col overflow-hidden">
+  <div class="flex h-full flex-col overflow-hidden">
     <ChatHeader />
-    <ChatContent />
-    <ChatFooter/>
+    <ChatContent :multipleCheckVisible="multipleCheckVisible" />
+    <ChatFooter v-show="!multipleCheckVisible" />
   </div>
 </template>
 
-<script name="chat" setup lang='ts'>
-import ChatHeader from "./components/ChatHeader.vue";
-import ChatContent from "./components/ChatContent.vue";
-import ChatFooter from "./components/ChatFooter/ChatFooter.vue";
-import useConversationState from "./useConversationState";
+<script name="chat" setup lang="ts">
+import ChatHeader from './components/ChatHeader.vue'
+import ChatContent from './components/ChatContent.vue'
+import ChatFooter from './components/ChatFooter/ChatFooter.vue'
+import useConversationState from './useConversationState'
 
-useConversationState()
+const { multipleCheckVisible } = useConversationState()
 </script>
 
-<style lang='scss' scoped>
-
-</style>
+<style lang="scss" scoped></style>

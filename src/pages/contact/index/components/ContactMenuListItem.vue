@@ -1,7 +1,7 @@
 <template>
-  <div class="px-[22px] h-[66px] flex items-center bg-white">
+  <div class="flex h-[66px] items-center bg-white px-[22px]">
     <Avatar :src="icon" :size="42" />
-    <div class="flex justify-between items-center w-full h-full ml-4">
+    <div class="ml-4 flex h-full w-full items-center justify-between">
       <div>{{ title }}</div>
       <div class="flex items-center">
         <van-badge class="mr-1" :content="badge" :show-zero="false" max="99" />
@@ -11,20 +11,19 @@
   </div>
 </template>
 
-<script setup lang='ts'>
-import Avatar from '@/components/Avatar/index.vue';
+<script setup lang="ts">
+import Avatar from '@/components/Avatar/index.vue'
 
 type ContactMenuProps = {
-  icon: string;
-  title: string;
-  badge?: number;
+  icon: string
+  title: string
+  badge?: number
 }
 
 const props = defineProps<ContactMenuProps>()
-
 </script>
 
-<style lang='scss' scoped>
+<style lang="scss" scoped>
 :deep(.van-badge--top-right) {
   transform: translate(0, 0);
 }

@@ -2,38 +2,84 @@
   <div class="page_container">
     <NavBar :title="$t('groupSetting')" />
 
-    <div class="overflow-y-auto flex-1">
-      <div class="flex items-center bg-white p-4 mt-[10px] mx-[10px] rounded-md">
-        <div class="relative w-12 h-12">
-          <Avatar :size="48" :src="conversationStore.currentConversation.faceURL" is-group @click="chooseAvatar" />
-          <img v-if="isOwner || isAdmin" class="w-[14px] h-[14px] absolute right-[-4px] bottom-[-4px]" :src="edit_icon"
-            alt="" />
+    <div class="flex-1 overflow-y-auto">
+      <div class="mx-[10px] mt-[10px] flex items-center rounded-md bg-white p-4">
+        <div class="relative h-12 w-12">
+          <Avatar
+            :size="48"
+            :src="conversationStore.currentConversation.faceURL"
+            is-group
+            @click="chooseAvatar"
+          />
+          <img
+            v-if="isOwner || isAdmin"
+            class="absolute right-[-4px] bottom-[-4px] h-[14px] w-[14px]"
+            :src="edit_icon"
+            alt=""
+          />
         </div>
 
-        <div class="flex flex-1 h-[48px] flex-col items-start ml-[10px]" @click="toChangeName(true)">
-          <div class="flex items-center justify-start">
-            <span class="text-base">{{ conversationStore.currentConversation.showName }}</span>
-            <span class="text-base">{{ "(" }}</span>
-            <span class="text-base">{{ conversationStore.storeCurrentGroupInfo.memberCount }}</span>
-            <span class="text-base">{{ ")" }}</span>
-            <img v-if="isOwner || isAdmin" class="w-[12px] h-[12px] ml-1.5" :src="edit" alt="">
+        <div class="ml-[10px] flex h-[48px] flex-1 flex-col items-start">
+          <div class="flex items-center justify-start" @click="toChangeName(true)">
+            <span class="text-base">{{
+              conversationStore.currentConversation.showName
+            }}</span>
+            <span class="text-base">{{ '(' }}</span>
+            <span class="text-base">{{
+              conversationStore.storeCurrentGroupInfo.memberCount
+            }}</span>
+            <span class="text-base">{{ ')' }}</span>
+            <img
+              v-if="isOwner || isAdmin"
+              class="ml-1.5 h-[12px] w-[12px]"
+              :src="edit"
+              alt=""
+            />
           </div>
 
-          <span class="text-sm text-sub-text mt-1">{{ conversationStore.storeCurrentGroupInfo.groupID }}</span>
+          <span class="mt-1 text-sm text-sub-text" @click="copyGroupID">{{
+            conversationStore.storeCurrentGroupInfo.groupID
+          }}</span>
         </div>
-        <img class="w-[18px] h-[18px]" @click="toGroupQr" :src="qr" alt="">
+        <img class="h-[18px] w-[18px]" @click="toGroupQr" :src="qr" alt="" />
       </div>
 
-      <GroupMemberRow :member-count="conversationStore.storeCurrentGroupInfo.memberCount" :is-nomal="isNomal" />
+      <GroupMemberRow
+        v-if="inSameGroup"
+        :member-count="conversationStore.storeCurrentGroupInfo.memberCount"
+        :is-nomal="isNomal"
+      />
 
-      <div class="bg-white m-[10px] rounded-md overflow-hidden">
-        <SettingRowItem danger :title="isOwner ? $t('buttons.disbandGroup') : $t('buttons.quitGroup')"
-          @click-item="dismissOrQuit" />
+      <div
+        v-if="inSameGroup"
+        class="mx-[10px] mt-[10px] overflow-hidden rounded-md bg-white"
+      >
+        <SettingRowItem
+          v-if="isOwner || isAdmin"
+          :title="$t('groupManage')"
+          @click="toGroupManage"
+        />
+      </div>
+
+      <div class="m-[10px] overflow-hidden rounded-md bg-white">
+        <SettingRowItem
+          v-if="inSameGroup"
+          danger
+          :title="isOwner ? $t('buttons.disbandGroup') : $t('buttons.quitGroup')"
+          @click-item="dismissOrQuit"
+        />
       </div>
     </div>
 
-    <van-uploader v-show="false" ref="uploaderRef" accept="image/*" capture="camcorder" :preview-image="false"
-      :multiple="false" :after-read="afterReadFile" />
+    <van-uploader
+      v-show="false"
+      ref="uploaderRef"
+      accept="image/*"
+      capture="camcorder"
+      :preview-image="false"
+      :multiple="false"
+      :after-read="afterReadFile"
+    />
   </div>
 </template>
 
@@ -41,24 +87,34 @@
 import qr from '@/assets/images/setting/qr.png'
 import edit from '@/assets/images/setting/edit.png'
 import edit_icon from '@/assets/images/setting/edit_icon.png'
-import NavBar from "@/components/NavBar/index.vue";
-import Avatar from "@/components/Avatar/index.vue";
-import { UploaderFileListItem, UploaderInstance, showConfirmDialog, showLoadingToast } from "vant";
-import SettingRowItem from "@/components/SettingRowItem/index.vue";
-import GroupMemberRow from "./components/GroupMemberRow.vue";
-import useConversationSettings from "@/hooks/useConversationSettings";
-import useCurrentMemberRole from "@/hooks/useCurrentMemberRole";
-import { IMSDK } from "@/utils/imCommon";
-import { v4 as uuidV4 } from "uuid";
-import { feedbackToast } from '@/utils/common';
+import NavBar from '@/components/NavBar/index.vue'
+import Avatar from '@/components/Avatar/index.vue'
+import {
+  UploaderFileListItem,
+  UploaderInstance,
+  showConfirmDialog,
+  showLoadingToast,
+} from 'vant'
+import SettingRowItem from '@/components/SettingRowItem/index.vue'
+import GroupMemberRow from './components/GroupMemberRow.vue'
+import { MessageReceiveOptType } from '@openim/wasm-client-sdk'
+import useConversationSettings from '@/hooks/useConversationSettings'
+import useCurrentMemberRole from '@/hooks/useCurrentMemberRole'
+import { IMSDK } from '@/utils/imCommon'
+import { v4 as uuidV4 } from 'uuid'
+import { feedbackToast, getFileType, useCopy } from '@/utils/common'
 
 const {
   conversationStore,
-} = useConversationSettings();
+  switchLoading,
+  updateConversationPinState,
+  updateConversationRecvMsgState,
+} = useConversationSettings()
 
-const { isNomal, isOwner, isAdmin } = useCurrentMemberRole();
-const router = useRouter();
+const { isNomal, isOwner, isAdmin, inSameGroup } = useCurrentMemberRole()
+const router = useRouter()
 const { t } = useI18n()
+const { copy } = useCopy()
 
 const uploaderRef = ref<UploaderInstance>()
 
@@ -67,23 +123,27 @@ const afterReadFile = (data: UploaderFileListItem | UploaderFileListItem[]) => {
   const uploadToast = showLoadingToast({
     message: t('uploading'),
     forbidClick: true,
-    duration: 0
+    duration: 0,
   })
   IMSDK.uploadFile({
-    name: fileData.file?.name ?? '',
+    name: new Date().getTime() + getFileType(fileData.file?.name ?? ''),
     contentType: fileData.file?.type!,
     uuid: uuidV4(),
     file: fileData.file as File,
-  }).then((res) => {
-    IMSDK.setGroupInfo({
-      groupID: conversationStore.storeCurrentConversation.groupID,
-      faceURL: res.data.url
-    }).finally(() => uploadToast.close())
-  }).catch(() => {
-    uploadToast.message = t('messageTip.uploadFailed'); setTimeout(() => {
-      uploadToast.close()
-    }, 200)
-  }).finally(() => uploadToast.close())
+  })
+    .then((res) => {
+      IMSDK.setGroupInfo({
+        groupID: conversationStore.storeCurrentConversation.groupID,
+        faceURL: res.data.url,
+      }).finally(() => uploadToast.close())
+    })
+    .catch(() => {
+      uploadToast.message = t('messageTip.uploadFailed')
+      setTimeout(() => {
+        uploadToast.close()
+      }, 200)
+    })
+    .finally(() => uploadToast.close())
 }
 
 const chooseAvatar = () => {
@@ -94,46 +154,59 @@ const chooseAvatar = () => {
 
 const toChangeName = (isGroup?: boolean) => {
   if (isGroup && isNomal.value) {
-    return;
+    return
   }
   router.push({
     path: 'changeName',
     query: {
-      originData: JSON.stringify(isGroup ? conversationStore.storeCurrentGroupInfo : conversationStore.storeCurrentMemberInGroup)
-    }
+      originData: JSON.stringify(
+        isGroup
+          ? conversationStore.storeCurrentGroupInfo
+          : conversationStore.storeCurrentMemberInGroup,
+      ),
+    },
   })
+}
+
+const toGroupManage = () => {
+  router.push('/groupManage')
 }
 
 const toGroupQr = () => {
   router.push({
     path: 'selfOrGroupQr',
     query: {
-      isGroup: 'true'
-    }
+      isGroup: 'true',
+    },
   })
 }
 
 const dismissOrQuit = () => {
-  const funName = isOwner ? 'dismissGroup' : "quitGroup"
-  const message = isOwner ? t('messageTip.disbandGroup') :  t('messageTip.quitGroup')
+  const funName = isOwner.value ? 'dismissGroup' : 'quitGroup'
+  const message = isOwner.value
+    ? t('messageTip.disbandGroup')
+    : t('messageTip.quitGroup')
 
   showConfirmDialog({
     message,
     beforeClose: (action: string) => {
       return new Promise((resolve) => {
-        if (action !== "confirm") {
-          resolve(true);
-          return;
+        if (action !== 'confirm') {
+          resolve(true)
+          return
         }
         IMSDK[funName](conversationStore.currentConversation.groupID)
           .then(() => router.push('/conversation'))
           .catch((error: unknown) => feedbackToast({ error }))
-          .finally(() => resolve(true));
-      });
+          .finally(() => resolve(true))
+      })
     },
-  });
+  })
 }
 
+const copyGroupID = () => {
+  copy(conversationStore.storeCurrentGroupInfo.groupID)
+}
 </script>
 
 <style lang="scss" scoped></style>

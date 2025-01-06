@@ -1,105 +1,104 @@
 <template>
-  <div ref="inputRef" class="custom_rich_input" :class="{ 'needsclick': !input }"
-    :placeholder="placeholder ?? $t('placeholder.typingMessage')" :contenteditable="!disable" @input="emitChange" />
+  <div
+    ref="inputRef"
+    class="custom_rich_input"
+    :class="{ needsclick: !input }"
+    :placeholder="placeholder ?? $t('placeholder.typingMessage')"
+    :contenteditable="!disable"
+    @input="emitChange"
+  />
 </template>
-  
+
 <script setup lang="ts">
-import { onBeforeUnmount } from 'vue';
+import { onBeforeUnmount } from 'vue'
 
 interface CustomEditProps {
-  placeholder?: string;
-  disable?: boolean;
-  input: string;
+  placeholder?: string
+  disable?: boolean
+  input: string
 }
 
 const props = withDefaults(defineProps<CustomEditProps>(), {
   disable: false,
-});
+})
 
-const { input, placeholder, disable } = toRefs(props);
-const emit = defineEmits(["update:input", 'change', 'triggerAt']);
+const { input, placeholder, disable } = toRefs(props)
+const emit = defineEmits(['update:input', 'change', 'triggerAt'])
 
-const inputRef = ref<HTMLDivElement>();
-let latestHtml = "";
-let cursorPos: Range;
+const inputRef = ref<HTMLDivElement>()
+let latestHtml = ''
+let cursorPos: Range
 
 onUpdated(() => {
-  latestHtml = input.value;
-});
+  latestHtml = input.value
+})
 
 const emitChange = () => {
-  const content = inputRef.value?.innerHTML;
+  const content = inputRef.value?.innerHTML
   emit('change', content)
   if (content !== latestHtml) {
-    emit("update:input", content)
+    emit('update:input', content)
   }
-  latestHtml = content!;
-
-  const selection = window.getSelection();
-  const range = selection!.getRangeAt(0);
-  const previousChar = range.startContainer.textContent!.charAt(range.startOffset - 1);
-  if (previousChar === '@') {
-    emit('triggerAt')
-  }
-};
+  latestHtml = content!
+}
 
 const clear = () => {
-  inputRef.value!.innerHTML = ""
+  inputRef.value!.innerHTML = ''
 }
 
 const insertAtCursor = (nodes: Node[]) => {
-  if (!cursorPos) return;
-  const selection = window.getSelection();
-  const range = cursorPos.cloneRange();
+  if (!cursorPos) return
+  const selection = window.getSelection()
+  const range = cursorPos.cloneRange()
 
-  range.deleteContents();
+  range.deleteContents()
   nodes.forEach((node) => {
-    range.insertNode(node);
-    range.setStartAfter(node);
-  });
-  range.collapse(false);
-  selection!.removeAllRanges();
-  selection!.addRange(range);
-  emitChange();
-};
+    range.insertNode(node)
+    range.setStartAfter(node)
+  })
+  range.collapse(false)
+  selection!.removeAllRanges()
+  selection!.addRange(range)
+  emitChange()
+}
 
 const deletePreviousChar = () => {
-  if (!cursorPos) return;
-  const range = cursorPos.cloneRange();
-  const previousChar = range.startContainer.textContent!.charAt(range.startOffset - 1);
-  if (previousChar === "@") {
-    range.setStart(range.startContainer, range.startOffset - 1);
-    range.deleteContents();
+  if (!cursorPos) return
+  const range = cursorPos.cloneRange()
+  const previousChar = range.startContainer.textContent!.charAt(range.startOffset - 1)
+  if (previousChar === '@') {
+    range.setStart(range.startContainer, range.startOffset - 1)
+    range.deleteContents()
   }
 }
 
 const updateCursorPosition = () => {
-  const selection = window.getSelection();
+  const selection = window.getSelection()
   if (selection && selection.rangeCount > 0) {
-    cursorPos = selection.getRangeAt(0);
+    cursorPos = selection.getRangeAt(0)
   }
 }
 
 const onSelectionChange = () => {
   if (inputRef.value === document.activeElement) {
-    updateCursorPosition();
+    updateCursorPosition()
   }
-};
+}
 
 onMounted(() => {
-  document.addEventListener('selectionchange', onSelectionChange);
-});
+  document.addEventListener('selectionchange', onSelectionChange)
+})
 
 onBeforeUnmount(() => {
-  document.removeEventListener('selectionchange', onSelectionChange);
-});
+  document.removeEventListener('selectionchange', onSelectionChange)
+})
 
 defineExpose({
   inputRef,
   insertAtCursor,
   deletePreviousChar,
-  clear
-});
+  clear,
+})
 </script>
 
 <style lang="scss" scoped>

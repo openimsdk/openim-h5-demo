@@ -1,21 +1,22 @@
-import { ExedMessageItem } from "./data";
-import useConversationStore from "@/store/modules/conversation";
-import useMessageStore from "@/store/modules/message";
-import { IMSDK } from "@/utils/imCommon";
-import { useIntersectionObserver } from "@vueuse/core";
-import { ComputedRef, Ref } from "vue";
+import { ExedMessageItem } from './data'
+import useConversationStore from '@/store/modules/conversation'
+import useMessageStore from '@/store/modules/message'
+import { IMSDK } from '@/utils/imCommon'
+import { SessionType } from '@openim/wasm-client-sdk'
+import { useIntersectionObserver } from '@vueuse/core'
+import { ComputedRef, Ref } from 'vue'
 
 type UseMessageIsReadProps = {
-  messageContainerRef: Ref<any>;
-  clientMsgID: string;
-  isSelfMsg: ComputedRef<boolean>;
-  isRead: boolean;
-  isPreView: boolean;
-  isGroupAnnounce: boolean;
-};
+  messageContainerRef: Ref<any>
+  clientMsgID: string
+  isSelfMsg: ComputedRef<boolean>
+  isRead: boolean
+  isPreView: boolean
+  isGroupAnnounce: boolean
+}
 
-const conversationStore = useConversationStore();
-const messageStore = useMessageStore();
+const conversationStore = useConversationStore()
+const messageStore = useMessageStore()
 
 export function useMessageIsRead({
   messageContainerRef,
@@ -26,35 +27,30 @@ export function useMessageIsRead({
   clientMsgID,
 }: UseMessageIsReadProps) {
   const markC2CAsRead = () => {
-    if (conversationStore.storeCurrentConversation.unreadCount > 0) {
-      IMSDK.markConversationMessageAsRead(
-        conversationStore.storeCurrentConversation.conversationID,
-      )
-    }
     messageStore.updateOneMessage({
       clientMsgID,
       isRead: true,
       isAppend: false,
-    } as ExedMessageItem);
-  };
+    } as ExedMessageItem)
+  }
 
   const getMessageVisible = () => {
     if (isSelfMsg.value || isRead || isPreView || isGroupAnnounce) {
-      return;
+      return
     }
 
     const { stop } = useIntersectionObserver(
       messageContainerRef,
       ([{ isIntersecting }], observerElement) => {
         if (isIntersecting) {
-          markC2CAsRead();
-          stop();
+          markC2CAsRead()
+          stop()
         }
-      }
-    );
-  };
+      },
+    )
+  }
 
   onMounted(() => {
-    getMessageVisible();
-  });
+    getMessageVisible()
+  })
 }

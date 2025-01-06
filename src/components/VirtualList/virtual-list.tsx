@@ -7,38 +7,38 @@ import {
   onUnmounted,
   ref,
   watch,
-} from "vue";
-import Virtual from "./virtual";
-import { Item, Slot } from "./item";
-import { VirtualProps } from "./props";
+} from 'vue'
+import Virtual from './virtual'
+import { Item, Slot } from './item'
+import { VirtualProps } from './props'
 
 enum EVENT_TYPE {
-  ITEM = "itemResize",
-  SLOT = "slotResize",
+  ITEM = 'itemResize',
+  SLOT = 'slotResize',
 }
 
 enum SLOT_TYPE {
-  HEADER = "thead", // string value also use for aria role attribute
-  FOOTER = "tfoot",
+  HEADER = 'thead', // string value also use for aria role attribute
+  FOOTER = 'tfoot',
 }
 
 interface Range {
-  start: number;
-  end: number;
-  padFront: number;
-  padBehind: number;
+  start: number
+  end: number
+  padFront: number
+  padBehind: number
 }
 
 export default defineComponent({
-  name: "VirtualList",
+  name: 'VirtualList',
   props: VirtualProps,
   setup(props, { emit, slots, expose }) {
-    const isHorizontal = props.direction === "horizontal";
-    const directionKey = isHorizontal ? "scrollLeft" : "scrollTop";
-    const range = ref<Range | null>(null);
-    const root = ref<HTMLElement | null>();
-    const shepherd = ref<HTMLDivElement | null>(null);
-    let virtual: Virtual;
+    const isHorizontal = props.direction === 'horizontal'
+    const directionKey = isHorizontal ? 'scrollLeft' : 'scrollTop'
+    const range = ref<Range | null>(null)
+    const root = ref<HTMLElement | null>()
+    const shepherd = ref<HTMLDivElement | null>(null)
+    let virtual: Virtual
 
     /**
      * watch
@@ -46,103 +46,99 @@ export default defineComponent({
     watch(
       () => props.dataSources.length,
       () => {
-        virtual.updateParam("uniqueIds", getUniqueIdFromDataSources());
-        virtual.handleDataSourcesChange();
-      }
-    );
+        virtual.updateParam('uniqueIds', getUniqueIdFromDataSources())
+        virtual.handleDataSourcesChange()
+      },
+    )
     watch(
       () => props.keeps,
       (newValue) => {
-        virtual.updateParam("keeps", newValue);
-        virtual.handleSlotSizeChange();
-      }
-    );
+        virtual.updateParam('keeps', newValue)
+        virtual.handleSlotSizeChange()
+      },
+    )
     watch(
       () => props.start,
       (newValue) => {
-        scrollToIndex(newValue);
-      }
-    );
+        scrollToIndex(newValue)
+      },
+    )
     watch(
       () => props.offset,
-      (newValue) => scrollToOffset(newValue)
-    );
+      (newValue) => scrollToOffset(newValue),
+    )
 
     /**
      * methods
      */
     // get item size by id
     const getSize = (id) => {
-      return virtual.sizes.get(id);
-    };
+      return virtual.sizes.get(id)
+    }
     const getOffset = () => {
       if (props.pageMode) {
-        return (
-          document.documentElement[directionKey] || document.body[directionKey]
-        );
+        return document.documentElement[directionKey] || document.body[directionKey]
       } else {
-        return root.value ? Math.ceil(root.value[directionKey]) : 0;
+        return root.value ? Math.ceil(root.value[directionKey]) : 0
       }
-    };
+    }
     // return client viewport size
     const getClientSize = () => {
-      const key = isHorizontal ? "clientWidth" : "clientHeight";
+      const key = isHorizontal ? 'clientWidth' : 'clientHeight'
       if (props.pageMode) {
-        return document.documentElement[key] || document.body[key];
+        return document.documentElement[key] || document.body[key]
       } else {
-        return root.value ? Math.ceil(root.value[key]) : 0;
+        return root.value ? Math.ceil(root.value[key]) : 0
       }
-    };
+    }
     // return all scroll size
     const getScrollSize = () => {
-      const key = isHorizontal ? "scrollWidth" : "scrollHeight";
+      const key = isHorizontal ? 'scrollWidth' : 'scrollHeight'
       if (props.pageMode) {
-        return document.documentElement[key] || document.body[key];
+        return document.documentElement[key] || document.body[key]
       } else {
-        return root.value ? Math.ceil(root.value[key]) : 0;
+        return root.value ? Math.ceil(root.value[key]) : 0
       }
-    };
+    }
     const emitEvent = (offset, clientSize, scrollSize, evt) => {
-      emit("scroll", evt, virtual.getRange());
+      emit('scroll', evt, virtual.getRange())
 
       if (
         virtual.isFront() &&
         !!props.dataSources.length &&
         offset - props.topThreshold <= 0
       ) {
-        emit("totop");
+        emit('totop')
       } else if (
         virtual.isBehind() &&
         offset + clientSize + props.bottomThreshold >= scrollSize
       ) {
-        emit("tobottom");
+        emit('tobottom')
       }
-    };
+    }
     const onScroll = (evt) => {
-      const offset = getOffset();
-      const clientSize = getClientSize();
-      const scrollSize = getScrollSize();
+      const offset = getOffset()
+      const clientSize = getClientSize()
+      const scrollSize = getScrollSize()
 
       // iOS scroll-spring-back behavior will make direction mistake
       if (offset < 0 || offset + clientSize > scrollSize + 1 || !scrollSize) {
-        return;
+        return
       }
 
-      virtual.handleScroll(offset);
-      emitEvent(offset, clientSize, scrollSize, evt);
-    };
+      virtual.handleScroll(offset)
+      emitEvent(offset, clientSize, scrollSize, evt)
+    }
 
     const getUniqueIdFromDataSources = () => {
-      const { dataKey, dataSources = [] } = props;
+      const { dataKey, dataSources = [] } = props
       return dataSources.map((dataSource: any) =>
-        typeof dataKey === "function"
-          ? dataKey(dataSource)
-          : dataSource[dataKey]
-      );
-    };
+        typeof dataKey === 'function' ? dataKey(dataSource) : dataSource[dataKey],
+      )
+    }
     const onRangeChanged = (newRange: any) => {
-      range.value = newRange;
-    };
+      range.value = newRange
+    }
     const installVirtual = () => {
       virtual = new Virtual(
         {
@@ -153,39 +149,39 @@ export default defineComponent({
           buffer: Math.round(props.keeps / 3), // recommend for a third of keeps
           uniqueIds: getUniqueIdFromDataSources(),
         },
-        onRangeChanged
-      );
+        onRangeChanged,
+      )
 
       // sync initial range
-      range.value = virtual.getRange();
-    };
+      range.value = virtual.getRange()
+    }
     // set current scroll position to a expectant index
     const scrollToIndex = (index: number) => {
       // scroll to bottom
       if (index >= props.dataSources.length - 1) {
-        scrollToBottom();
+        scrollToBottom()
       } else {
-        const offset = virtual.getOffset(index);
-        scrollToOffset(offset);
+        const offset = virtual.getOffset(index)
+        scrollToOffset(offset)
       }
-    };
+    }
     // set current scroll position to a expectant offset
     const scrollToOffset = (offset: number) => {
       if (props.pageMode) {
-        document.body[directionKey] = offset;
-        document.documentElement[directionKey] = offset;
+        document.body[directionKey] = offset
+        document.documentElement[directionKey] = offset
       } else {
         if (root.value) {
-          root.value[directionKey] = offset;
+          root.value[directionKey] = offset
         }
       }
-    };
+    }
     // get the real render slots based on range data
     // in-place patch strategy will try to reuse components as possible
     // so those components that are reused will not trigger lifecycle mounted
     const getRenderSlots = () => {
-      const slots = [];
-      const { start, end } = range.value;
+      const slots = []
+      const { start, end } = range.value
       const {
         dataSources,
         dataKey,
@@ -195,23 +191,19 @@ export default defineComponent({
         extraProps,
         dataComponent,
         itemScopedSlots,
-      } = props;
+      } = props
       for (let index = start; index <= end; index++) {
-        const dataSource = dataSources[index];
+        const dataSource = dataSources[index]
         if (dataSource) {
           const uniqueKey =
-            typeof dataKey === "function"
-              ? dataKey(dataSource)
-              : dataSource[dataKey];
+            typeof dataKey === 'function' ? dataKey(dataSource) : dataSource[dataKey]
           const internalExtraProps =
-            typeof extraProps === "function"
-              ? extraProps(dataSource)
-              : extraProps;
+            typeof extraProps === 'function' ? extraProps(dataSource) : extraProps
           const internalDataComponent =
-            typeof dataComponent === "function"
+            typeof dataComponent === 'function'
               ? dataComponent(dataSource)
-              : dataComponent;
-          if (typeof uniqueKey === "string" || typeof uniqueKey === "number") {
+              : dataComponent
+          if (typeof uniqueKey === 'string' || typeof uniqueKey === 'number') {
             slots.push(
               <Item
                 index={index}
@@ -225,113 +217,110 @@ export default defineComponent({
                 scopedSlots={itemScopedSlots}
                 style={itemStyle}
                 class={`${itemClass}${
-                  props.itemClassAdd ? " " + props.itemClassAdd(index) : ""
+                  props.itemClassAdd ? ' ' + props.itemClassAdd(index) : ''
                 }`}
                 onItemResize={onItemResized}
-              />
-            );
+              />,
+            )
           } else {
-            console.warn(
-              `Cannot get the data-key '${dataKey}' from data-sources.`
-            );
+            console.warn(`Cannot get the data-key '${dataKey}' from data-sources.`)
           }
         } else {
-          console.warn(`Cannot get the index '${index}' from data-sources.`);
+          console.warn(`Cannot get the index '${index}' from data-sources.`)
         }
       }
-      return slots;
-    };
+      return slots
+    }
 
     // event called when each item mounted or size changed
     const onItemResized = (id: string, size: number) => {
-      virtual.saveSize(id, size);
-      emit("resized", id, size);
-    };
+      virtual.saveSize(id, size)
+      emit('resized', id, size)
+    }
 
     // event called when slot mounted or size changed
     const onSlotResized = (type: SLOT_TYPE, size: number, hasInit: boolean) => {
       if (type === SLOT_TYPE.HEADER) {
-        virtual.updateParam("slotHeaderSize", size);
+        virtual.updateParam('slotHeaderSize', size)
       } else if (type === SLOT_TYPE.FOOTER) {
-        virtual.updateParam("slotFooterSize", size);
+        virtual.updateParam('slotFooterSize', size)
       }
 
       if (hasInit) {
-        virtual.handleSlotSizeChange();
+        virtual.handleSlotSizeChange()
       }
-    };
+    }
 
     // set current scroll position to bottom
     const scrollToBottom = () => {
       if (shepherd.value) {
-        const offset =
-          shepherd.value[isHorizontal ? "offsetLeft" : "offsetTop"];
-        scrollToOffset(offset);
+        const offset = shepherd.value[isHorizontal ? 'offsetLeft' : 'offsetTop']
+        scrollToOffset(offset)
 
         // check if it's really scrolled to the bottom
         // maybe list doesn't render and calculate to last range
         // so we need retry in next event loop until it really at bottom
         setTimeout(() => {
           if (getOffset() + getClientSize() < getScrollSize()) {
-            scrollToBottom();
+            scrollToBottom()
           }
-        }, 3);
+        }, 3)
       }
-    };
+    }
 
     // when using page mode we need update slot header size manually
     // taking root offset relative to the browser as slot header size
     const updatePageModeFront = () => {
       if (root.value) {
-        const rect = root.value.getBoundingClientRect();
-        const { defaultView } = root.value.ownerDocument;
+        const rect = root.value.getBoundingClientRect()
+        const { defaultView } = root.value.ownerDocument
         const offsetFront = isHorizontal
           ? rect.left + defaultView!.pageXOffset
-          : rect.top + defaultView!.pageYOffset;
-        virtual.updateParam("slotHeaderSize", offsetFront);
+          : rect.top + defaultView!.pageYOffset
+        virtual.updateParam('slotHeaderSize', offsetFront)
       }
-    };
+    }
 
     // get the total number of stored (rendered) items
     const getSizes = () => {
-      return virtual.sizes.size;
-    };
+      return virtual.sizes.size
+    }
 
     /**
      * life cycles
      */
     onBeforeMount(() => {
-      installVirtual();
-    });
+      installVirtual()
+    })
 
     // set back offset when awake from keep-alive
     onActivated(() => {
-      scrollToOffset(virtual.offset);
-    });
+      scrollToOffset(virtual.offset)
+    })
 
     onMounted(() => {
       // set position
       if (props.start) {
-        scrollToIndex(props.start);
+        scrollToIndex(props.start)
       } else if (props.offset) {
-        scrollToOffset(props.offset);
+        scrollToOffset(props.offset)
       }
 
       // in page mode we bind scroll event to document
       if (props.pageMode) {
-        updatePageModeFront();
-        document.addEventListener("scroll", onScroll, {
+        updatePageModeFront()
+        document.addEventListener('scroll', onScroll, {
           passive: false,
-        });
+        })
       }
-    });
+    })
 
     onUnmounted(() => {
-      virtual.destroy();
+      virtual.destroy()
       if (props.pageMode) {
-        document.removeEventListener("scroll", onScroll);
+        document.removeEventListener('scroll', onScroll)
       }
-    });
+    })
 
     /**
      * public methods
@@ -345,7 +334,7 @@ export default defineComponent({
       getClientSize,
       scrollToOffset,
       scrollToIndex,
-    });
+    })
 
     return () => {
       const {
@@ -360,17 +349,17 @@ export default defineComponent({
         footerTag,
         footerClass,
         footerStyle,
-      } = props;
-      const { padFront, padBehind } = range.value!;
+      } = props
+      const { padFront, padBehind } = range.value!
       const paddingStyle = {
         padding: isHorizontal
           ? `0px ${padBehind}px 0px ${padFront}px`
           : `${padFront}px 0px ${padBehind}px`,
-      };
+      }
       const wrapperStyle = wrapStyle
         ? Object.assign({}, wrapStyle, paddingStyle)
-        : paddingStyle;
-      const { header, footer } = slots;
+        : paddingStyle
+      const { header, footer } = slots
 
       return (
         <RootTag ref={root} onScroll={!pageMode && onScroll}>
@@ -411,12 +400,12 @@ export default defineComponent({
           <div
             ref={shepherd}
             style={{
-              width: isHorizontal ? "0px" : "100%",
-              height: isHorizontal ? "100%" : "0px",
+              width: isHorizontal ? '0px' : '100%',
+              height: isHorizontal ? '100%' : '0px',
             }}
           />
         </RootTag>
-      );
-    };
+      )
+    }
   },
-});
+})

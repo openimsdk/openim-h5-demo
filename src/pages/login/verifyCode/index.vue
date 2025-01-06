@@ -1,28 +1,42 @@
 <template>
-  <div class="page_container px-10 relative">
-    <img class="w-6 h-6 mt-[5vh]" :src="login_back" alt="" @click="$router.back">
+  <div class="page_container relative px-10">
+    <img class="mt-[5vh] h-6 w-6" :src="login_back" alt="" @click="$router.back" />
 
-    <div class="text-2xl text-primary font-semibold mt-12">{{ $t('placeholder.inputVerificationCode') }}</div>
-    <div class="text-sub-text text-xs mt-2">
-      <span class="mr-1">{{ baseData.areaCode }}</span>
-      <span>{{ baseData.phoneNumber }}</span>
+    <div class="mt-12 text-2xl font-semibold text-primary">
+      {{ $t('placeholder.inputVerificationCode') }}
+    </div>
+    <div class="mt-2 text-xs text-sub-text">
+      <template v-if="!baseData.isByEmail">
+        <span class="mr-1">{{ baseData.areaCode }}</span>
+        <span>{{ baseData.phoneNumber }}</span>
+      </template>
+      <template v-else>{{ baseData.email }}</template>
     </div>
 
     <div class="mt-10">
-      <van-password-input class="!m-0" :value="verificationCode" :mask="false" :focused="showKeyboard"
-        @focus="showKeyboard = true" />
+      <van-password-input
+        class="!m-0"
+        :value="verificationCode"
+        :mask="false"
+        :focused="showKeyboard"
+        @focus="showKeyboard = true"
+      />
     </div>
 
-    <div class="text-sub-text text-xs mt-4">
+    <div class="mt-4 text-xs text-sub-text">
       <span v-if="count > 0">{{ count }}S</span>
       <span @click="reSend">{{ $t('reAcquire') }}</span>
     </div>
 
-    <van-number-keyboard v-model="verificationCode" :show="showKeyboard" @blur="showKeyboard = false" />
+    <van-number-keyboard
+      v-model="verificationCode"
+      :show="showKeyboard"
+      @blur="showKeyboard = false"
+    />
   </div>
 </template>
 
-<script setup lang='ts'>
+<script setup lang="ts">
 import { UsedFor } from '@/api/data'
 import { sendSms, verifyCode } from '@/api/login'
 import { feedbackToast } from '@/utils/common'
@@ -33,36 +47,40 @@ export interface BaseData {
   phoneNumber: string
   invitationCode: string
   isRegiste: boolean
+  isByEmail: boolean
+  email: string
 }
 
 const props = defineProps<{
   baseData: BaseData
 }>()
 const { t } = useI18n()
-const router = useRouter();
+const router = useRouter()
 const verificationCode = ref()
 const showKeyboard = ref(true)
 const count = ref(60)
 let timer: NodeJS.Timer
 
 const onSubmit = () => {
-  const { phoneNumber, areaCode, isRegiste } = props.baseData
+  const { phoneNumber, areaCode, email, isRegiste } = props.baseData
   verifyCode({
     phoneNumber,
     areaCode,
+    email,
     verifyCode: verificationCode.value,
-    usedFor: isRegiste ? UsedFor.Register : UsedFor.Modify
-  })
-    .then(() => router.push({
+    usedFor: isRegiste ? UsedFor.Register : UsedFor.Modify,
+  }).then(() =>
+    router.push({
       path: 'setBaseInfo',
       query: {
         baseData: JSON.stringify({
           ...props.baseData,
           verificationCode: verificationCode.value,
-        })
-      }
-    }))
-    .catch(error => feedbackToast({ message: t('messageTip.codeInvalidOrExpired'), error }))
+        }),
+      },
+    }),
+  )
+  // .catch(error => feedbackToast({ message: t('messageTip.codeInvalidOrExpired'), error }))
 }
 
 const startTimer = () => {
@@ -84,10 +102,10 @@ const reSend = () => {
   sendSms({
     phoneNumber: props.baseData.phoneNumber,
     areaCode: props.baseData.areaCode,
-    usedFor: props.baseData.isRegiste ? UsedFor.Register : UsedFor.Modify
-  })
-    .then(startTimer)
-    .catch(error => feedbackToast({ message: t('messageTip.sendCodeFailed'), error }))
+    email: props.baseData.email,
+    usedFor: props.baseData.isRegiste ? UsedFor.Register : UsedFor.Modify,
+  }).then(startTimer)
+  // .catch(error => feedbackToast({ message: t('messageTip.sendCodeFailed'), error }))
 }
 
 watch(verificationCode, (newVal) => {
@@ -103,16 +121,19 @@ onUnmounted(() => {
     clearInterval(timer)
   }
 })
-
 </script>
 
-<style lang='scss' scoped>
+<style lang="scss" scoped>
 .page_container {
-  background: linear-gradient(180deg, rgba(0, 137, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(0, 137, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
 :deep(.van-password-input__item) {
-  border: 1px solid #E8EAEF;
+  border: 1px solid #e8eaef;
   border-radius: 8px;
   margin: 0 4px;
 
@@ -120,7 +141,6 @@ onUnmounted(() => {
     border-color: transparent !important;
   }
 }
-
 
 :deep(.van-password-input__security) {
   &::after {

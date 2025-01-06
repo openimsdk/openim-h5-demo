@@ -1,86 +1,111 @@
 <template>
   <div class="page_container">
     <NavBar :title="$t('placeholder.search')" />
-    <van-search v-model="searchState.keyword" background="#fff" :placeholder="$t('placeholder.search')" autofocus
-      @search="onSearch" />
-    <div v-show="searchState.dataList.length > 0 && !searchState.loading"
-      class="flex-1 overflow-y-auto overflow-x-hidden relative">
-      <GenericListItem class="bg-white" v-for="(item, index) in searchState.dataList" :key="item.userID || item.groupID"
-        :source="item" :total="searchState.dataList.length" :index="index" @click="itemClick(item)" />
+    <van-search
+      v-model="searchState.keyword"
+      background="#fff"
+      :placeholder="$t('placeholder.search')"
+      autofocus
+      @search="onSearch"
+    />
+    <div
+      v-show="searchState.dataList.length > 0 && !searchState.loading"
+      class="relative flex-1 overflow-y-auto overflow-x-hidden"
+    >
+      <GenericListItem
+        class="bg-white"
+        v-for="(item, index) in searchState.dataList"
+        :key="item.userID || item.groupID"
+        :source="item"
+        :total="searchState.dataList.length"
+        :index="index"
+        @click="itemClick(item)"
+      />
     </div>
-    <CommonEmpty :description="$t('messageTip.searchEmpty')"
-      v-show="searchState.dataList.length === 0 && !searchState.loading" />
-    <div v-show="searchState.loading" class="flex justify-center px-[22px] pt-1 pb-4 bg-white text-[#999]">
+    <CommonEmpty
+      :description="$t('messageTip.searchEmpty')"
+      v-show="searchState.dataList.length === 0 && !searchState.loading"
+    />
+    <div
+      v-show="searchState.loading"
+      class="flex justify-center bg-white px-[22px] pt-1 pb-4 text-[#999]"
+    >
       <van-loading size="24" type="spinner" />
     </div>
   </div>
 </template>
 
-<script setup lang='ts'>
-import GenericListItem from '@/components/GenericListItem/index.vue';
-import useContactStore from '@/store/modules/contact';
-import type { GroupItem, SearchedFriendsInfo } from '@openim/wasm-client-sdk/lib/types/entity';
-import CommonEmpty from '@/components/CommonEmpty/index.vue';
-import { IMSDK } from '@/utils/imCommon';
-import { feedbackToast } from '@/utils/common';
-import useConversationStore from '@/store/modules/conversation';
+<script setup lang="ts">
+import GenericListItem from '@/components/GenericListItem/index.vue'
+import useContactStore from '@/store/modules/contact'
+import type {
+  GroupItem,
+  SearchedFriendsInfo,
+} from '@openim/wasm-client-sdk/lib/types/entity'
+import CommonEmpty from '@/components/CommonEmpty/index.vue'
+import { IMSDK } from '@/utils/imCommon'
+import { feedbackToast } from '@/utils/common'
+import useConversationStore from '@/store/modules/conversation'
 
 type GroupInfo = {
-  groupID: string;
-  groupName: string;
-  faceURL: string;
-};
+  groupID: string
+  groupName: string
+  faceURL: string
+}
 
 type FriendInfo = {
-  nickname: string;
-  userID: string;
-  faceURL: string;
-};
+  nickname: string
+  userID: string
+  faceURL: string
+}
 
 const contactStore = useContactStore()
-const conversationStore = useConversationStore();
-const router = useRouter();
+const conversationStore = useConversationStore()
+const router = useRouter()
 
 const searchState = reactive({
   dataList: [] as Partial<GroupItem & SearchedFriendsInfo>[],
   keyword: '',
-  loading: false
+  loading: false,
 })
 
 const onSearch = () => {
-  searchState.loading = true;
+  searchState.loading = true
   let func
   if (history.state.isGroup) {
     func = IMSDK.searchGroups({
       keywordList: [searchState.keyword],
       isSearchGroupID: false,
-      isSearchGroupName: true
+      isSearchGroupName: true,
     })
   } else {
     func = IMSDK.searchFriends({
       keywordList: [searchState.keyword],
       isSearchUserID: false,
       isSearchNickname: true,
-      isSearchRemark: true
+      isSearchRemark: true,
     })
   }
-  func.then(({ data }) => { searchState.dataList = data }).catch(error => feedbackToast({ error }))
-    .finally(() => searchState.loading = false)
+  func
+    .then(({ data }) => {
+      searchState.dataList = data
+    })
+    .catch((error) => feedbackToast({ error }))
+    .finally(() => (searchState.loading = false))
 }
 
 const itemClick = (item: any) => {
   if (history.state.isGroup) {
     conversationStore.updateCurrentGroupInfo(item)
     router.push({
-      path: 'groupCard'
+      path: 'groupCard',
     })
-    return;
+    return
   }
   contactStore.setUserCardData({
-    baseInfo: item
+    baseInfo: item,
   })
 }
-
 </script>
 
-<style lang='scss' scoped></style>
+<style lang="scss" scoped></style>

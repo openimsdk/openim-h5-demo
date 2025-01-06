@@ -2,7 +2,7 @@
  * props declaration for default, item and slot component
  */
 
-import { PropType } from 'vue';
+import { PropType } from 'vue'
 
 export const VirtualProps = {
   dataKey: {
@@ -24,7 +24,7 @@ export const VirtualProps = {
     default: 30,
   },
   extraProps: {
-    type: [Object,Function],
+    type: [Object, Function],
   },
   estimateSize: {
     type: Number,
@@ -109,7 +109,7 @@ export const VirtualProps = {
   itemScopedSlots: {
     type: Object,
   },
-};
+}
 
 export const ItemProps = {
   index: {
@@ -139,7 +139,7 @@ export const ItemProps = {
   scopedSlots: {
     type: Object,
   },
-};
+}
 
 export const SlotProps = {
   event: {
@@ -154,4 +154,4 @@ export const SlotProps = {
   horizontal: {
     type: Boolean,
   },
-};
+}

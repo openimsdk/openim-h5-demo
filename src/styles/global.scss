@@ -13,6 +13,13 @@
   --searchbar-height: 2.5rem;
 }
 
+html {
+  font-family: 'Noto Sans SC', 'SF Pro SC', 'SF Pro Text', 'SF Pro Icons', 'PingFang SC',
+    'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
 body {
   overflow: hidden;
 }
@@ -41,6 +48,7 @@ body {
 .link-el {
   color: var(--primary);
   cursor: pointer;
+  margin: 0 1.5px;
 }
 
 .van-nav-bar__placeholder {
@@ -75,7 +83,7 @@ body {
 .van-popover__action {
   position: relative;
   &::after {
-    content: "";
+    content: '';
     position: absolute;
     bottom: 0;
     left: 10%;
@@ -85,7 +93,7 @@ body {
 }
 
 .van-popover__action:last-child::after {
-  content: "";
+  content: '';
   position: absolute;
   border-bottom: none;
 }
@@ -94,11 +102,6 @@ body {
   justify-content: center !important;
 }
 
-@font-face {
-  font-family: "MozillaTwemojiColr";
-  src: url("/font/twemoji.woff2") format("woff2");
-}
-
-emoji-picker {
-  --emoji-font-family: MozillaTwemojiColr;
+.van-image-preview__index {
+  display: none !important;
 }

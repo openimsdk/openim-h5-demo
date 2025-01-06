@@ -1,23 +1,23 @@
-import useConversationStore from "@/store/modules/conversation";
-import { feedbackToast } from "@/utils/common";
-import { IMSDK } from "@/utils/imCommon";
-import { ConversationItem } from "@openim/wasm-client-sdk/lib/types/entity";
-import { SessionType } from "@openim/wasm-client-sdk";
+import useConversationStore from '@/store/modules/conversation'
+import { feedbackToast } from '@/utils/common'
+import { IMSDK } from '@/utils/imCommon'
+import type { ConversationItem } from '@openim/wasm-client-sdk/lib/types/entity'
+import { SessionType } from '@openim/wasm-client-sdk'
 
 export default function useConversationToggle() {
-  const router = useRouter();
-  const conversationStore = useConversationStore();
+  const router = useRouter()
+  const conversationStore = useConversationStore()
 
   const getConversation = async ({
     sourceID,
     sessionType,
   }: {
-    sourceID: string;
-    sessionType: SessionType;
+    sourceID: string
+    sessionType: SessionType
   }): Promise<ConversationItem | undefined> => {
     let conversation = conversationStore.conversationList.find(
-      (item) => item.userID === sourceID || item.groupID === sourceID
-    );
+      (item) => item.userID === sourceID || item.groupID === sourceID,
+    )
     if (!conversation) {
       try {
         conversation = (
@@ -25,30 +25,25 @@ export default function useConversationToggle() {
             sourceID,
             sessionType,
           })
-        ).data;
+        ).data
       } catch (error) {
-        feedbackToast({ error });
+        feedbackToast({ error })
       }
     }
-    return conversation;
-  };
+    return conversation
+  }
 
   const toSpecifiedConversation = async (data: {
-    sourceID: string;
-    sessionType: SessionType;
+    sourceID: string
+    sessionType: SessionType
   }) => {
-    const conversation = await getConversation(data);
-    if (
-      !conversation ||
-      conversationStore.currentConversation.conversationID ===
-        conversation.conversationID
-    )
-      return;
-    conversationStore.updateCurrentConversation({ ...conversation });
-    router.push("chat");
-  };
+    const conversation = await getConversation(data)
+    if (!conversation) return
+    conversationStore.updateCurrentConversation({ ...conversation })
+    router.push('chat')
+  }
 
   return {
     toSpecifiedConversation,
-  };
+  }
 }

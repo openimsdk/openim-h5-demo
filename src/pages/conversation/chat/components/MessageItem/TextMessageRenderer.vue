@@ -3,28 +3,40 @@
 </template>
 
 <script setup lang="ts">
-import { formatLink, parseBr } from "@/utils/imCommon";
-import { MessageType } from "@openim/wasm-client-sdk";
-import { ExedMessageItem } from "./data";
+import { formatLink, parseAt, parseBr } from '@/utils/imCommon'
+import { AtTextElem, MessageType } from '@openim/wasm-client-sdk'
+import { ExedMessageItem } from './data'
 
 type TextMsgRendererProps = {
-  message: ExedMessageItem;
+  message: ExedMessageItem
 }
 
-const props = defineProps<TextMsgRendererProps>();
+const props = defineProps<TextMsgRendererProps>()
 
 const content = computed(() => {
-  let msgStr = '';
+  let msgStr = ''
+  if (props.message.contentType === MessageType.QuoteMessage) {
+    msgStr = props.message.quoteElem?.text!
+  }
+  if (props.message.contentType === MessageType.AtTextMessage) {
+    msgStr = parseAt(props.message.atTextElem!)
+  }
   if (props.message.contentType === MessageType.TextMessage) {
-    msgStr = props.message.textElem!.content;
+    msgStr = props.message.textElem?.content!
   }
   return parseBr(formatLink(msgStr))
-});
+})
 </script>
 
 <style lang="scss" scoped>
 .text_content {
   word-break: break-all;
   word-wrap: break-word;
+
+  :deep(.emoji_el) {
+    padding-right: 2px;
+    vertical-align: sub;
+    width: 24px;
+  }
 }
 </style>

@@ -26,7 +26,7 @@ import { ExMessageItem } from "@/store/modules/message";
 import emitter from "@/utils/events";
 import { RemoteParticipant, Room, RoomEvent } from "livekit-client";
 import Connected from "./Connected.vue";
-import { getRtcConnectData } from "@/api/im";
+import { getRtcConnectData } from "@api/im";
 import { v4 as uuidV4 } from "uuid";
 
 type IRtcControlEmits = {

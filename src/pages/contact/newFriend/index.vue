@@ -1,60 +1,72 @@
 <template>
   <div class="page_container">
     <NavBar :title="$t('contactMenu.newFriends')" />
-    <div class="mt-[10px]">
-      <virtual-list v-if="contactStore.storeSendFriendApplicationList.length > 0"
-        class="my_scrollbar overflow-y-auto bg-white" :data-key="'toUserID'"
-        :data-sources="contactStore.storeSendFriendApplicationList" :data-component="ApplicationItem" :estimate-size="88"
+    <div class="mt-[10px] overflow-y-auto">
+      <virtual-list
+        v-if="contactStore.storeSendFriendApplicationList.length > 0"
+        class="my_scrollbar overflow-y-auto bg-white"
+        :data-key="'toUserID'"
+        :data-sources="contactStore.storeSendFriendApplicationList"
+        :data-component="ApplicationItem"
+        :estimate-size="88"
         :extra-props="{
           total: contactStore.storeSendFriendApplicationList.length,
           type: ApplicationTypeEnum.SentFriendApplication,
-        }" />
-      <virtual-list v-if="contactStore.storeRecvFriendApplicationList.length > 0"
-        class="my_scrollbar overflow-y-auto bg-white" :data-key="'toUserID'"
-        :data-sources="contactStore.storeRecvFriendApplicationList" :data-component="ApplicationItem" :estimate-size="88"
+        }"
+      />
+      <virtual-list
+        v-if="contactStore.storeRecvFriendApplicationList.length > 0"
+        class="my_scrollbar overflow-y-auto bg-white"
+        :data-key="'toUserID'"
+        :data-sources="contactStore.storeRecvFriendApplicationList"
+        :data-component="ApplicationItem"
+        :estimate-size="88"
         :extra-props="{
           total: contactStore.storeRecvFriendApplicationList.length,
           type: ApplicationTypeEnum.RecivedFriendApplication,
-        }" />
+        }"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import VirtualList from '@components/VirtualList';
-import ApplicationItem from "@/components/ApplicationItem/index.vue";
-import { ApplicationTypeEnum } from "@/components/ApplicationItem/data";
-import useContactStore from '@/store/modules/contact';
-import { getAccessedFriendApplication, setAccessedFriendApplication } from '@/utils/storage';
+import VirtualList from '@components/VirtualList'
+import ApplicationItem from '@/components/ApplicationItem/index.vue'
+import { ApplicationTypeEnum } from '@/components/ApplicationItem/data'
+import useContactStore from '@/store/modules/contact'
+import {
+  getAccessedFriendApplication,
+  setAccessedFriendApplication,
+} from '@/utils/storage'
 
-const contactStore = useContactStore();
+const contactStore = useContactStore()
 
 const storeAccessedApplication = () => {
-  const accessedFriendApplications = getAccessedFriendApplication();
+  const accessedFriendApplications = getAccessedFriendApplication()
 
   let unHandleFriendApplication = contactStore.storeRecvFriendApplicationList.filter(
     (application) =>
       application.handleResult === 0 &&
       !accessedFriendApplications.includes(
-        `${application.fromUserID}_${application.createTime}`
-      )
-  );
+        `${application.fromUserID}_${application.createTime}`,
+      ),
+  )
   if (unHandleFriendApplication.length === 0) {
-    return;
+    return
   }
-  unHandleFriendApplication.map(application => {
+  unHandleFriendApplication.map((application) => {
     accessedFriendApplications.push(
-      `${application.fromUserID}_${application.createTime}`
-    );
+      `${application.fromUserID}_${application.createTime}`,
+    )
   })
-  setAccessedFriendApplication(accessedFriendApplications);
+  setAccessedFriendApplication(accessedFriendApplications)
   contactStore.updateUnHandleFriendApplicationNum(0)
 }
 
 onMounted(() => {
   storeAccessedApplication()
 })
-
 </script>
 
 <style lang="scss" scoped>

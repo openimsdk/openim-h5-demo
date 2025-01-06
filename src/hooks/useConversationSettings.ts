@@ -1,76 +1,83 @@
-import { feedbackToast } from "@utils/common";
-import useConversationStore from "@/store/modules/conversation";
-import useMessageStore from "@/store/modules/message";
-import { IMSDK } from "@/utils/imCommon";
-import { MessageReceiveOptType } from "@openim/wasm-client-sdk";
-import { showConfirmDialog } from "vant";
+import { feedbackToast } from '@utils/common'
+import useConversationStore from '@/store/modules/conversation'
+import useMessageStore from '@/store/modules/message'
+import { IMSDK } from '@/utils/imCommon'
+import { MessageReceiveOptType } from '@openim/wasm-client-sdk'
+import { showConfirmDialog } from 'vant'
 
 export default function useConversationSettings() {
-  const { t } = useI18n();
-  const conversationStore = useConversationStore();
-  const messageStore = useMessageStore();
+  const { t } = useI18n()
+  const conversationStore = useConversationStore()
+  const messageStore = useMessageStore()
 
   const switchLoading = reactive({
     pinLoading: false,
     recvMsgLoading: false,
-    privateLoading: false,
-  });
+  })
 
   const updateConversationPinState = async () => {
-    switchLoading.pinLoading = true;
+    switchLoading.pinLoading = true
     try {
       await IMSDK.pinConversation({
-        conversationID:
-          conversationStore.storeCurrentConversation.conversationID,
+        conversationID: conversationStore.storeCurrentConversation.conversationID,
         isPinned: !conversationStore.storeCurrentConversation.isPinned,
-      });
+      })
     } catch (error) {}
-    switchLoading.pinLoading = false;
-  };
+    switchLoading.pinLoading = false
+  }
 
   const updateConversationRecvMsgState = async (
     flag: boolean,
-    opt: MessageReceiveOptType
+    opt: MessageReceiveOptType,
   ) => {
-    switchLoading.recvMsgLoading = true;
+    switchLoading.recvMsgLoading = true
     try {
       await IMSDK.setConversationRecvMessageOpt({
-        conversationID:
-          conversationStore.storeCurrentConversation.conversationID,
+        conversationID: conversationStore.storeCurrentConversation.conversationID,
         opt: flag ? opt : MessageReceiveOptType.Normal,
-      });
+      })
     } catch (error) {}
-    switchLoading.recvMsgLoading = false;
-  };
+    switchLoading.recvMsgLoading = false
+  }
+
+  const updateBurnDuration = async (seconds: number) => {
+    try {
+      await IMSDK.setConversationBurnDuration({
+        conversationID: conversationStore.storeCurrentConversation.conversationID,
+        burnDuration: seconds,
+      })
+    } catch (error) {}
+  }
 
   const clearLogs = () => {
     showConfirmDialog({
-      message: t("popover.clearChatHistory"),
+      message: t('popover.clearChatHistory'),
       beforeClose: (action: string) => {
         return new Promise((resolve) => {
-          if (action !== "confirm") {
-            resolve(true);
-            return;
+          if (action !== 'confirm') {
+            resolve(true)
+            return
           }
           IMSDK.clearConversationAndDeleteAllMsg(
-            conversationStore.storeCurrentConversation.conversationID
+            conversationStore.storeCurrentConversation.conversationID,
           )
             .then(() => {
-              messageStore.clearHistoryMessage();
-              feedbackToast();
+              messageStore.clearHistoryMessage()
+              feedbackToast()
             })
             .catch((error: unknown) => feedbackToast({ error }))
-            .finally(() => resolve(true));
-        });
+            .finally(() => resolve(true))
+        })
       },
-    });
-  };
+    })
+  }
 
   return {
     conversationStore,
     switchLoading,
     updateConversationPinState,
     updateConversationRecvMsgState,
-    clearLogs,
-  };
+    updateBurnDuration,
+    clearLogs
+  }
 }

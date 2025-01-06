@@ -6,16 +6,13 @@
   </div>
 </template>
 
-<script name="contact" setup lang='ts'>
-import ContactHeader from './components/ContactHeader.vue';
-import ContactMenuList from './components/ContactMenuList.vue';
-import ContactFrequentList from './components/ContactFrequentList.vue';
+<script name="contact" setup lang="ts">
+import ContactHeader from './components/ContactHeader.vue'
+import ContactMenuList from './components/ContactMenuList.vue'
+import ContactFrequentList from './components/ContactFrequentList.vue'
 
-const emit = defineEmits([]);
-const props = defineProps({});
-
+const emit = defineEmits([])
+const props = defineProps({})
 </script>
 
-<style lang='scss' scoped>
-
-</style>
+<style lang="scss" scoped></style>

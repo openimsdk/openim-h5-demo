@@ -1,16 +1,28 @@
 <template>
   <div class="page_container">
     <NavBar :title="title" />
-    <van-search v-model="keyword" :placeholder="placeholder" @search="onSearch" @cancel="onCancel" />
-    <div v-show="!empty && !searching" class="flex items-center px-[22px] py-3 bg-white border-y" @click="onSearch">
-      <img class="w-6 h-6 mr-2" :src="imgUrl" alt="">
+    <van-search
+      v-model="keyword"
+      :placeholder="placeholder"
+      @search="onSearch"
+      @cancel="onCancel"
+    />
+    <div
+      v-show="!empty && !searching"
+      class="flex items-center border-y bg-white px-[22px] py-3"
+      @click="onSearch"
+    >
+      <img class="mr-2 h-6 w-6" :src="imgUrl" alt="" />
       <div class="text-primary">{{ `${$t('find')}：${keyword}` }}</div>
     </div>
 
-    <div v-show="searching" class="flex justify-center px-[22px] py-3 bg-white text-[#999]">
+    <div
+      v-show="searching"
+      class="flex justify-center bg-white px-[22px] py-3 text-[#999]"
+    >
       <van-loading size="24" type="spinner" />
     </div>
-    <div v-show="empty" class="flex justify-center px-[22px] py-3 bg-white text-[#999]">
+    <div v-show="empty" class="flex justify-center bg-white px-[22px] py-3 text-[#999]">
       <span v-show="empty">{{ $t('messageTip.searchEmpty') }}</span>
     </div>
   </div>
@@ -19,83 +31,85 @@
 <script setup lang="ts">
 import search_user from '@assets/images/search_user.png'
 import search_group from '@assets/images/search_group.png'
-import { searchUserInfoByBusiness } from "@/api/user";
-import useContactStore from "@/store/modules/contact";
-import useConversationStore from "@/store/modules/conversation";
-import { IMSDK } from "@/utils/imCommon";
+import { searchUserInfoByBusiness } from '@/api/user'
+import useContactStore from '@/store/modules/contact'
+import useConversationStore from '@/store/modules/conversation'
+import { IMSDK } from '@/utils/imCommon'
 
 type SearchToJoinProps = {
-  isGroup: boolean;
-};
+  isGroup: boolean
+}
 
-const { t } = useI18n();
-const router = useRouter();
-const contactStore = useContactStore();
-const conversationStore = useConversationStore();
-const props = defineProps<SearchToJoinProps>();
+const { t } = useI18n()
+const router = useRouter()
+const contactStore = useContactStore()
+const conversationStore = useConversationStore()
+const props = defineProps<SearchToJoinProps>()
 
-const keyword = ref("");
-const searching = ref(false);
-const empty = ref(false);
+const keyword = ref('')
+const searching = ref(false)
+const empty = ref(false)
 
 const title = props.isGroup ? t('addGroup') : t('addFriend')
 const placeholder = props.isGroup ? t('addGroupDesc') : t('addFriendDesc')
 const imgUrl = props.isGroup ? search_group : search_user
 
 const onSearch = async () => {
-  if (!keyword.value) return;
-  searching.value = true;
+  if (!keyword.value) return
+  searching.value = true
   if (props.isGroup) {
-    await searchGroups();
+    await searchGroups()
   } else {
-    await searchUsers();
+    await searchUsers()
   }
-  searching.value = false;
-};
+  searching.value = false
+}
 
 const searchGroups = async () => {
   try {
     let info = contactStore.storeGroupList.find(
-      (item) => item.groupID === keyword.value
-    );
+      (item) => item.groupID === keyword.value,
+    )
     if (!info) {
-      const { data } = await IMSDK.getSpecifiedGroupsInfo([keyword.value]);
-      info = data[0];
+      const { data } = await IMSDK.getSpecifiedGroupsInfo([keyword.value])
+      info = data[0]
     }
     if (info) {
-      conversationStore.updateCurrentGroupInfo(info);
+      conversationStore.updateCurrentGroupInfo(info)
       router.push({
-        path: "groupCard",
-      });
+        path: 'groupCard',
+      })
     } else {
-      empty.value = true;
+      empty.value = true
     }
-  } catch (error) { }
-};
+  } catch (error) {}
+}
 
 const searchUsers = async () => {
   try {
-    const { data: { users, total } } = await searchUserInfoByBusiness(keyword.value);
+    const {
+      data: { users, total },
+    } = await searchUserInfoByBusiness(keyword.value)
     if (total > 0) {
-      const businessData = users[0];
-      const { data } = await IMSDK.getUsersInfo([businessData.userID]);
-      const imData = data[0];
+      const businessData = users[0]
+      const { data } = await IMSDK.getUsersInfo([businessData.userID])
+      const imData = data[0]
       const info = {
         ...imData,
         ...businessData,
-      };
+      }
       contactStore.setUserCardData({
         baseInfo: info,
-      });
+      })
     } else {
-      empty.value = true;
+      empty.value = true
     }
-  } catch (error) { }
-};
+  } catch (error) {}
+}
 
 const onCancel = () => {
-  router.back();
-};
+  router.back()
+}
 </script>
 
 <style lang="scss" scoped></style>

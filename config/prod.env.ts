@@ -1,9 +1,20 @@
+const BASE_HOST = 'your-server-ip'
+const CHAT_URL = `http://${BASE_HOST}:10008`
+const API_URL = `http://${BASE_HOST}:10002`
+const WS_URL = `ws://${BASE_HOST}:10001`
+
+// const BASE_DOMAIN = 'your-server-domain'
+// const CHAT_URL = `http://${BASE_DOMAIN}/chat`
+// const API_URL = `http://${BASE_DOMAIN}/api`
+// const WS_URL = `ws://${BASE_DOMAIN}/msg_gateway`
+
 export default {
-  NODE_ENV: "development",
-  CHAT_URL: "http://your-server-ip:10008",
-  API_URL: "http://your-server-ip:10002",
-  WS_URL: "ws://your-server-ip:10001",
-  AMAP_KEY: "key",
-  AMAP_SNAP_KEY: "key",
-  VERSION: "OpenCorp-H5-Demo",
-};
+  NODE_ENV: 'production',
+  CHAT_URL,
+  API_URL,
+  WS_URL,
+  LOG_LEVEL: 5,
+  AMAP_KEY: '',
+  AMAP_SNAP_KEY: '',
+  VERSION: 'H5-Demo',
+}

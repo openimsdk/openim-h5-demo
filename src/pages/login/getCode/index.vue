@@ -1,20 +1,15 @@
 <template>
-  <div class="page_container px-10 relative">
-    <img
-      class="w-6 h-6 mt-[5vh]"
-      :src="login_back"
-      alt=""
-      @click="$router.back"
-    />
+  <div class="page_container relative px-10">
+    <img class="mt-[5vh] h-6 w-6" :src="login_back" alt="" @click="$router.back" />
 
-    <div class="text-2xl text-primary font-semibold my-12">
-      {{ isRegiste ? $t("register") : $t("forgetPasswordTitle") }}
+    <div class="my-12 text-2xl font-semibold text-primary">
+      {{ isRegiste ? $t('register') : $t('forgetPasswordTitle') }}
     </div>
 
     <van-form @submit="onSubmit">
-      <div>
-        <div class="text-sm mb-1 text-sub-text">{{ $t("cellphone") }}</div>
-        <div class="border border-gap-text rounded-lg flex items-center">
+      <div v-if="!isByEmail">
+        <div class="mb-1 text-sm text-sub-text">{{ $t('cellphone') }}</div>
+        <div class="flex items-center rounded-lg border border-gap-text">
           <div
             class="flex items-center border-r border-gap-text px-3"
             @click="showAreaCode = true"
@@ -33,11 +28,24 @@
         </div>
       </div>
 
+      <div v-else>
+        <div class="mb-1 text-sm text-sub-text">{{ $t('email') }}</div>
+        <div class="rounded-lg border border-gap-text">
+          <van-field
+            class="!py-1"
+            clearable
+            v-model="formData.email"
+            name="email"
+            :placeholder="$t('placeholder.inputEmail')"
+          />
+        </div>
+      </div>
+
       <div class="mt-5" v-if="isRegiste"></div>
 
       <div class="mt-5" v-else>
-        <div class="text-sm mb-1 text-sub-text">{{ $t("reAcquireDesc") }}</div>
-        <div class="border border-gap-text rounded-lg">
+        <div class="mb-1 text-sm text-sub-text">{{ $t('reAcquireDesc') }}</div>
+        <div class="rounded-lg border border-gap-text">
           <van-field
             class="!py-1"
             clearable
@@ -48,7 +56,7 @@
           >
             <template #button>
               <span class="text-primary" @click="reSend" v-if="count <= 0">{{
-                $t("buttons.verificationCode")
+                $t('buttons.verificationCode')
               }}</span>
               <span class="text-primary" v-else>{{ count }}S</span>
             </template>
@@ -58,7 +66,7 @@
 
       <div class="mt-28">
         <van-button block type="primary" native-type="submit">
-          {{ $t("buttons.next") }}
+          {{ $t('buttons.next') }}
         </van-button>
       </div>
     </van-form>
@@ -79,105 +87,120 @@
 </template>
 
 <script setup lang="ts">
-import type { PickerConfirmEventParams } from "vant";
-import { UsedFor } from "@/api/data";
-import { sendSms, verifyCode } from "@/api/login";
-import countryCode from "@/utils/areaCode";
-import { feedbackToast } from "@/utils/common";
-import login_back from "@assets/images/login_back.png";
+import type { PickerConfirmEventParams } from 'vant'
+import { BusinessAllowType, UsedFor } from '@/api/data'
+import { sendSms, verifyCode } from '@/api/login'
+import useUserStore from '@/store/modules/user'
+import countryCode from '@/utils/areaCode'
+import { feedbackToast } from '@/utils/common'
+import login_back from '@assets/images/login_back.png'
 
-const phoneRegExp = /^1[3-9]\d{9}$/;
+const phoneRegExp = /^1[3-9]\d{9}$/
+const emailRegExp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 
-const { t } = useI18n();
-const router = useRouter();
+const { t } = useI18n()
+const userStore = useUserStore()
+const router = useRouter()
 
-const props = defineProps<{ isRegiste: boolean }>();
+const props = defineProps<{ isRegiste: boolean; isByEmail: boolean }>()
 const formData = reactive({
-  phoneNumber: "",
-  areaCode: "+86",
-  invitationCode: "",
+  email: '',
+  phoneNumber: '',
+  areaCode: '+86',
+  invitationCode: '',
   accept: true,
-  verificationCode: "",
-});
-const showAreaCode = ref(false);
-const count = ref(0);
-let timer: NodeJS.Timer;
+  verificationCode: '',
+})
+const showAreaCode = ref(false)
+const count = ref(0)
+let timer: NodeJS.Timer
 
 const onSubmit = () => {
-  if (!phoneRegExp.test(formData.phoneNumber)) {
+  if (!props.isByEmail && !phoneRegExp.test(formData.phoneNumber)) {
     feedbackToast({
-      message: t("messageTip.correctPhoneNumber"),
-      error: t("messageTip.correctPhoneNumber"),
-    });
-    return;
+      message: t('messageTip.correctPhoneNumber'),
+      error: t('messageTip.correctPhoneNumber'),
+    })
+    return
+  }
+  if (props.isByEmail && !emailRegExp.test(formData.email)) {
+    feedbackToast({
+      message: t('messageTip.correctEmail'),
+      error: t('messageTip.correctEmail'),
+    })
+    return
   }
   if (!props.isRegiste) {
     verifyCode({
       phoneNumber: formData.phoneNumber,
       areaCode: formData.areaCode,
+      email: formData.email,
       verifyCode: formData.verificationCode,
       usedFor: UsedFor.Modify,
     }).then(() => {
       router.push({
-        path: "setPassword",
+        path: 'setPassword',
         query: {
           baseData: JSON.stringify({
             ...formData,
             isRegiste: props.isRegiste,
+            isByEmail: props.isByEmail,
           }),
         },
-      });
-    });
-    return;
+      })
+    })
+    return
   }
   sendSms({
     phoneNumber: formData.phoneNumber,
     areaCode: formData.areaCode,
+    email: formData.email,
     usedFor: UsedFor.Register,
+    invitationCode: formData.invitationCode,
   }).then(() => {
     router.push({
-      path: "verifyCode",
+      path: 'verifyCode',
       query: {
         baseData: JSON.stringify({
           ...formData,
           isRegiste: props.isRegiste,
+          isByEmail: props.isByEmail,
         }),
       },
-    });
-  });
-};
+    })
+  })
+  // .catch(error => feedbackToast({ message: t('messageTip.sendCodeFailed'), error }))
+}
 
 const onConfirmAreaCode = ({ selectedValues }: PickerConfirmEventParams) => {
-  formData.areaCode = String(selectedValues[0]);
-  showAreaCode.value = false;
-};
+  formData.areaCode = String(selectedValues[0])
+  showAreaCode.value = false
+}
 
 const reSend = () => {
-  if (count.value > 0) return;
+  if (count.value > 0) return
   sendSms({
     phoneNumber: formData.phoneNumber,
+    email: formData.email,
     areaCode: formData.areaCode,
     usedFor: UsedFor.Login,
-  })
-    .then(startTimer)
-    .catch((error) =>
-      feedbackToast({ message: t("messageTip.sendCodeFailed"), error })
-    );
-};
+  }).then(startTimer)
+  // .catch(error => feedbackToast({ message: t('messageTip.sendCodeFailed'), error }))
+}
 
 const startTimer = () => {
   if (timer) {
-    clearInterval(timer);
+    clearInterval(timer)
   }
-  count.value = 60;
+  count.value = 60
   timer = setInterval(() => {
     if (count.value > 0) {
-      count.value -= 1;
+      count.value -= 1
     } else {
-      clearInterval(timer);
+      clearInterval(timer)
     }
-  }, 1000);
-};
+  }, 1000)
+}
 </script>
 
 <style lang="scss" scoped>

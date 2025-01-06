@@ -1,39 +1,36 @@
-import useConversationStore from "@/store/modules/conversation";
-import { feedbackToast } from "@/utils/common";
-import { IMSDK } from "@/utils/imCommon";
-import { CbEvents } from "@openim/wasm-client-sdk";
-import { GroupMemberItem, WSEvent } from "@openim/wasm-client-sdk/lib/types/entity";
+import useConversationStore from '@/store/modules/conversation'
+import { feedbackToast } from '@/utils/common'
+import { IMSDK } from '@/utils/imCommon'
+import { CbEvents } from '@openim/wasm-client-sdk'
+import type { GroupMemberItem, WSEvent } from '@openim/wasm-client-sdk/lib/types/entity'
 
-const conversationStore = useConversationStore();
+const conversationStore = useConversationStore()
 
 export type FetchStateType = {
-  offset: number;
-  searchOffset: number;
-  count: number;
-  loading: boolean;
-  hasMore: boolean;
-  groupMemberList: GroupMemberItem[];
-  searchMemberList: GroupMemberItem[];
-};
+  offset: number
+  searchOffset: number
+  count: number
+  loading: boolean
+  hasMore: boolean
+  groupMemberList: GroupMemberItem[]
+  searchMemberList: GroupMemberItem[]
+}
 
-export default function useGroupMemberList(
-  groupID?: string,
-  needRefresh = false
-) {
-  const { t } = useI18n();
+export default function useGroupMemberList(groupID?: string, needRefresh = false) {
+  const { t } = useI18n()
 
   const fetchState = reactive<FetchStateType>({
     offset: 0,
     searchOffset: 0,
-    count: 20,
+    count: 500,
     loading: false,
     hasMore: true,
     groupMemberList: [],
     searchMemberList: [],
-  });
+  })
 
   const searchMember = (keyword: string) => {
-    fetchState.loading = true;
+    fetchState.loading = true
     IMSDK.searchGroupMembers({
       groupID: groupID ?? conversationStore.storeCurrentGroupInfo.groupID,
       offset: fetchState.searchOffset,
@@ -43,104 +40,106 @@ export default function useGroupMemberList(
       isSearchUserID: false,
     })
       .then(({ data }) => {
-        fetchState.searchMemberList = [...fetchState.searchMemberList, ...data];
-        fetchState.hasMore = data.length === fetchState.count;
-        fetchState.searchOffset += 20;
-        console.log(fetchState.searchMemberList);
+        fetchState.searchMemberList = [...fetchState.searchMemberList, ...data]
+        fetchState.hasMore = data.length === 20
+        fetchState.searchOffset += 20
+        console.log(fetchState.searchMemberList)
       })
       .catch((error) =>
         feedbackToast({
-          message: t("getMemberFailed"),
+          message: t('getMemberFailed'),
           error,
-        })
+        }),
       )
-      .finally(() => (fetchState.loading = false));
-  };
+      .finally(() => (fetchState.loading = false))
+  }
 
   const getMemberData = () => {
-    fetchState.loading = true;
+    fetchState.loading = true
     IMSDK.getGroupMemberList({
       groupID: groupID ?? conversationStore.storeCurrentGroupInfo.groupID,
       offset: fetchState.offset,
-      count: 20,
+      count: 500,
       filter: 0,
     })
       .then(({ data }) => {
-        fetchState.groupMemberList = [...fetchState.groupMemberList, ...data];
-        fetchState.hasMore = data.length === fetchState.count;
-        fetchState.offset += 20;
-        console.log(fetchState.groupMemberList);
+        fetchState.groupMemberList = [...fetchState.groupMemberList, ...data]
+        fetchState.hasMore = data.length === 500
+        fetchState.offset += 500
+        console.log(fetchState.groupMemberList)
       })
       .catch((error) =>
         feedbackToast({
-          message: t("getMemberFailed"),
+          message: t('getMemberFailed'),
           error,
-        })
+        }),
       )
-      .finally(() => (fetchState.loading = false));
-  };
+      .finally(() => (fetchState.loading = false))
+  }
 
-  const groupMemberInfoChangedHandler = ({ data }: any) => {
-    const member = data;
+  const groupMemberInfoChangedHandler = ({ data }: WSEvent<GroupMemberItem>) => {
+    const member = data
     if (member.groupID === fetchState.groupMemberList[0]?.groupID) {
       const idx = fetchState.groupMemberList.findIndex(
-        (item) => item.userID === member.userID
-      );
-      fetchState.groupMemberList[idx] = { ...member };
+        (item) => item.userID === member.userID,
+      )
+      fetchState.groupMemberList[idx] = { ...member }
     }
-  };
+  }
 
   const groupMemberCountHandler = ({ data }: any) => {
     if (!needRefresh) {
-      return;
+      return
     }
-    const member = data;
+    const member = data
     if (member.groupID === fetchState.groupMemberList[0]?.groupID) {
-      fetchState.offset = 0;
-      fetchState.groupMemberList = [];
-      getMemberData();
+      fetchState.offset = 0
+      fetchState.groupMemberList = []
+      setTimeout(() => {
+        getMemberData()
+      }, 200)
     }
-  };
+  }
 
   const setIMListener = () => {
-    IMSDK.on(CbEvents.OnGroupMemberInfoChanged, groupMemberInfoChangedHandler);
-    IMSDK.on(CbEvents.OnGroupMemberAdded, groupMemberCountHandler);
-    IMSDK.on(CbEvents.OnGroupMemberDeleted, groupMemberCountHandler);
-  };
+    IMSDK.on(CbEvents.OnGroupMemberInfoChanged, groupMemberInfoChangedHandler)
+    IMSDK.on(CbEvents.OnGroupMemberAdded, groupMemberCountHandler)
+    IMSDK.on(CbEvents.OnGroupMemberDeleted, groupMemberCountHandler)
+  }
 
   const disposeIMListener = () => {
-    IMSDK.off(CbEvents.OnGroupMemberInfoChanged, groupMemberInfoChangedHandler);
-    IMSDK.off(CbEvents.OnGroupMemberAdded, groupMemberCountHandler);
-    IMSDK.off(CbEvents.OnGroupMemberDeleted, groupMemberCountHandler);
-  };
+    IMSDK.off(CbEvents.OnGroupMemberInfoChanged, groupMemberInfoChangedHandler)
+    IMSDK.off(CbEvents.OnGroupMemberAdded, groupMemberCountHandler)
+    IMSDK.off(CbEvents.OnGroupMemberDeleted, groupMemberCountHandler)
+  }
 
   onMounted(() => {
-    setIMListener();
-  });
+    setIMListener()
+  })
 
   onUnmounted(() => {
-    disposeIMListener();
-  });
+    disposeIMListener()
+  })
 
   watch(
     () => conversationStore.storeCurrentGroupInfo.groupID,
     (newVal) => {
       if (newVal) {
-        fetchState.groupMemberList = [];
-        fetchState.offset = 0;
-        fetchState.loading = false;
-        fetchState.hasMore = true;
-        getMemberData();
+        fetchState.groupMemberList = []
+        fetchState.offset = 0
+        fetchState.loading = false
+        fetchState.hasMore = true
+        getMemberData()
       }
     },
     {
       immediate: true,
-    }
-  );
+    },
+  )
 
   return {
     fetchState,
     getMemberData,
     searchMember,
-  };
+  }
 }

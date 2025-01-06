@@ -1,4 +1,10 @@
-import { MessageType, SessionType } from "@openim/wasm-client-sdk";
+import { MessageType, SessionType } from '@openim/wasm-client-sdk'
+
+export const CustomMessageType = {
+  Call: 100,
+  MassMsg: 903,
+  MeetingInvitation: 905,
+}
 
 export enum CustomType {
   CallingInvite = 200,
@@ -16,7 +22,7 @@ export enum RtcMessageStatus {
   HandleByOtherDevice,
 }
 
-export const GroupSessionTypes = [SessionType.Group, SessionType.WorkingGroup];
+export const GroupSessionTypes = [SessionType.Group, SessionType.WorkingGroup]
 
 export const GroupSystemMessageTypes = [
   MessageType.GroupCreated,
@@ -31,19 +37,19 @@ export const GroupSystemMessageTypes = [
   MessageType.GroupMuted,
   MessageType.GroupCancelMuted,
   MessageType.GroupMemberCancelMuted,
-  MessageType.GroupNameUpdated
-];
+  MessageType.GroupNameUpdated,
+]
 
 export const TipTypes = [
   MessageType.RevokeMessage,
   MessageType.FriendAdded,
   MessageType.BurnMessageChange,
-  ...GroupSystemMessageTypes
-];
+  ...GroupSystemMessageTypes,
+]
 
 export const FileMessageTypes = [
   MessageType.PictureMessage,
   MessageType.VideoMessage,
   MessageType.VoiceMessage,
   MessageType.FileMessage,
-];
+]

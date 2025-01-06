@@ -1,3 +1,3 @@
-import VirtualList from './virtual-list';
+import VirtualList from './virtual-list'
 
-export default VirtualList;
+export default VirtualList

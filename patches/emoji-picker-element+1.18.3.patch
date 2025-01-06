@@ -1,0 +1,20 @@
+diff --git a/node_modules/emoji-picker-element/database.js b/node_modules/emoji-picker-element/database.js
+index ac983fb..a660165 100644
+--- a/node_modules/emoji-picker-element/database.js
++++ b/node_modules/emoji-picker-element/database.js
+@@ -861,12 +861,12 @@ class Database {
+     addOnCloseListener(this._dbName, this._clear);
+     const dataSource = this.dataSource;
+     const empty = await isEmpty(db);
+-
+     if (empty) {
+       await loadDataForFirstTime(db, dataSource);
+-    } else { // offline-first - do an update asynchronously
+-      this._lazyUpdate = checkForUpdates(db, dataSource);
+     } 
++    // else { // offline-first - do an update asynchronously
++    //   this._lazyUpdate = checkForUpdates(db, dataSource);
++    // }
+   }
+ 
+   async ready () {

@@ -7,43 +7,71 @@
       </div>
       <div class="box2" v-if="cmpData.isUseTorch">
         <div class="track" @click="openTrack">
-          <svg t="1653920715959" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
-            p-id="1351" width="32" height="32">
+          <svg
+            t="1653920715959"
+            class="icon"
+            viewBox="0 0 1024 1024"
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            p-id="1351"
+            width="32"
+            height="32"
+          >
             <path
               d="M651.353043 550.479503H378.752795L240.862609 364.315031c-3.688944-4.897391-5.660621-10.876025-5.660621-17.045466v-60.040745c0-15.773416 12.847702-28.621118 28.621118-28.621118h502.459627c15.773416 0 28.621118 12.847702 28.621118 28.621118v59.977143c0 6.105839-1.971677 12.084472-5.660621 17.045466l-137.890187 186.228074zM378.752795 598.308571v398.024348c0 15.328199 12.402484 27.667081 27.667081 27.667081h217.266087c15.328199 0 27.667081-12.402484 27.66708-27.667081V598.308571H378.752795z m136.300124 176.942112c-14.564969 0-26.331429-11.76646-26.331428-26.331428v-81.283975c0-14.564969 11.76646-26.331429 26.331428-26.331429 14.564969 0 26.331429 11.76646 26.331429 26.331429v81.283975c0 14.564969-11.76646 26.331429-26.331429 26.331428zM512 222.608696c-17.554286 0-31.801242-14.246957-31.801242-31.801243V31.801242c0-17.554286 14.246957-31.801242 31.801242-31.801242s31.801242 14.246957 31.801242 31.801242v159.006211c0 17.554286-14.246957 31.801242-31.801242 31.801243zM280.932174 205.881242c-9.47677 0-18.889938-4.197764-25.122981-12.275279L158.242981 67.991056a31.864845 31.864845 0 0 1 5.597019-44.648944 31.864845 31.864845 0 0 1 44.648944 5.597018l97.502609 125.551305a31.864845 31.864845 0 0 1-5.597019 44.648944c-5.787826 4.579379-12.656894 6.741863-19.46236 6.741863zM723.987081 205.881242c-6.805466 0-13.674534-2.162484-19.462361-6.678261a31.794882 31.794882 0 0 1-5.597018-44.648944l97.566211-125.551304a31.794882 31.794882 0 0 1 44.648944-5.597019 31.794882 31.794882 0 0 1 5.597019 44.648944l-97.566211 125.551305c-6.360248 8.077516-15.709814 12.27528-25.186584 12.275279z"
-              fill="#ffffff" p-id="1352"></path>
+              fill="#ffffff"
+              p-id="1352"
+            ></path>
           </svg>
           {{ cmpData.trackStatus ? $t('offFlash') : $t('onFlash') }}
         </div>
       </div>
 
       <div class="mask1 mask" :style="'height:' + cmpData.maskHeight + 'px;'"></div>
-      <div class="mask2 mask"
-        :style="'width:' + cmpData.maskWidth + 'px;top:' + cmpData.maskHeight + 'px;height:' + cmpData.canvasHeight + 'px'">
-      </div>
+      <div
+        class="mask2 mask"
+        :style="
+          'width:' +
+          cmpData.maskWidth +
+          'px;top:' +
+          cmpData.maskHeight +
+          'px;height:' +
+          cmpData.canvasHeight +
+          'px'
+        "
+      ></div>
       <div class="mask3 mask" :style="'height:' + cmpData.maskHeight + 'px;'"></div>
-      <div class="mask4 mask"
-        :style="'width:' + cmpData.maskWidth + 'px;top:' + cmpData.maskHeight + 'px;height:' + cmpData.canvasHeight + 'px'">
-      </div>
+      <div
+        class="mask4 mask"
+        :style="
+          'width:' +
+          cmpData.maskWidth +
+          'px;top:' +
+          cmpData.maskHeight +
+          'px;height:' +
+          cmpData.canvasHeight +
+          'px'
+        "
+      ></div>
     </template>
   </div>
 </template>
 
-<script setup lang='ts'>
+<script setup lang="ts">
 import jsQR from 'jsqr'
 
 interface QrScanerProps {
-  continue?: boolean;
-  exact?: string;
-  size?: string;
-  definition?: boolean;
+  continue?: boolean
+  exact?: string
+  size?: string
+  definition?: boolean
 }
 
 const props = withDefaults(defineProps<QrScanerProps>(), {
   continue: false,
   exact: 'environment',
   size: 'whole',
-  definition: true
+  definition: true,
 })
 
 const cmpData = reactive({
@@ -63,13 +91,13 @@ const cmpData = reactive({
   trackStatus: false,
 
   isParse: false,
-  isUse: true
+  isUse: true,
 })
 
 const openScan = () => {
   const videoParam = {
     audio: false,
-    video: true
+    video: true,
     // video: {
     //     facingMode: { exact: props.exact },
     //     width,
@@ -78,7 +106,7 @@ const openScan = () => {
   }
   navigator.mediaDevices
     .getUserMedia(videoParam)
-    .then(stream => {
+    .then((stream) => {
       cmpData.video = document.createElement('video')
 
       const canvas = document.createElement('canvas')
@@ -99,7 +127,8 @@ const openScan = () => {
       canvas2.width = cmpData.canvasWidth
       canvas2.height = cmpData.canvasHeight
       // @ts-ignore
-      canvas2.style = 'position: absolute;top: 50%;left: 50%;z-index: 20;transform: translate(-50%, -50%);'
+      canvas2.style =
+        'position: absolute;top: 50%;left: 50%;z-index: 20;transform: translate(-50%, -50%);'
       cmpData.canvas2d2 = canvas2.getContext('2d')
       canvasBox?.append(canvas2)
 
@@ -114,8 +143,8 @@ const openScan = () => {
         cmpData.isUseTorch = cmpData.track?.getCapabilities().torch || null
       }, 500)
     })
-    .catch(err => {
-      console.log(err);
+    .catch((err) => {
+      console.log(err)
 
       cmpData.isUse = false
       // cmpData.$emit('error', err)
@@ -126,7 +155,7 @@ const closeCamera = () => {
   cmpData.isParse = false
   if (cmpData.video && cmpData.video.srcObject) {
     // @ts-ignore
-    cmpData.video.srcObject.getTracks().forEach(track => {
+    cmpData.video.srcObject.getTracks().forEach((track) => {
       track.stop()
     })
   }
@@ -144,18 +173,18 @@ const tick = () => {
       0,
       0,
       transtion(cmpData.canvasWidth),
-      transtion(cmpData.canvasHeight)
+      transtion(cmpData.canvasHeight),
     )
 
     const imageData = cmpData.canvas2d?.getImageData(
       0,
       0,
       transtion(cmpData.canvasWidth),
-      transtion(cmpData.canvasHeight)
+      transtion(cmpData.canvasHeight),
     )
 
     const code = jsQR(imageData!.data, imageData!.width, imageData!.height, {
-      inversionAttempts: 'dontInvert'
+      inversionAttempts: 'dontInvert',
     })
 
     cmpData.canvas2d2?.clearRect(0, 0, cmpData.canvasWidth, cmpData.canvasHeight)
@@ -183,7 +212,7 @@ const drawLine = (begin: any, end: any, color = '#FF3B58') => {
 
 const getData = (data: any) => {
   // cmpData.$emit('success', data)
-  console.log(data);
+  console.log(data)
 
   if (!props.continue) {
     closeCamera()
@@ -194,7 +223,7 @@ const openTrack = () => {
   cmpData.trackStatus = !cmpData.trackStatus
   cmpData.track?.applyConstraints({
     // @ts-ignore
-    advanced: [{ torch: cmpData.trackStatus }]
+    advanced: [{ torch: cmpData.trackStatus }],
   })
 }
 
@@ -213,9 +242,12 @@ const nutranstion = (number: number) => {
 onMounted(() => {
   // if (origin.indexOf('https') === -1) throw
 
-  cmpData.windowWidth = document.documentElement.clientWidth || document.body.clientWidth
-  cmpData.windowHeight = document.documentElement.clientHeight || document.body.clientHeight
-  cmpData.windowHeight = props.size === 'whole' ? cmpData.windowHeight : cmpData.windowHeight / 2
+  cmpData.windowWidth =
+    document.documentElement.clientWidth || document.body.clientWidth
+  cmpData.windowHeight =
+    document.documentElement.clientHeight || document.body.clientHeight
+  cmpData.windowHeight =
+    props.size === 'whole' ? cmpData.windowHeight : cmpData.windowHeight / 2
   cmpData.isParse = true
 
   nextTick(() => {
@@ -225,18 +257,18 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  closeCamera();
+  closeCamera()
 })
-
 </script>
 
-<style lang='scss' scoped>
+<style lang="scss" scoped>
 .canvasBox {
   width: 100vw;
   height: 100%;
   position: relative;
 
-  background-image: linear-gradient(0deg,
+  background-image: linear-gradient(
+      0deg,
       transparent 24%,
       rgba(32, 255, 77, 0.1) 25%,
       rgba(32, 255, 77, 0.1) 26%,
@@ -245,8 +277,10 @@ onUnmounted(() => {
       rgba(32, 255, 77, 0.1) 75%,
       rgba(32, 255, 77, 0.1) 76%,
       transparent 77%,
-      transparent),
-    linear-gradient(90deg,
+      transparent
+    ),
+    linear-gradient(
+      90deg,
       transparent 24%,
       rgba(32, 255, 77, 0.1) 25%,
       rgba(32, 255, 77, 0.1) 26%,
@@ -255,7 +289,8 @@ onUnmounted(() => {
       rgba(32, 255, 77, 0.1) 75%,
       rgba(32, 255, 77, 0.1) 76%,
       transparent 77%,
-      transparent);
+      transparent
+    );
   background-size: 3rem 3rem;
   background-position: -1rem -1rem;
   z-index: 10;

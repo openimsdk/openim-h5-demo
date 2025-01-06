@@ -1,186 +1,194 @@
-import useConversationStore from "@/store/modules/conversation";
-import useMessageStore from "@/store/modules/message";
-import emitter from "@/utils/events";
-import { useThrottleFn } from "@vueuse/core";
+import useConversationStore from '@/store/modules/conversation'
+import useMessageStore from '@/store/modules/message'
+import emitter from '@/utils/events'
+import { IMSDK } from '@/utils/imCommon'
+import { CbEvents } from '@openim/wasm-client-sdk'
+import { useThrottleFn } from '@vueuse/core'
 
-const messageStore = useMessageStore();
-const conversationStore = useConversationStore();
+const messageStore = useMessageStore()
+const conversationStore = useConversationStore()
 
 type UseHistoryMessageListProps = {
-  cancelMultiple: () => void;
-};
+  cancelMultiple: () => void
+}
 
 export default function useHistoryMessageList({
   cancelMultiple,
 }: UseHistoryMessageListProps) {
-  const vsl = ref();
-  const overflow = ref(false);
-  const isFirstPage = ref(true);
+  const vsl = ref()
+  const overflow = ref(false)
+  const isFirstPage = ref(true)
   const loadState = reactive({
     loading: false,
     lastMinSeq: 0,
-  });
-  const initLoading = ref(false);
-  const notScroll = ref(false);
+  })
+  const initLoading = ref(false)
+  const notScroll = ref(false)
 
   const unReadCount = computed(
     () =>
       messageStore.storeHistoryMessageList.filter(
-        (message) => message.isAppend === true
-      ).length
-  );
+        (message) => message.isAppend === true,
+      ).length,
+  )
 
   const onScoll = useThrottleFn(() => {
     notScroll.value =
       vsl.value.getScrollSize() - vsl.value.getOffset() >
-      vsl.value.getClientSize() * 1.3;
-  }, 500);
+      vsl.value.getClientSize() * 1.3
+  }, 500)
 
   const onTotop = async () => {
     if (messageStore.storeHistoryMessageHasMore && !loadState.loading) {
-      const { messageIDList } = await getMessageData();
-      await nextTick();
-      getOffset(messageIDList);
+      const { messageIDList } = await getMessageData()
+      await nextTick()
+      getOffset(messageIDList)
     }
-  };
+  }
 
   const getMessageData = async () => {
-    loadState.loading = true;
+    loadState.loading = true
     const data = await messageStore.getHistoryMessageListFromReq({
       conversationID: conversationStore.storeCurrentConversation.conversationID,
-      userID: "",
-      groupID: "",
+      userID: '',
+      groupID: '',
       count: 20,
-      startClientMsgID:
-        messageStore.storeHistoryMessageList[0]?.clientMsgID ?? "",
+      startClientMsgID: messageStore.storeHistoryMessageList[0]?.clientMsgID ?? '',
       lastMinSeq: isFirstPage.value ? 0 : loadState.lastMinSeq,
-    });
+    })
     if (data.lastMinSeq) {
-      loadState.lastMinSeq = data.lastMinSeq;
+      loadState.lastMinSeq = data.lastMinSeq
     }
-    return data;
-  };
+    return data
+  }
 
   const onItemRendered = () => {
     if (!vsl.value || !isFirstPage.value) {
-      return;
+      return
     }
-    const els = Array.from(document.querySelectorAll(".need_preload_message"));
-    const idx = els.findIndex((el) => el.clientHeight < 2);
+    const els = Array.from(document.querySelectorAll('.need_preload_message'))
+    const idx = els.findIndex((el) => el.clientHeight < 2)
 
     if (idx === -1) {
       // first page items are all mounted, scroll to bottom
       setTimeout(() => {
-        setVirtualListToBottom();
-        initLoading.value = false;
-        loadState.loading = false;
-      });
-      isFirstPage.value = false;
-      checkOverFlow();
+        setVirtualListToBottom()
+        initLoading.value = false
+        loadState.loading = false
+      })
+      isFirstPage.value = false
+      checkOverFlow()
     }
-  };
+  }
 
   const getOffset = (clientMsgIDList: string[]) => {
     const offset = clientMsgIDList.reduce((previousValue, currentSid) => {
       const previousSize =
-        typeof previousValue === "string" && previousValue !== 0
+        typeof previousValue === 'string' && previousValue !== 0
           ? vsl.value.getSize(previousValue)
-          : previousValue;
-      return previousSize + vsl.value.getSize(currentSid);
-    }, 0);
-    setVirtualListToOffset(Number(offset));
-  };
+          : previousValue
+      return previousSize + vsl.value.getSize(currentSid)
+    }, 0)
+    setVirtualListToOffset(Number(offset))
+  }
 
   const setVirtualListToOffset = (offset: number) => {
     if (vsl.value) {
-      vsl.value.scrollToOffset(offset);
-      nextTick(() => (loadState.loading = false));
+      vsl.value.scrollToOffset(offset)
+      nextTick(() => (loadState.loading = false))
     }
-  };
+  }
 
   const checkOverFlow = () => {
     if (vsl.value) {
-      overflow.value = vsl.value.getScrollSize() > vsl.value.getClientSize();
+      overflow.value = vsl.value.getScrollSize() > vsl.value.getClientSize()
     }
-  };
+  }
 
   const setVirtualListToBottom = (isAppend?: boolean) => {
     if (isAppend && notScroll.value) {
-      return;
+      return
     }
     if (vsl.value) {
-      nextTick(() => vsl.value.scrollToBottom());
+      nextTick(() => vsl.value.scrollToBottom())
     }
-  };
+  }
 
   const setVirtualListToIndex = (idx: number) => {
     if (vsl.value) {
-      vsl.value.scrollToIndex(idx);
+      vsl.value.scrollToIndex(idx)
     }
-  };
+  }
 
   const scroll2ClientMsgID = (clientMsgID: string) => {
     const idx = messageStore.storeHistoryMessageList.findIndex(
-      (message) => message.clientMsgID === clientMsgID
-    );
+      (message) => message.clientMsgID === clientMsgID,
+    )
     if (idx > -1) {
-      messageStore.storeHistoryMessageList[idx].jump = true;
+      messageStore.storeHistoryMessageList[idx].jump = true
       setTimeout(() => {
-        messageStore.storeHistoryMessageList[idx].jump = false;
-      }, 3000);
-      setVirtualListToIndex(idx);
+        messageStore.storeHistoryMessageList[idx].jump = false
+      }, 3000)
+      setVirtualListToIndex(idx)
     }
-  };
+  }
 
   const scrollToUnread = () => {
     const idx = messageStore.storeHistoryMessageList.findIndex(
-      (message) => message.isAppend === true && !message.isRead
-    );
-    console.log(idx);
+      (message) => message.isAppend === true && !message.isRead,
+    )
+    console.log(idx)
 
     if (idx > -1) {
-      setVirtualListToIndex(idx);
+      setVirtualListToIndex(idx)
     }
-  };
+  }
 
   // events
   const setEventListener = () => {
-    emitter.on("CHAT_MAIN_SCROLL_TO_BOTTOM", setVirtualListToBottom);
-    emitter.on("CHAT_MAIN_SCROLL_TO_CLIENTMSGID", scroll2ClientMsgID);
-  };
+    emitter.on('CHAT_MAIN_SCROLL_TO_BOTTOM', setVirtualListToBottom)
+    emitter.on('CHAT_MAIN_SCROLL_TO_CLIENTMSGID', scroll2ClientMsgID)
+  }
 
   const disposeEvemtListener = () => {
-    emitter.off("CHAT_MAIN_SCROLL_TO_BOTTOM", setVirtualListToBottom);
-    emitter.off("CHAT_MAIN_SCROLL_TO_CLIENTMSGID", scroll2ClientMsgID);
-  };
+    emitter.off('CHAT_MAIN_SCROLL_TO_BOTTOM', setVirtualListToBottom)
+    emitter.off('CHAT_MAIN_SCROLL_TO_CLIENTMSGID', scroll2ClientMsgID)
+  }
 
-  onMounted(() => {
-    setEventListener();
-  });
-  onUnmounted(() => {
-    disposeEvemtListener();
-  });
+  const resetMessageList = async () => {
+    cancelMultiple()
+    isFirstPage.value = true
+    messageStore.resetHistoryMessageList()
+    initLoading.value = true
+    const { messageIDList } = await getMessageData()
+    if (messageIDList.length === 0) {
+      isFirstPage.value = false
+      initLoading.value = false
+      loadState.loading = false
+    }
+  }
+
+  onActivated(() => {
+    setEventListener()
+    IMSDK.on(CbEvents.OnSyncServerFinish, resetMessageList)
+  })
+
+  onDeactivated(() => {
+    disposeEvemtListener()
+    IMSDK.off(CbEvents.OnSyncServerFinish, resetMessageList)
+  })
 
   watch(
     () => conversationStore.storeCurrentConversation.conversationID,
-    async (newVal) => {
+    (newVal) => {
       if (newVal) {
-        cancelMultiple();
-        isFirstPage.value = true;
-        messageStore.resetHistoryMessageList();
-        initLoading.value = true;
-        const { messageIDList } = await getMessageData();
-        if (messageIDList.length === 0) {
-          isFirstPage.value = false;
-          initLoading.value = false;
-          loadState.loading = false;
-        }
+        resetMessageList()
       }
     },
     {
       immediate: true,
-    }
-  );
+    },
+  )
 
   return {
     vsl,
@@ -193,5 +201,5 @@ export default function useHistoryMessageList({
     onItemRendered,
     onScoll,
     scrollToUnread,
-  };
+  }
 }

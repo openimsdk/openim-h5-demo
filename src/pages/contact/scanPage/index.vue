@@ -10,28 +10,28 @@
   </div>
 </template>
 
-<script setup lang='ts'>
+<script setup lang="ts">
 // @ts-ignore
 import { QrStream } from 'vue3-qr-reader'
-import { AddFriendQrCodePrefix, AddGroupQrCodePrefix, IMSDK } from '@/utils/imCommon';
-import useContactStore from '@/store/modules/contact';
-import useConversationStore from '@/store/modules/conversation';
-import { feedbackToast } from '@/utils/common';
+import { AddFriendQrCodePrefix, AddGroupQrCodePrefix, IMSDK } from '@/utils/imCommon'
+import useContactStore from '@/store/modules/contact'
+import useConversationStore from '@/store/modules/conversation'
+import { feedbackToast } from '@/utils/common'
 
 const { t } = useI18n()
-const router = useRouter();
-const contactStore = useContactStore();
-const conversationStore = useConversationStore();
+const router = useRouter()
+const contactStore = useContactStore()
+const conversationStore = useConversationStore()
 
 const onDecode = async (data: string) => {
   if (data.includes(AddFriendQrCodePrefix)) {
-    contactStore.getUserCardData(data.replace(AddFriendQrCodePrefix, ''));
+    contactStore.getUserCardData(data.replace(AddFriendQrCodePrefix, ''))
     return
   }
   if (data.includes(AddGroupQrCodePrefix)) {
     const groupID = data.replace(AddGroupQrCodePrefix, '')
     try {
-      let info = contactStore.storeGroupList.find(item => item.groupID === groupID)
+      let info = contactStore.storeGroupList.find((item) => item.groupID === groupID)
       if (!info) {
         const { data } = await IMSDK.getSpecifiedGroupsInfo([groupID])
         info = data[0]
@@ -39,19 +39,21 @@ const onDecode = async (data: string) => {
       if (info) {
         conversationStore.updateCurrentGroupInfo(info)
         router.push({
-          path: 'groupCard'
+          path: 'groupCard',
         })
       }
-    } catch (error) { }
+    } catch (error) {}
     return
   }
 
-  feedbackToast({ error: t('messageTip.unknownContent'), message: t('messageTip.unknownContent') })
+  feedbackToast({
+    error: t('messageTip.unknownContent'),
+    message: t('messageTip.unknownContent'),
+  })
 }
-
 </script>
 
-<style lang='scss' scoped>
+<style lang="scss" scoped>
 .stream {
   max-height: 500px;
   max-width: 500px;

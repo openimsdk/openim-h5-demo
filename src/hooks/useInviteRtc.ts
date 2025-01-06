@@ -1,4 +1,3 @@
-import { RtcType } from '@/constants/action'
 import useUserStore from '@/store/modules/user'
 import useConversationStore from '@/store/modules/conversation'
 import { v4 as uuidV4 } from 'uuid'
@@ -28,7 +27,7 @@ export const useInviteRtc = () => {
       invitation: {
         inviterUserID: userStore.selfInfo.userID,
         inviteeUserIDList: userIDList,
-        groupID:"",
+        groupID: '',
         roomID: uuidV4(),
         timeout: 60,
         mediaType,

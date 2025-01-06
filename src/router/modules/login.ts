@@ -1,71 +1,74 @@
-import { RouteLocationNormalized, RouteRecordRaw } from "vue-router";
-import router from "..";
+import { RouteLocationNormalized, RouteRecordRaw } from 'vue-router'
+import router from '..'
 
 const checkBaseData = ({ query }: RouteLocationNormalized) => {
-  let baseData;
+  let baseData
   try {
-    baseData = JSON.parse(query.baseData as string);
+    baseData = JSON.parse(query.baseData as string)
   } catch (error) {
-    router.replace("login");
+    router.replace('login')
   }
   return {
     baseData,
-  };
-};
+  }
+}
 
 const loginRouters: Array<RouteRecordRaw> = [
   {
-    path: "/login",
-    name: "Login",
-    component: () => import("@pages/login/index/index.vue"),
+    path: '/login',
+    name: 'Login',
+    component: () => import('@pages/login/index/index.vue'),
   },
   {
-    path: "/getCode",
-    name: "GetCode",
+    path: '/getCode',
+    name: 'GetCode',
     props: ({ query }) => {
-      let isRegiste;
+      let isRegiste
+      let isByEmail
       try {
-        isRegiste = JSON.parse(query.isRegiste as string);
+        isRegiste = JSON.parse(query.isRegiste as string)
+        isByEmail = JSON.parse(query.isByEmail as string)
       } catch (error) {}
       return {
         isRegiste,
-      };
+        isByEmail,
+      }
     },
-    component: () => import("@pages/login/getCode/index.vue"),
+    component: () => import('@pages/login/getCode/index.vue'),
   },
   {
-    path: "/verifyCode",
-    name: "VerifyCode",
+    path: '/verifyCode',
+    name: 'VerifyCode',
     props: checkBaseData,
-    component: () => import("@pages/login/verifyCode/index.vue"),
+    component: () => import('@pages/login/verifyCode/index.vue'),
   },
   {
-    path: "/setPassword",
-    name: "SetPassword",
+    path: '/setPassword',
+    name: 'SetPassword',
     props: checkBaseData,
-    component: () => import("@pages/login/setPassword/index.vue"),
+    component: () => import('@pages/login/setPassword/index.vue'),
   },
   {
-    path: "/setBaseInfo",
-    name: "SetBaseInfo",
+    path: '/setBaseInfo',
+    name: 'SetBaseInfo',
     props: ({ query }) => {
       setTimeout(() => {
-        const url = new URL(window.location.href);
-        url.search = "";
-        window.history.replaceState({}, "", url.href);
-      });
-      let baseData;
+        const url = new URL(window.location.href)
+        url.search = ''
+        window.history.replaceState({}, '', url.href)
+      })
+      let baseData
       try {
-        baseData = JSON.parse(query.baseData as string);
+        baseData = JSON.parse(query.baseData as string)
       } catch (error) {
-        router.replace("login");
+        router.replace('login')
       }
       return {
         baseData,
-      };
+      }
     },
-    component: () => import("@pages/login/setBaseInfo/index.vue"),
+    component: () => import('@pages/login/setBaseInfo/index.vue'),
   },
-];
+]
 
-export default loginRouters;
+export default loginRouters

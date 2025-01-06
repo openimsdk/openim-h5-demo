@@ -11,14 +11,12 @@
   <CommonModal />
 </template>
 
-<script setup lang='ts'>
-import useUserStore from '@/store/modules/user'
-import { checkIsSafari } from '@/utils/common';
-import emitter from '@/utils/events';
+<script setup lang="ts">
+import { checkIsSafari } from '@/utils/common'
+import emitter from '@/utils/events'
 import CommonModal from './CommonModal.vue'
 
 const innerHeight = ref(`${window.visualViewport?.height ?? window.innerHeight}px`)
-const userStore = useUserStore();
 
 const resizeHandler = () => {
   innerHeight.value = `${checkIsSafari() ? window.innerHeight : window.visualViewport?.height ?? window.innerHeight}px`
@@ -26,17 +24,16 @@ const resizeHandler = () => {
 
 onMounted(() => {
   window.addEventListener('resize', resizeHandler)
-  emitter.on("KEYBOARD_UPDATE", resizeHandler)
+  emitter.on('KEYBOARD_UPDATE', resizeHandler)
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', resizeHandler)
-  emitter.off("KEYBOARD_UPDATE", resizeHandler)
+  emitter.off('KEYBOARD_UPDATE', resizeHandler)
 })
-
 </script>
 
-<style lang='scss' scoped>
+<style lang="scss" scoped>
 .global_wrap {
   display: flex;
   flex-direction: column;
