@@ -70,7 +70,7 @@ OpenIM 为开发者提供开源即时通讯 SDK，作为 Twilio、Sendbird 等�
 
 3. 修改配置
 
-   - `config/dev.env.ts`
+   - `config/dev.env.ts` 和 `config/pord.env.ts`
 
      > 如果没有修改过服务端默认端口，则只需要修改`BASE_HOST`为您的服务器 ip 即可，如需配置域名和 https 访问，可以参考[nginx 配置](https://docs.openim.io/zh-Hans/guides/gettingStarted/nginxDomainConfig)，并采用最下方的配置项，并修改`BASE_DOMAIN`为您的域名。
 

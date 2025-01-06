@@ -71,7 +71,7 @@ Follow these steps to set up your local development environment:
 
 3. Modify the configuration
 
-   - In the `config/dev.env.ts` file:
+   - In the `config/dev.env.ts` and `config/pord.env.ts` file:
 
      > If you haven't changed the default server port, simply change `BASE_HOST` to your server IP. If you need to set up a domain and HTTPS access, please refer to [nginx configuration](https://docs.openim.io/zh-Hans/guides/gettingStarted/nginxDomainConfig), use the configuration at the bottom, and modify `BASE_DOMAIN` to your domain name.
 
