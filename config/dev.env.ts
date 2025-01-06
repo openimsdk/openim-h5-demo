@@ -1,4 +1,4 @@
-const BASE_HOST = '116.205.175.233'
+const BASE_HOST = 'your-server-ip'
 const CHAT_URL = `http://${BASE_HOST}:10008`
 const API_URL = `http://${BASE_HOST}:10002`
 const WS_URL = `ws://${BASE_HOST}:10001`
