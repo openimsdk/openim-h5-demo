@@ -2,7 +2,7 @@ import useConversationStore from '@/store/modules/conversation'
 import useMessageStore from '@/store/modules/message'
 import emitter from '@/utils/events'
 import { IMSDK } from '@/utils/imCommon'
-import { CbEvents } from '@openim/wasm-client-sdk'
+import { CbEvents, ViewType } from '@openim/wasm-client-sdk'
 import { useThrottleFn } from '@vueuse/core'
 
 const messageStore = useMessageStore()
@@ -20,7 +20,6 @@ export default function useHistoryMessageList({
   const isFirstPage = ref(true)
   const loadState = reactive({
     loading: false,
-    lastMinSeq: 0,
   })
   const initLoading = ref(false)
   const notScroll = ref(false)
@@ -50,15 +49,10 @@ export default function useHistoryMessageList({
     loadState.loading = true
     const data = await messageStore.getHistoryMessageListFromReq({
       conversationID: conversationStore.storeCurrentConversation.conversationID,
-      userID: '',
-      groupID: '',
       count: 20,
       startClientMsgID: messageStore.storeHistoryMessageList[0]?.clientMsgID ?? '',
-      lastMinSeq: isFirstPage.value ? 0 : loadState.lastMinSeq,
+      viewType: ViewType.History
     })
-    if (data.lastMinSeq) {
-      loadState.lastMinSeq = data.lastMinSeq
-    }
     return data
   }
 

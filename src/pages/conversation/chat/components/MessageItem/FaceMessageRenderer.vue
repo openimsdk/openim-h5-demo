@@ -20,7 +20,7 @@ type MediaMessageRendererProps = {
   disabled: boolean
 }
 
-export type CustomEmojiItem = {
+type CustomEmojiItem = {
   url: string;
   path?: string;
   width: number;

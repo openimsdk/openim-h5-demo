@@ -19,7 +19,6 @@ type ExType = {
 
 type GetHistoryMessageListFromReqResp = {
   messageIDList: string[]
-  lastMinSeq: number
 }
 
 export type ExMessageItem = MessageItem & ExType
@@ -37,7 +36,7 @@ const useStore = defineStore('message', {
     async getHistoryMessageListFromReq(
       params: GetAdvancedHistoryMsgParams,
     ): Promise<GetHistoryMessageListFromReqResp> {
-      const isFirstPage = params.startClientMsgID === '' || params.lastMinSeq === 0
+      const isFirstPage = params.startClientMsgID === ''
       try {
         const { data: tmpData } = await IMSDK.getAdvancedHistoryMessageList(params)
         this.historyMessageList = [
@@ -51,14 +50,12 @@ const useStore = defineStore('message', {
           messageIDList: tmpData.messageList.map(
             (message: MessageItem) => message.clientMsgID,
           ),
-          lastMinSeq: tmpData.lastMinSeq,
         }
       } catch (error) {
         feedbackToast({ message: 'Get history message failed', error })
         this.hasMore = false
         return {
           messageIDList: [],
-          lastMinSeq: 0,
         }
       }
     },

@@ -5,14 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite --force --host",
-    "build": "vite build",
+    "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "format": "prettier --write .",
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "@livekit/components-core": "^0.11.10",
-    "@openim/wasm-client-sdk": "^3.8.2-4",
+    "@livekit/components-core": "^0.8.2",
+    "@openim/wasm-client-sdk": "^3.8.3",
     "@vuemap/vue-amap": "^2.0.5",
     "@vueuse/core": "^9.10.0",
     "absurd-sql-optimized": "^0.0.1",
@@ -22,7 +22,7 @@
     "dayjs": "^1.11.5",
     "emoji-picker-element": "^1.18.3",
     "js-audio-recorder": "^1.0.7",
-    "livekit-client": "^2.7.5",
+    "livekit-client": "^1.15.13",
     "md5": "^2.3.0",
     "mitt": "^3.0.0",
     "patch-package": "^8.0.0",

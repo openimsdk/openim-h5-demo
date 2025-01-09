@@ -1,5 +1,6 @@
 import useConversationStore from '@/store/modules/conversation'
 import useMessageStore from '@/store/modules/message'
+import { ViewType } from '@openim/wasm-client-sdk'
 
 const messageStore = useMessageStore()
 const conversationStore = useConversationStore()
@@ -10,15 +11,11 @@ export default function useHistoryNotificationList() {
   const historyNotificationInitLoading = ref(false)
   const loadState = reactive({
     loading: false,
-    lastMinSeq: 0,
   })
 
   const onToBottom = async () => {
     if (messageStore.storeHistoryMessageHasMore && !loadState.loading) {
-      const { messageIDList, lastMinSeq } = await getMessageData()
-      if (lastMinSeq) {
-        loadState.lastMinSeq = lastMinSeq
-      }
+      await getMessageData()
       loadState.loading = false
     }
   }
@@ -27,11 +24,9 @@ export default function useHistoryNotificationList() {
     loadState.loading = true
     return await messageStore.getHistoryMessageListFromReq({
       conversationID: conversationStore.storeCurrentConversation.conversationID,
-      userID: '',
-      groupID: '',
       count: 20,
       startClientMsgID: messageStore.storeHistoryMessageList[0]?.clientMsgID ?? '',
-      lastMinSeq: loadState.lastMinSeq,
+      viewType: ViewType.History
     })
   }
 
