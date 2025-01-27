@@ -60,7 +60,9 @@ const useStore = defineStore('message', {
       }
     },
     pushNewMessage(message: MessageItem) {
-      this.historyMessageList.push(message)
+      if(this.historyMessageList.findIndex(item => item.clientMsgID === message.clientMsgID) === -1) {
+        this.historyMessageList.push(message)
+      }
     },
     updateOneMessage(message: ExMessageItem, isSuccessCallBack = false) {
       const idx = this.historyMessageList.findIndex(

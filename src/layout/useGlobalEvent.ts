@@ -286,7 +286,10 @@ export function useGlobalEvent() {
       (c) =>
         c.conversationID === conversationStore.storeCurrentConversation.conversationID,
     )
-    if (idx !== -1) conversationStore.updateCurrentConversation(changes[idx])
+    if (idx !== -1) {
+      conversationStore.updateCurrentConversation(changes[idx])
+      messageStore.pushNewMessage(JSON.parse(changes[idx].latestMsg!))
+    }
     const result = [...changes, ...filterArr]
     conversationStore.updateConversationList(conversationSort(result))
   }
