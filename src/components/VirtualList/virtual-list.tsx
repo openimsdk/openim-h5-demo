@@ -48,6 +48,7 @@ export default defineComponent({
       () => {
         virtual.updateParam('uniqueIds', getUniqueIdFromDataSources())
         virtual.handleDataSourcesChange()
+        scrollToIndex(props.dataSources.length)
       },
     )
     watch(
