@@ -1,0 +1,107 @@
+:root {
+  --full-height: 100%;
+  --chat-bubble: #f4f5f7;
+  --chat-bubble-sender: #cce7fe;
+  --base-black: #0c1c33;
+  --primary: #0089ff;
+  --primary-active: #f3f8ff;
+  --top-search-bar: #0289fa;
+  --sub-text: #8e9ab0;
+  --gap-text: #e8eaef;
+  --warn-text: #ff381f;
+  --moment-text: #6085b1;
+  --searchbar-height: 2.5rem;
+}
+
+html {
+  font-family: 'Noto Sans SC', 'SF Pro SC', 'SF Pro Text', 'SF Pro Icons', 'PingFang SC',
+    'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+body {
+  overflow: hidden;
+}
+
+.page_container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #f8f9fa;
+  color: #333;
+}
+
+.emojione {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+}
+
+.at_el {
+  display: inline-block;
+  color: var(--primary);
+  width: fit-content;
+}
+
+.link-el {
+  color: var(--primary);
+  cursor: pointer;
+  margin: 0 1.5px;
+}
+
+.van-nav-bar__placeholder {
+  min-height: 46px;
+}
+
+.van-search {
+  padding: 12px 22px !important;
+}
+
+.van-search_no_b {
+  padding-bottom: 0 !important;
+}
+
+.emoji_display {
+  width: 24px;
+  height: 18px;
+  vertical-align: sub;
+  display: inline-block;
+}
+
+.van-cell {
+  background: none !important;
+}
+
+.van-hairline--bottom {
+  &::after {
+    border-color: transparent !important;
+  }
+}
+
+.van-popover__action {
+  position: relative;
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    width: 80%;
+    border-bottom: 1px solid #e8eaef;
+  }
+}
+
+.van-popover__action:last-child::after {
+  content: '';
+  position: absolute;
+  border-bottom: none;
+}
+
+.van-popover__action--with-icon .van-popover__action-text {
+  justify-content: center !important;
+}
+
+.van-image-preview__index {
+  display: none !important;
+}
