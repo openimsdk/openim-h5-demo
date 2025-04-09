@@ -11,16 +11,6 @@ import 'vant/es/toast/style'
 import 'vant/es/dialog/style'
 import 'vant/es/image-preview/style'
 
-import { initAMapApiLoader } from '@vuemap/vue-amap'
-import '@vuemap/vue-amap/dist/style.css'
-
-initAMapApiLoader({
-  key: process.env.AMAP_KEY!,
-  //Loca:{
-  //  version: '2.0.0'
-  //}
-})
-
 import VConsole from 'vconsole'
 
 // const vConsole = new VConsole();

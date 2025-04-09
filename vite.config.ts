@@ -6,9 +6,7 @@ import { VantResolver } from 'unplugin-vue-components/resolvers'
 import AutoImport from 'unplugin-auto-import/vite'
 import VueSetupExtend from 'vite-plugin-vue-setup-extend'
 import vueJsx from '@vitejs/plugin-vue-jsx'
-import { VueAmapResolver } from '@vuemap/unplugin-resolver'
 import userConfig from './config'
-import { visualizer } from 'rollup-plugin-visualizer'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -26,12 +24,11 @@ export default defineConfig({
     vueJsx(),
     VueSetupExtend(),
     Components({
-      resolvers: [VantResolver(), VueAmapResolver()],
+      resolvers: [VantResolver()],
     }),
     AutoImport({
       imports: ['vue', 'vue-router', 'vue-i18n'],
       dts: 'src/auto-import.d.ts',
-      resolvers: [VueAmapResolver()],
     }),
     // visualizer({ open: true }),
   ],

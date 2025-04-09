@@ -9,7 +9,5 @@ export default {
   API_URL,
   WS_URL,
   LOG_LEVEL: 5,
-  AMAP_KEY: '',
-  AMAP_SNAP_KEY: '',
   VERSION: 'H5-Demo',
 }
