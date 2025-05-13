@@ -161,14 +161,40 @@ export function useGlobalEvent() {
     handleNewMessage(parsedData)
   }
   const handleNewMessage = (newServerMsg: ExMessageItem) => {
-    if (newServerMsg.contentType === MessageType.CustomMessage) {
-      const customData = JSON.parse(newServerMsg.customElem!.data);
-      if (
-        200 <= customData.customType &&
-        customData.customType <= 204
-      ) {
-        return;
+    if (inCurrentConversation(newServerMsg)) {
+      if (newServerMsg.contentType === MessageType.CustomMessage) {
+        const customData = JSON.parse(newServerMsg.customElem!.data)
+        if (200 <= customData.customType && customData.customType <= 204) {
+          return
+        }
       }
+      if (
+        newServerMsg.contentType !== MessageType.TypingMessage &&
+        newServerMsg.contentType !== MessageType.RevokeMessage
+      ) {
+        newServerMsg.isAppend = true
+        messageStore.pushNewMessage(newServerMsg)
+        emitter.emit('CHAT_MAIN_SCROLL_TO_BOTTOM', true)
+      }
+    }
+  }
+  const inCurrentConversation = (newServerMsg: MessageItem) => {
+    switch (newServerMsg.sessionType) {
+      case SessionType.Single:
+        return (
+          newServerMsg.sendID === conversationStore.storeCurrentConversation.userID ||
+          (newServerMsg.sendID === userStore.storeSelfInfo.userID &&
+            newServerMsg.recvID === conversationStore.storeCurrentConversation.userID)
+        )
+      case SessionType.Group:
+      case SessionType.WorkingGroup:
+        return (
+          newServerMsg.groupID === conversationStore.storeCurrentConversation.groupID
+        )
+      case SessionType.Notification:
+        return newServerMsg.sendID === conversationStore.storeCurrentConversation.userID
+      default:
+        return false
     }
   }
   // conversation
@@ -232,8 +258,8 @@ export function useGlobalEvent() {
   const joinedGroupDeletedHandler = ({ data }: WSEvent<GroupItem>) => {
     if (data.groupID === conversationStore.currentConversation?.groupID) {
       conversationStore.updateCurrentGroupInfo(data)
-      conversationStore.getCurrentGroupInfoFromReq(data.groupID);
-      conversationStore.updateCurrentMemberInGroup();
+      conversationStore.getCurrentGroupInfoFromReq(data.groupID)
+      conversationStore.updateCurrentMemberInGroup()
     }
     contactStore.updateGroupList(data, true)
   }
